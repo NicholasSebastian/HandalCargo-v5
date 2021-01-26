@@ -1,21 +1,24 @@
-import React, { Component } from 'react';
+import React, { Component, createRef } from 'react';
 import styled from 'styled-components';
-import { Layout, Menu, Button } from 'antd';
+import { Typography, Layout, Menu, Modal, Input, Space, message } from 'antd';
 import { 
-  DropboxOutlined, WindowsOutlined, CopyOutlined, UserOutlined, SettingOutlined,
-  MenuFoldOutlined, MenuUnfoldOutlined
+  DropboxOutlined, AppstoreAddOutlined, CopyOutlined, UserOutlined, SettingOutlined, 
+  CloseCircleOutlined, KeyOutlined
 } from '@ant-design/icons';
 
+const { Title, Text } = Typography;
 const { Sider } = Layout;
 const { SubMenu, Item } = Menu;
+const { confirm } = Modal;
+const { Password } = Input;
 
 interface ISidebarProps {
+  collapse: boolean
   activePage: string
   changeToPage: (targetKey: string) => void
 }
 
 interface ISidebarState {
-  collapse: boolean
   currentlyOpen: Array<string>
 }
 
@@ -23,30 +26,75 @@ class Sidebar extends Component<ISidebarProps, ISidebarState> {
   constructor(props: ISidebarProps) {
     super(props);
     this.state = {
-      collapse: false,
-      currentlyOpen: []
+      currentlyOpen: [],
     }
-    this.toggleCollapse = this.toggleCollapse.bind(this);
     this.handleSubMenuOpen = this.handleSubMenuOpen.bind(this);
-  }
-
-  toggleCollapse() {
-    this.setState({ collapse: !this.state.collapse });
+    this.openSubMenu = this.openSubMenu.bind(this);
   }
 
   handleSubMenuOpen(openKeys: React.ReactText[]) {
-    if (openKeys.length > 1) {
-      this.setState({ currentlyOpen: openKeys.slice(openKeys.length - 1) as Array<string> });
+    const isClosing = openKeys.length === 0;
+    if (isClosing) {
+      this.setState({ currentlyOpen: [] });
     }
     else {
-      this.setState({ currentlyOpen: openKeys as Array<string> });
+      const newTab = openKeys[openKeys.length - 1] as string;
+      this.openSubMenu(newTab);
     }
+  }
+
+  openSubMenu(newTab: string) {
+    const { level } = JSON.parse(window.sessionStorage.getItem('profile')!);
+
+    const level2Restriction = (newTab === 'item_2');
+    const level3Restriction = (newTab === 'item_3' || newTab === 'item_4');
+
+    if ((level3Restriction && level < 3) || (level2Restriction && level < 2)) {
+      if (!this.props.collapse) {
+        this.promptAccess(() => this.setState({ currentlyOpen: [newTab as string] }));
+      }
+    }
+    else {
+      this.setState({ currentlyOpen: [newTab as string] });
+    }
+  }
+
+  promptAccess(callback: () => void) {
+    const passwordRef = createRef<any>();
+    const content = (
+      <Space direction="vertical">
+        <Text>You do not have permission to access this section.</Text>
+        <Password ref={passwordRef} placeholder="Master Key" 
+          prefix={<KeyOutlined style={{ color: 'gray' }} />} />
+      </Space>
+    );
+
+    confirm({
+      title: 'Account Access Denied',
+      icon: <CloseCircleOutlined />,
+      content,
+      okText: 'Unlock',
+      okType: 'danger',
+      cancelText: 'Back',
+      maskClosable: true,
+      onOk() {
+        const enteredPassword = passwordRef.current!.state.value as string;
+        if (enteredPassword === 'test') { // temporary password
+          message.success('Access Granted');
+          callback();
+        }
+        else {
+          message.error('Invalid Password');
+        }
+      }
+    });
   }
 
   render() {
     return (
-      <SidebarStyles width={250} theme="light" collapsed={this.state.collapse}>
-        <Menu mode="inline" 
+      <SidebarStyles width={250} collapsed={this.props.collapse}>
+        <Title level={3}>{this.props.collapse ? 'HC' : 'Handal Cargo'}</Title>
+        <Menu mode="inline" theme="dark"
           selectedKeys={[this.props.activePage]}
           openKeys={this.state.currentlyOpen} 
           onOpenChange={this.handleSubMenuOpen}
@@ -58,7 +106,7 @@ class Sidebar extends Component<ISidebarProps, ISidebarState> {
             <Item key="payment">Payment</Item>
             <Item key="customers">Customers</Item>
           </SubMenu>
-          <SubMenu icon={<WindowsOutlined/>} title="References">
+          <SubMenu icon={<AppstoreAddOutlined/>} title="References">
             <Item key="containerGroups">Container Groups</Item>
             <Item key="carriers">Carriers</Item>
             <Item key="routes">Routes</Item>
@@ -83,9 +131,6 @@ class Sidebar extends Component<ISidebarProps, ISidebarState> {
             <Item key="backupRestore">Backup and Restore</Item>
           </SubMenu>
         </Menu>
-        <Button shape="circle" 
-          onClick={this.toggleCollapse}
-          icon={this.state.collapse ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />} />
       </SidebarStyles>
     );
   }
@@ -96,11 +141,13 @@ export default Sidebar;
 const SidebarStyles = styled(Sider)`
   > div {
     position: relative;
+    overflow-x: hidden;
+    overflow-y: auto;
 
-    > ul {
-      height: 100%;
-      overflow-x: hidden;
-      overflow-y: auto;
+    > h3 {
+      color: #fff;
+      text-align: center;
+      margin: 20px 0;
     }
 
     > button {

@@ -75,7 +75,6 @@ class Connection {
           }
           const truePassword = customDecrypt(encryptedTruePassword)
           if (truePassword === password) {
-            windowInstance.onLogin()
             ipcMain.removeAllListeners('login')
             const profileInfo =
               await this.connection?.query('\
@@ -85,6 +84,7 @@ class Connection {
                 WHERE `staffid` = ?',
                 [username]
               )
+            windowInstance.onLogin()
             event.reply('login-success', profileInfo[0])
           }
           else {

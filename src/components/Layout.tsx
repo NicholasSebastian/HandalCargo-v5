@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
-import { Layout as AntLayout, Tabs, message, Typography } from 'antd';
+import { Layout as AntLayout, Tabs, message, PageHeader } from 'antd';
 
 import Header from './Header';
 import Sidebar from './Sidebar';
@@ -9,13 +9,13 @@ import Dashboard from '../pages/Dashboard';
 import Profile from '../pages/Profile';
 import Staff from '../pages/Staff';
 
-const { Title } = Typography;
 const { Content } = AntLayout;
 const { TabPane } = Tabs;
 
 interface ILayoutState {
   activeTab: string
   tabs: Array<IPage>
+  collapse: boolean // lifting state up from sidebar.
 }
 
 interface IPage {
@@ -36,13 +36,19 @@ class Layout extends Component<{}, ILayoutState> {
     const defaultPage = pages[0]
     this.state = {
       activeTab: defaultPage.key,
-      tabs: [defaultPage]
+      tabs: [defaultPage],
+      collapse: false
     };
+    this.toggleCollapse = this.toggleCollapse.bind(this);
     this.changeToPage = this.changeToPage.bind(this);
     this.handleTab = this.handleTab.bind(this);
     this.setActiveTab = this.setActiveTab.bind(this);
     this.addTab = this.addTab.bind(this);
     this.removeTab = this.removeTab.bind(this);
+  }
+
+  toggleCollapse() {
+    this.setState({ collapse: !this.state.collapse });
   }
 
   changeToPage(targetKey: string) {
@@ -101,17 +107,17 @@ class Layout extends Component<{}, ILayoutState> {
   render() {
     return (
       <LayoutStyles>
-        <Header changeToPage={this.changeToPage} />
+        <Sidebar collapse={this.state.collapse} activePage={this.state.activeTab} changeToPage={this.changeToPage} />
         <AntLayout>
-          <Sidebar activePage={this.state.activeTab} changeToPage={this.changeToPage} />
+          <Header collapse={this.state.collapse} toggleCollapse={this.toggleCollapse} changeToPage={this.changeToPage} />
           <Content>
             <Tabs type='editable-card' hideAdd
               activeKey={this.state.activeTab} onChange={this.setActiveTab}
               onEdit={this.handleTab}>
               {this.state.tabs.map(({ key, title, content }) => (
                 <TabPane key={key} tab={title}>
-                  <Title level={3}>{title}</Title>
-                  <div>{content}</div>
+                  <PageHeader ghost={false} title={title} />
+                  {content}
                 </TabPane>
               ))}
             </Tabs>
@@ -142,19 +148,9 @@ const LayoutStyles = styled(AntLayout)`
 
         > div {
           display: grid;
-          grid-template-rows: 60px 1fr;
+          grid-template-rows: auto 1fr;
 
-          > h3 {
-            background-color: #fff;
-            margin: 0;
-            padding: 15px 20px;
-          }
-
-          > div {
-            background-color: #fff;
-            margin: 20px;
-            padding: 20px;
-          }
+          > div:last-child { margin: 20px; }
         }
       }
     }

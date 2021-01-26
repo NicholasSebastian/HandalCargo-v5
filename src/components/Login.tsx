@@ -2,13 +2,15 @@ import React, { Component } from 'react';
 import { ipcRenderer } from 'electron';
 import styled from 'styled-components'
 import { Typography, Form, Input, Button, message } from 'antd'
-import { UserOutlined, LockOutlined, EyeTwoTone, EyeInvisibleOutlined } from '@ant-design/icons'
+import { UserOutlined, LockOutlined } from '@ant-design/icons'
 
 import Image from '../assets/login.jpg'
 
 const { Title, Text } = Typography
 const { Item } = Form
 const { Password } = Input
+
+const currentYear = new Date().getFullYear();
 
 interface ILoginProps {
   callUpdate: Function
@@ -61,11 +63,11 @@ class Login extends Component<ILoginProps, ILoginState> {
               <Input prefix={<UserOutlined style={{ color: 'gray' }} />} placeholder="Username" />
             </Item>
             <Item name="password" rules={[{ required: true, message: 'Password is required.' }]}>
-              <Password prefix={<LockOutlined style={{ color: 'gray' }} />} placeholder="Password" iconRender={visible => visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />} />
+              <Password prefix={<LockOutlined style={{ color: 'gray' }} />} placeholder="Password" />
             </Item>
             <Button type="primary" loading={this.state.loading} htmlType="submit">Login</Button>
           </Form>
-          <Text>© Handal Cargo 2021, All rights reserved.</Text>
+          <Text>© Handal Cargo {currentYear}, All rights reserved.</Text>
         </div>
       </LoginStyles>
     );

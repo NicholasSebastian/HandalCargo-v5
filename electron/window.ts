@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-expressions */
 
-import { BrowserWindow, dialog } from 'electron'
+import { BrowserWindow } from 'electron'
 import '@babel/polyfill'
 import * as path from 'path'
 import * as url from 'url'
@@ -46,13 +46,7 @@ class Window {
   }
 
   public onLogout (): void {
-    dialog.showMessageBox({
-      title: 'Log Out and Exit',
-      message: 'Log Out and Exit?',
-      detail: 'This will close the application and its connection to the database.',
-      buttons: ['Log Out and Exit', 'Cancel']
-    })
-      .then(({ response }) => { if (response === 0) this.window?.close() })
+    this.window?.close()
   }
 
   private loadContent () {
