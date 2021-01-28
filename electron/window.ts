@@ -1,5 +1,3 @@
-/* eslint-disable no-unused-expressions */
-
 import { BrowserWindow } from 'electron'
 import '@babel/polyfill'
 import * as path from 'path'
@@ -8,7 +6,7 @@ import * as url from 'url'
 import { connectionInstance } from './main'
 
 const loginWindowSize = { width: 550, height: 400 }
-const windowSize = { width: 1366, height: 768, minWidth: 1200, minHeight: 600 }
+const windowSize = { width: 1366, height: 768, minWidth: 1230, minHeight: 600 }
 
 class Window {
   window: Electron.BrowserWindow | null

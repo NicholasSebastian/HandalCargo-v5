@@ -1,0 +1,12 @@
+{
+  "staff": {
+    "tableQuery": "SELECT `staffid`, `staffname`, `groupname`, `phonenum`, `status` FROM `staff` LEFT JOIN `staffgroup` ON `staff`.`groupcode` = `staffgroup`.`stfgrcode`",
+    "viewQuery": "SELECT * FROM `staff` LEFT JOIN `staffgroup` ON `staff`.`groupcode` = `staffgroup`.`stfgrcode` WHERE `staffid` = ?",
+    "formQuery": "SELECT `staffid`, `level`, `status`, `staffname`, `gender`, `placeofbirth`, `dateofbirth`, `groupcode`, `dateofemployment` FROM `staff` WHERE `staffid` = ?",
+    "updateQuery": "",
+    "deleteQuery": "DELETE FROM `staff` WHERE `staffid` = ?"
+  },
+  "staffGroup": {
+    "tableQuery": "SELECT `stfgrcode`, `groupname` FROM `staffgroup`"
+  }
+}

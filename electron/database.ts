@@ -1,9 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-types */
-/* eslint-disable brace-style */
-/* eslint-disable no-multi-str */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable no-unused-expressions */
-
 import { ipcMain, dialog } from 'electron'
 import mariadb from 'mariadb'
 import '@babel/polyfill'
@@ -26,42 +20,6 @@ class Connection {
         event.reply('connected')
       })
       .catch(Connection.handleConnectionError)
-  }
-
-  public query (event: Electron.IpcMainEvent, query: string, values: Array<string>, replyKey: string): void {
-    if (this.connection?.isValid()) {
-      this.connection.query(query, values)
-        .then((data: Array<any>) => {
-          event.reply(replyKey, data)
-        })
-        .catch(error => dialog.showErrorBox('Query failed', error.message))
-    } else {
-      Connection.handleConnectionError()
-    }
-  }
-
-  public queryNoReply (query: string, values: Array<string>): void {
-    if (this.connection?.isValid()) {
-      this.connection.query(query, values)
-        .catch(error => dialog.showErrorBox('Query failed', error.message))
-    } else {
-      Connection.handleConnectionError()
-    }
-  }
-
-  public querySync (event: Electron.IpcMainEvent, query: string, values: Array<string>): void {
-    if (this.connection?.isValid()) {
-      this.connection.query(query, values)
-        .then((data: Array<any>) => {
-          event.returnValue = data
-        })
-        .catch(error => {
-          dialog.showErrorBox('Query failed', error.message)
-          event.returnValue = null
-        })
-    } else {
-      Connection.handleConnectionError()
-    }
   }
 
   public onLogin (event: Electron.IpcMainEvent, username: string, password: string): void {
@@ -95,6 +53,30 @@ class Connection {
         }
       })
       .catch(Connection.handleConnectionError)
+  }
+
+  public query (event: Electron.IpcMainEvent, query: string, replyKey: string): void {
+    if (this.connection?.isValid()) {
+      this.connection.query(query)
+        .then((data: Array<any>) => {
+          event.reply(replyKey, data)
+        })
+        .catch(error => event.reply('prompt', error.message))
+    } else {
+      Connection.handleConnectionError()
+    }
+  }
+
+  public queryWithValues (event: Electron.IpcMainEvent, query: string, values: Array<string>, replyKey: string): void {
+    if (this.connection?.isValid()) {
+      this.connection.query(query, values)
+        .then((data: Array<any>) => {
+          event.reply(replyKey, data)
+        })
+        .catch(error => event.reply('prompt', error.message))
+    } else {
+      Connection.handleConnectionError()
+    }
   }
 
   private createConnectionHeartbeat () {

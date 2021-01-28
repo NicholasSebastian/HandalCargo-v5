@@ -50,9 +50,7 @@ class Sidebar extends Component<ISidebarProps, ISidebarState> {
     const level3Restriction = (newTab === 'item_3' || newTab === 'item_4');
 
     if ((level3Restriction && level < 3) || (level2Restriction && level < 2)) {
-      if (!this.props.collapse) {
-        this.promptAccess(() => this.setState({ currentlyOpen: [newTab as string] }));
-      }
+      this.promptAccess(() => this.setState({ currentlyOpen: [newTab as string] }));
     }
     else {
       this.setState({ currentlyOpen: [newTab as string] });

@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
 import { ipcRenderer } from 'electron';
 import styled from 'styled-components';
-import { Layout, Button, Tooltip, Dropdown, Menu, Modal } from 'antd';
+import { Layout, Button, Tooltip, Dropdown, Menu, Modal, Avatar } from 'antd';
 import { 
   MenuFoldOutlined, MenuUnfoldOutlined, OrderedListOutlined, CalculatorOutlined, MailOutlined,
   UserOutlined, TranslationOutlined, LogoutOutlined, ExclamationCircleOutlined
@@ -52,7 +52,10 @@ class Header extends PureComponent<IHeaderProps, {}> {
           <Tooltip title="Calculator"><Button type="text" icon={<CalculatorOutlined />} /></Tooltip>
           <Tooltip title="Mail"><Button type="text" icon={<MailOutlined />} /></Tooltip>
           <Dropdown overlay={overlay} placement="bottomRight">
-            <Button type="text">{profile.staffname}</Button>
+            <Button type="text">
+              <Avatar size={28} icon={<UserOutlined />} /* TODO: images */ />
+              {profile.staffname}
+            </Button>
           </Dropdown>
         </div>
       </HeaderStyles>
@@ -70,7 +73,10 @@ const HeaderStyles = styled(AntHeader)`
   justify-content: space-between;
   align-items: center;
 
-  > h3 {
-    margin-bottom: 5px;
+  > div > button:last-child {
+    > span:first-child {
+      margin-top: -3px;
+      margin-right: 7px;
+    }
   }
 `;

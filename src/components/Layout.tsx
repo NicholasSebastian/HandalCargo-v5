@@ -1,4 +1,5 @@
-import React, { Component } from 'react';
+import React, { Component, createContext } from 'react';
+import { ipcRenderer } from 'electron';
 import styled from 'styled-components';
 import { Layout as AntLayout, Tabs, message, PageHeader } from 'antd';
 
@@ -30,6 +31,8 @@ const pages: Array<IPage> = [
   { key: 'staff', title: 'Staff', content: <Staff /> }
 ];
 
+const pageContext = createContext('');
+
 class Layout extends Component<{}, ILayoutState> {
   constructor(props: {}) {
     super(props);
@@ -45,6 +48,12 @@ class Layout extends Component<{}, ILayoutState> {
     this.setActiveTab = this.setActiveTab.bind(this);
     this.addTab = this.addTab.bind(this);
     this.removeTab = this.removeTab.bind(this);
+  }
+
+  componentDidMount() {
+    ipcRenderer.on('prompt', (event, text) => {
+      message.error(text);
+    });
   }
 
   toggleCollapse() {
@@ -117,7 +126,11 @@ class Layout extends Component<{}, ILayoutState> {
               {this.state.tabs.map(({ key, title, content }) => (
                 <TabPane key={key} tab={title}>
                   <PageHeader ghost={false} title={title} />
-                  {content}
+                  <div>
+                    <pageContext.Provider value={this.state.activeTab}>
+                      {content}
+                    </pageContext.Provider>
+                  </div>
                 </TabPane>
               ))}
             </Tabs>
@@ -128,6 +141,7 @@ class Layout extends Component<{}, ILayoutState> {
   }
 }
 
+export { pageContext };
 export default Layout;
 
 const LayoutStyles = styled(AntLayout)`
@@ -150,7 +164,13 @@ const LayoutStyles = styled(AntLayout)`
           display: grid;
           grid-template-rows: auto 1fr;
 
-          > div:last-child { margin: 20px; }
+          > div:first-child { padding: 16px 20px; }
+
+          > div:last-child { 
+            padding: 20px; 
+            overflow-x: hidden;
+            overflow-y: auto;
+          }
         }
       }
     }
