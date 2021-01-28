@@ -9,7 +9,7 @@ import { Store } from 'antd/lib/form/interface';
 import { EditOutlined, DeleteOutlined, UserOutlined } from '@ant-design/icons';
 
 import { staff, staffGroup } from '../Queries.json';
-const { tableQuery, viewQuery, formQuery, updateQuery, deleteQuery } = staff;
+const { tableQuery, viewQuery, formQuery, insertQuery, updateQuery, deleteQuery } = staff;
 
 import PageEffect from '../components/PageEffect';
 import ProfileView from '../components/ProfileTemplate';
@@ -17,7 +17,7 @@ import ProfileView from '../components/ProfileTemplate';
 const { Meta } = Card;
 const { Text } = Typography;
 const { Item } = AntForm;
-const { Password } = Input;
+const { Password, TextArea } = Input;
 const { Option } = Select;
 
 interface IStaffTableInfo {
@@ -90,7 +90,27 @@ class Form extends Component<IFormProps, IFormState> {
   }
 
   handleSubmit(values: any) {
-    console.table(values); // TODO: handle submit according to 'add' or 'edit'
+    const encryptedPassword = ipcRenderer.sendSync('encrypt', values.pwd);
+    const finalizedValues = { 
+      ...values, 
+      pwd: encryptedPassword.cipherText,
+      pwd_iv: encryptedPassword.initializeVector,
+      pwd_salt: encryptedPassword.salt,
+      profilepic: null,                   // TODO: Images
+      profilepic_type: null
+    };
+    const rawValues = Object.values(finalizedValues);
+
+    if (this.props.staffId) {             // TODO: Fix insert and update query syntax errors.
+      // Edit form on submit.
+      ipcRenderer.once('staffUpdateQuery', () => message.success(`Staff ${this.props.staffId} successfully updated`));
+      ipcRenderer.send('queryValues', updateQuery, [...rawValues, this.props.staffId], 'staffUpdateQuery');
+    }
+    else {
+      // Add form on submit.
+      ipcRenderer.once('staffInsertQuery', () => message.success('Staff successfully added'));
+      ipcRenderer.send('queryValues', insertQuery, rawValues, 'staffInsertQuery');
+    }
     this.props.closeModal();
   }
   
@@ -129,6 +149,18 @@ class Form extends Component<IFormProps, IFormState> {
             <Option value={0}>Female</Option>
           </Select>
         </Item>
+        <Item label="Phone Number" name="phonenum">
+          <Input />
+        </Item>
+        <Item label="Address" name="address1">
+          <TextArea autoSize={{ minRows: 2 }} />
+        </Item>
+        <Item label="District" name="district">
+          <Input />
+        </Item>
+        <Item label="City" name="city">
+          <Input />
+        </Item>
         <Item label="Place of Birth" name="placeofbirth">
           <Input />
         </Item>
@@ -146,6 +178,22 @@ class Form extends Component<IFormProps, IFormState> {
         </Item>
         <Item label="Employment Date" name="dateofemployment">
           <DatePicker />
+        </Item>
+        <Divider />
+        <Item label="Salary" name="salary">
+          <Input />
+        </Item>
+        <Item label="Overtime Pay" name="othr">
+          <Input />
+        </Item>
+        <Item label="Meal Allowance" name="foodallowance">
+          <Input />
+        </Item>
+        <Item label="Bonus" name="bonus">
+          <Input />
+        </Item>
+        <Item label="Extra Bonus" name="dilligencebonus">
+          <Input />
         </Item>
         <Item><Button type="primary" htmlType="submit">Submit</Button></Item>
       </FormStyles>
@@ -184,7 +232,7 @@ class Staff extends Component<{}, IStaffState> {
 
   handleView(staffId: string) {
     ipcRenderer.once('staffViewQuery', (event, data) => {
-      this.setState({ modal: <ProfileView profile={data[0]} />});
+      this.setState({ modal: <ProfileView profile={data[0]} showSalary />});
     });
     ipcRenderer.send('queryValues', viewQuery, [staffId], 'staffViewQuery');
   }
@@ -202,6 +250,8 @@ class Staff extends Component<{}, IStaffState> {
   }
 
   render() {
+    const active = <span style={{ color: 'green' }}>Active</span>
+    const inactive = <span style={{ color: 'red' }}>Inactive</span>
     return (
       <>
         <PageEffect function={() => this.refreshTable()} pageKey='staff' />
@@ -222,8 +272,8 @@ class Staff extends Component<{}, IStaffState> {
                   <Space direction='vertical' size={2}>
                     <Text>{staff.staffid}</Text>
                     <Text>{staff.groupname}</Text>
-                    <Text>{staff.status}</Text>
-                    <Text>{staff.phonenum}</Text>
+                    <Text>{staff.status ? active : inactive}</Text>
+                    <Text>{staff.phonenum || 'No Phone Number'}</Text>
                   </Space>
                 } />
             </Card>

@@ -10,16 +10,26 @@ interface IProfile {
   status: boolean
   staffname: string
   gender: boolean
+  address1: string
+  district: string
+  city: string
+  phonenum: string
   placeofbirth: any
   dateofbirth: any
   groupname: string
   dateofemployment: any
   profilepic: any
   profilepictype: string
+  salary: string // here
+  othr: string
+  foodallowance: string
+  bonus: string
+  dilligencebonus: string // until here
 }
 
 interface ITemplateProps {
-  profile: IProfile
+  profile: IProfile,
+  showSalary?: boolean
 }
 
 class Template extends PureComponent<ITemplateProps, {}> {
@@ -44,6 +54,10 @@ class Template extends PureComponent<ITemplateProps, {}> {
           <Descriptions title="Personal Details" labelStyle={{ fontWeight: 500 }}>
             <Item label="Full Name">{profile.staffname}</Item>
             <Item label="Gender">{profile.gender ? 'Male' : 'Female'}</Item>
+            <Item label="Phone Number">{profile.phonenum || 'Unknown'}</Item>
+            <Item label="Address">{profile.address1 || 'Unknown'}</Item>
+            <Item label="District">{profile.district || 'Unknown'}</Item>
+            <Item label="City">{profile.city || 'Unknown'}</Item>
             <Item label="Place of Birth">{profile.placeofbirth || 'Unknown'}</Item>
             <Item label="Date of Birth">{profile.dateofbirth || 'Unknown'}</Item>
           </Descriptions>
@@ -52,6 +66,17 @@ class Template extends PureComponent<ITemplateProps, {}> {
             <Item label="Employment Date">{profile.dateofemployment || 'Unknown'}</Item>
           </Descriptions>
         </Card>
+        {this.props.showSalary &&
+        <Card title="Salary Details">
+          <Descriptions labelStyle={{ fontWeight: 500 }}>
+            <Item label="Salary">{profile.salary || 'Unknown'}</Item>
+            <Item label="Overtime Pay">{profile.othr || 'Unknown'}</Item>
+            <Item label="Meal Allowance">{profile.foodallowance || 'Unknown'}</Item>
+            <Item label="Bonus">{profile.bonus || 'Unknown'}</Item>
+            <Item label="Extra Bonus">{profile.dilligencebonus || 'Unknown'}</Item>
+          </Descriptions>
+        </Card>
+        }
       </TemplateStyles>
     );
   }

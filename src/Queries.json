@@ -3,7 +3,8 @@
     "tableQuery": "SELECT `staffid`, `staffname`, `groupname`, `phonenum`, `status` FROM `staff` LEFT JOIN `staffgroup` ON `staff`.`groupcode` = `staffgroup`.`stfgrcode`",
     "viewQuery": "SELECT * FROM `staff` LEFT JOIN `staffgroup` ON `staff`.`groupcode` = `staffgroup`.`stfgrcode` WHERE `staffid` = ?",
     "formQuery": "SELECT `staffid`, `level`, `status`, `staffname`, `gender`, `placeofbirth`, `dateofbirth`, `groupcode`, `dateofemployment` FROM `staff` WHERE `staffid` = ?",
-    "updateQuery": "",
+    "insertQuery": "INSERT INTO `staff` (`staffid`, `pwd`, `level`, `status`, `staffname`, `gender`, `phonenum`, `address1`, `district`, `city`, `dateofbirth`, `groupcode`, `dateofemployment`, `salary`, `othr`, `foodallowance`, `bonus`, `dilligencebonus`, `pwd_iv`, `pwd_salt`, `profilepic`, `profilepic_type`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?. ?)",
+    "updateQuery": "UPDATE `staff` SET `staffid` = ?, `pwd` = ?, `level` = ?, `status` = ?, `staffname` = ?, `gender` = ?, `phonenum` = ?, `address1` = ?, `district` = ?, `city` = ?, `dateofbirth` = ?, `groupcode` = ?, `dateofemployment` = ?, `salary` = ?, `othr` = ?, `foodallowance` = ?, `bonus` = ?, `dilligencebonus` = ?, `pwd_iv` = ?, `pwd_salt` = ?, `profilepic` = ?, `profilepic_type` = ? WHERE `staffid` = ?",
     "deleteQuery": "DELETE FROM `staff` WHERE `staffid` = ?"
   },
   "staffGroup": {
