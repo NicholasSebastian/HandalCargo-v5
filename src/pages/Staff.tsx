@@ -39,6 +39,7 @@ interface IStaffState {
 }
 
 interface IFormProps {
+  closeModal: () => void
   staffId?: string
 }
 
@@ -58,6 +59,7 @@ class Form extends Component<IFormProps, IFormState> {
     }
     this.formRef = createRef();
     this.initializeData = this.initializeData.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   componentDidMount() {
@@ -89,7 +91,7 @@ class Form extends Component<IFormProps, IFormState> {
 
   handleSubmit(values: any) {
     console.table(values); // TODO: handle submit according to 'add' or 'edit'
-    Modal.destroyAll(); // TODO: this doesn't work. figure out a way to programmatically close the modal.
+    this.props.closeModal();
   }
   
   render() {
@@ -158,6 +160,8 @@ class Staff extends Component<{}, IStaffState> {
       tableData: [],
       modal: null
     }
+    this.refreshTable = this.refreshTable.bind(this);
+    this.closeModal = this.closeModal.bind(this);
     this.handleAdd = this.handleAdd.bind(this);
     this.handleView = this.handleView.bind(this);
     this.handleEdit = this.handleEdit.bind(this);
@@ -170,8 +174,12 @@ class Staff extends Component<{}, IStaffState> {
     console.log('Staff Table Refreshed');
   }
 
+  closeModal() {
+    this.setState({ modal: null });
+  }
+
   handleAdd() {
-    this.setState({ modal: <Form /> });
+    this.setState({ modal: <Form closeModal={this.closeModal} /> });
   }
 
   handleView(staffId: string) {
@@ -182,7 +190,7 @@ class Staff extends Component<{}, IStaffState> {
   }
 
   handleEdit(staffId: string) {
-    this.setState({ modal: <Form staffId={staffId} /> });
+    this.setState({ modal: <Form closeModal={this.closeModal} staffId={staffId} /> });
   }
 
   handleDelete(staffId: string) {
@@ -226,7 +234,7 @@ class Staff extends Component<{}, IStaffState> {
         <Modal centered maskClosable width={900} footer={null}
           bodyStyle={{ paddingTop: 45, maxHeight: '90vh', overflowY: 'auto' }}
           visible={this.state.modal !== null} 
-          onCancel={() => this.setState({ modal: null })}>
+          onCancel={this.closeModal}>
           {this.state.modal}
         </Modal>
       </>
