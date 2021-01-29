@@ -1,11 +1,67 @@
 {
+  "containerGroup": {
+    "tableQuery": "SELECT `containercode`, `containerdesc`, `size` FROM `kelcontainer`",
+    "formQuery": "SELECT `containercode`, `containerdesc`, `size` FROM `kelcontainer` WHERE `containercode` = ?",
+    "insertQuery": "INSERT INTO `kelcontainer` (`containercode`, `containerdesc`, `size`) VALUES (?, ?, ?)",
+    "updateQuery": "UPDATE `kelcontainer` SET `containercode` = ?, `containerdesc` = ?, `size` = ? WHERE `containercode` = ?",
+    "deleteQuery": "DELETE FROM `kelcontainer` WHERE `containercode` = ?"
+  },
+  "carriers": {
+    "tableQuery": "SELECT `shippercode`, `name` FROM `shipper`",
+    "formQuery": "SELECT `shippercode`, `name` FROM `shipper` WHERE `shippercode` = ?",
+    "insertQuery": "INSERT INTO `shipper` (`shippercode`, `name`) VALUES (?, ?)",
+    "updateQuery": "UPDATE `shipper` SET `shippercode` = ?, `name` = ? WHERE `shippercode` = ?",
+    "deleteQuery": "DELETE FROM `shipper` WHERE `shippercode` = ?"
+  },
+  "routes": {
+    "tableQuery": "SELECT `rutecode`, `rutedesc` FROM `rute`",
+    "formQuery": "SELECT `rutecode`, `rutedesc` FROM `rute` WHERE `rutecode` = ?",
+    "insertQuery": "INSERT INTO `rute` (`rutecode`, `rutedesc`) VALUES (?, ?)",
+    "updateQuery": "UPDATE `rute` SET `rutecode` = ?, `rutedesc` = ? WHERE `rutecode` = ?",
+    "deleteQuery": "DELETE FROM `rute` WHERE `rutecode` = ?"
+  },
+  "handlers": {
+    "tableQuery": "SELECT `penguruscode`, `pengurusname` FROM `pengurus`",
+    "formQuery": "SELECT `penguruscode`, `pengurusname` FROM `pengurus` WHERE `penguruscode` = ?",
+    "insertQuery": "INSERT INTO `pengurus` (`penguruscode`, `pengurusname`) VALUES (?, ?)",
+    "updateQuery": "UPDATE `pengurus` SET `penguruscode` = ?, `pengurusname` = ? WHERE `penguruscode` = ?",
+    "deleteQuery": "DELETE FROM `pengurus` WHERE `penguruscode` = ?"
+  },
+  "planes": {
+    "tableQuery": "SELECT `pesawatcode`, `pesawatdesc` FROM `pesawat`",
+    "formQuery": "SELECT `pesawatcode`, `pesawatdesc` FROM `pesawat` WHERE `pesawatcode` = ?",
+    "insertQuery": "INSERT INTO `pesawat` (`pesawatcode`, `pesawatdesc`) VALUES (?, ?)",
+    "updateQuery": "UPDATE `pesawat` SET `pesawatcode` = ?, `pesawatdesc` = ? WHERE `pesawatcode` = ?",
+    "deleteQuery": "DELETE FROM `pesawat` WHERE `pesawatcode` = ?"
+  },
+  "currencies": {
+    "tableQuery": "SELECT `currencycode`, `currencydesc` FROM `currency`",
+    "formQuery": "SELECT `currencycode`, `currencydesc` FROM `currency` WHERE `currencycode` = ?",
+    "insertQuery": "INSERT INTO `currency` (`currencycode`, `currencydesc`) VALUES (?, ?)",
+    "updateQuery": "UPDATE `currency` SET `currencycode` = ?, `currencydesc` = ? WHERE `currencycode` = ?",
+    "deleteQuery": "DELETE FROM `currency` WHERE `currencycode` = ?"
+  },
+  "productDetails": {
+    "tableQuery": "SELECT `brgcode`, `brgdesc` FROM `keteranganbrg`",
+    "formQuery": "SELECT `brgcode`, `brgdesc` FROM `keteranganbrg` WHERE `brgcode` = ?",
+    "insertQuery": "INSERT INTO `keteranganbrg` (`brgcode`, `brgdesc`) VALUES (?, ?)",
+    "updateQuery": "UPDATE `keteranganbrg` SET `brgcode` = ?, `brgdesc` = ? WHERE `brgcode` = ?",
+    "deleteQuery": "DELETE FROM `keteranganbrg` WHERE `brgcode` = ?"
+  },
   "staff": {
     "tableQuery": "SELECT `staffid`, `staffname`, `groupname`, `phonenum`, `status` FROM `staff` LEFT JOIN `staffgroup` ON `staff`.`groupcode` = `staffgroup`.`stfgrcode`",
     "viewQuery": "SELECT * FROM `staff` LEFT JOIN `staffgroup` ON `staff`.`groupcode` = `staffgroup`.`stfgrcode` WHERE `staffid` = ?",
     "formQuery": "SELECT `staffid`, `level`, `status`, `staffname`, `gender`, `placeofbirth`, `dateofbirth`, `groupcode`, `dateofemployment` FROM `staff` WHERE `staffid` = ?",
-    "insertQuery": "INSERT INTO `staff` (`staffid`, `pwd`, `level`, `status`, `staffname`, `gender`, `phonenum`, `address1`, `district`, `city`, `dateofbirth`, `groupcode`, `dateofemployment`, `salary`, `othr`, `foodallowance`, `bonus`, `dilligencebonus`, `pwd_iv`, `pwd_salt`, `profilepic`, `profilepic_type`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?. ?)",
-    "updateQuery": "UPDATE `staff` SET `staffid` = ?, `pwd` = ?, `level` = ?, `status` = ?, `staffname` = ?, `gender` = ?, `phonenum` = ?, `address1` = ?, `district` = ?, `city` = ?, `dateofbirth` = ?, `groupcode` = ?, `dateofemployment` = ?, `salary` = ?, `othr` = ?, `foodallowance` = ?, `bonus` = ?, `dilligencebonus` = ?, `pwd_iv` = ?, `pwd_salt` = ?, `profilepic` = ?, `profilepic_type` = ? WHERE `staffid` = ?",
+    "insertQuery": "INSERT INTO `staff` (`staffid`, `pwd`, `level`, `status`, `staffname`, `gender`, `phonenum`, `address1`, `district`, `city`, `placeofbirth`, `dateofbirth`, `groupcode`, `dateofemployment`, `salary`, `othr`, `foodallowance`, `bonus`, `dilligencebonus`, `pwd_iv`, `pwd_salt`, `profilepic`, `profilepictype`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    "updateQuery": "UPDATE `staff` SET `staffid` = ?, `pwd` = ?, `level` = ?, `status` = ?, `staffname` = ?, `gender` = ?, `phonenum` = ?, `address1` = ?, `district` = ?, `city` = ?, `placeofbirth` = ?, `dateofbirth` = ?, `groupcode` = ?, `dateofemployment` = ?, `salary` = ?, `othr` = ?, `foodallowance` = ?, `bonus` = ?, `dilligencebonus` = ?, `pwd_iv` = ?, `pwd_salt` = ?, `profilepic` = ?, `profilepictype` = ? WHERE `staffid` = ?",
     "deleteQuery": "DELETE FROM `staff` WHERE `staffid` = ?"
+  },
+  "staffGroups": {
+    "tableQuery": "SELECT `stfgrcode`, `groupname` FROM `staffgroup`",
+    "formQuery": "SELECT `stfgrcode`, `groupname` FROM `staffgroup` WHERE `stfgrcode` = ?",
+    "insertQuery": "INSERT INTO `staffgroup` (`stfgrcode`, `groupname`) VALUES (?, ?)",
+    "updateQuery": "UPDATE `staffgroup` SET `stfgrcode` = ?, `groupname` = ? WHERE `stfgrcode` = ?",
+    "deleteQuery": "DELETE FROM `staffgroup` WHERE `stfgrcode` = ?"
   },
   "staffGroup": {
     "tableQuery": "SELECT `stfgrcode`, `groupname` FROM `staffgroup`"

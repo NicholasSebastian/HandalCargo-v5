@@ -8,7 +8,15 @@ import Sidebar from './Sidebar';
 
 import Dashboard from '../pages/Dashboard';
 import Profile from '../pages/Profile';
+import ContainerGroups from '../pages/ContainerGroups';
+import Carriers from '../pages/Carriers';
+import Routes from '../pages/Route';
+import Handlers from '../pages/Handlers';
+import Planes from '../pages/Planes';
+import Currencies from '../pages/Currencies';
+import ProductDetails from '../pages/ProductDetails';
 import Staff from '../pages/Staff';
+import StaffGroups from '../pages/StaffGroups';
 
 const { Content } = AntLayout;
 const { TabPane } = Tabs;
@@ -28,7 +36,15 @@ interface IPage {
 const pages: Array<IPage> = [
   { key: 'dashboard', title: 'Dashboard', content: <Dashboard /> },
   { key: 'profile', title: 'Profile', content: <Profile /> },
-  { key: 'staff', title: 'Staff', content: <Staff /> }
+  { key: 'containerGroups', title: 'Container Groups', content: <ContainerGroups /> },
+  { key: 'carriers', title: 'Carriers', content: <Carriers /> },
+  { key: 'routes', title: 'Routes', content: <Routes /> },
+  { key: 'handlers', title: 'Handlers', content: <Handlers /> },
+  { key: 'planes', title: 'Planes', content: <Planes /> },
+  { key: 'currencies', title: 'Currencies', content: <Currencies /> },
+  { key: 'productDetails', title: 'Product Details', content: <ProductDetails /> },
+  { key: 'staff', title: 'Staff', content: <Staff /> },
+  { key: 'staffGroups', title: 'Staff Groups', content: <StaffGroups /> }
 ];
 
 const pageContext = createContext('');
@@ -169,7 +185,7 @@ const LayoutStyles = styled(AntLayout)`
           > div:last-child { 
             padding: 20px; 
             overflow-x: hidden;
-            overflow-y: auto;
+            overflow-y: scroll;
           }
         }
       }

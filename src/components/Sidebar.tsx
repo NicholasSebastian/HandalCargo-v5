@@ -120,7 +120,7 @@ class Sidebar extends Component<ISidebarProps, ISidebarState> {
           </SubMenu>
           <SubMenu icon={<UserOutlined />} title="Master">
             <Item key="staff">Staff</Item>
-            <Item key="staffGroup">Staff Groups</Item>
+            <Item key="staffGroups">Staff Groups</Item>
             <Item key="accessLevels">Access Levels</Item>
             <Item key="companySetup">Company Setup</Item>
           </SubMenu>

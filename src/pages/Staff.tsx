@@ -3,7 +3,7 @@ import { ipcRenderer } from 'electron';
 import styled from 'styled-components';
 import { 
   Card, Avatar, Typography, Space, Modal, Button, Form as AntForm, 
-  Input, Select, Switch, DatePicker, Divider, message, Spin, FormInstance 
+  Input, Select, Switch, DatePicker, Divider, message, FormInstance 
 } from 'antd';
 import { Store } from 'antd/lib/form/interface';
 import { EditOutlined, DeleteOutlined, UserOutlined } from '@ant-design/icons';
@@ -12,10 +12,11 @@ import { staff, staffGroup } from '../Queries.json';
 const { tableQuery, viewQuery, formQuery, insertQuery, updateQuery, deleteQuery } = staff;
 
 import PageEffect from '../components/PageEffect';
+import Loading from '../components/Loading';
 import ProfileView from '../components/ProfileTemplate';
 
 const { Meta } = Card;
-const { Text } = Typography;
+const { Text, Title } = Typography;
 const { Item } = AntForm;
 const { Password, TextArea } = Input;
 const { Option } = Select;
@@ -99,11 +100,11 @@ class Form extends Component<IFormProps, IFormState> {
       profilepic: null,                   // TODO: Images
       profilepic_type: null
     };
-    const rawValues = Object.values(finalizedValues);
+    const rawValues = Object.values(finalizedValues).map(value => value || null);
 
-    if (this.props.staffId) {             // TODO: Fix insert and update query syntax errors.
+    if (this.props.staffId) {
       // Edit form on submit.
-      ipcRenderer.once('staffUpdateQuery', () => message.success(`Staff ${this.props.staffId} successfully updated`));
+      ipcRenderer.once('staffUpdateQuery', () => message.success(`Staff '${this.props.staffId}' successfully updated`));
       ipcRenderer.send('queryValues', updateQuery, [...rawValues, this.props.staffId], 'staffUpdateQuery');
     }
     else {
@@ -117,7 +118,9 @@ class Form extends Component<IFormProps, IFormState> {
   render() {
     return (
       <FormStyles ref={this.formRef} labelCol={{ span: 5 }}
-        onFinish={this.handleSubmit} initialValues={this.state.initialValues}>
+        onFinish={this.handleSubmit} /* onFinishFailed={() => } TODO: scroll to top on fail */
+        initialValues={this.state.initialValues}>
+        <Title level={4}>Account Details</Title>
         <Item label="Username" name="staffid" 
           rules={[{ required: true, message: 'Username is required' }]}>
           <Input />
@@ -138,6 +141,7 @@ class Form extends Component<IFormProps, IFormState> {
           <Switch defaultChecked />
         </Item>
         <Divider />
+        <Title level={4}>Personal Information</Title>
         <Item label="Full Name" name="staffname" 
           rules={[{ required: true, message: 'Name is required' }]}>
           <Input />
@@ -168,6 +172,7 @@ class Form extends Component<IFormProps, IFormState> {
           <DatePicker />
         </Item>
         <Divider />
+        <Title level={4}>Work Details</Title>
         <Item label="Job Category" name="groupcode" 
           rules={[{ required: true, message: 'Staff Group is required' }]}>
           <Select>
@@ -180,6 +185,7 @@ class Form extends Component<IFormProps, IFormState> {
           <DatePicker />
         </Item>
         <Divider />
+        <Title level={4}>Salary Details</Title>
         <Item label="Salary" name="salary">
           <Input />
         </Item>
@@ -219,11 +225,11 @@ class Staff extends Component<{}, IStaffState> {
   refreshTable() {
     ipcRenderer.once('staffTableQuery', (event, data) => this.setState({ tableData: data }));
     ipcRenderer.send('query', tableQuery, 'staffTableQuery');
-    console.log('Staff Table Refreshed');
   }
 
   closeModal() {
     this.setState({ modal: null });
+    this.refreshTable();
   }
 
   handleAdd() {
@@ -263,7 +269,7 @@ class Staff extends Component<{}, IStaffState> {
               onClick={() => this.handleView(staff.staffid)} 
               actions={[
                 <EditOutlined onClick={e => { e.stopPropagation(); this.handleEdit(staff.staffid); }}>Edit</EditOutlined>,
-                <DeleteOutlined onClick={e => { e.stopPropagation(); this.handleDelete(staff.staffid); }}>Delete</DeleteOutlined>
+                <DeleteOutlined onClick={e => { e.stopPropagation(); this.handleDelete(staff.staffid); /* TODO: pop confirm */ }}>Delete</DeleteOutlined>
               ]}>
               <Meta
                 avatar={<Avatar size={64} shape="square" icon={<UserOutlined />} /* TODO: images */ />}
@@ -279,7 +285,7 @@ class Staff extends Component<{}, IStaffState> {
             </Card>
           ))}
         </StaffStyles> :
-        <Center><Spin size='large'/></Center>
+        <Loading />
         }
         <Modal centered maskClosable width={900} footer={null}
           bodyStyle={{ paddingTop: 45, maxHeight: '90vh', overflowY: 'auto' }}
@@ -300,15 +306,13 @@ const StaffStyles = styled.div`
   gap: 20px;
 `;
 
-const Center = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
-
 const FormStyles = styled(AntForm)`
   width: 700px;
   margin: 0 auto 5px auto;
+
+  > h4 {
+    margin-bottom: 20px;
+  }
 
   > div:last-child {
     text-align: right;
