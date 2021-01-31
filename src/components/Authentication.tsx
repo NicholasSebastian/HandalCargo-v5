@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
 import { ipcRenderer } from 'electron';
-import styled from 'styled-components';
-import { Spin } from 'antd';
 
 import Login from './Login';
 import Layout from './Layout';
+import Loading from './Loading';
 
 class Authentication extends Component {
   componentDidMount() {
@@ -28,15 +27,8 @@ class Authentication extends Component {
       else
         return <Login callUpdate={() => this.forceUpdate()} />
     }
-    return <LoadingStyles><Spin/></LoadingStyles>
+    return <Loading />
   }
 }
 
 export default Authentication;
-
-const LoadingStyles = styled.div`
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;

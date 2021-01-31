@@ -3,7 +3,7 @@ import { ipcRenderer } from 'electron';
 import styled from 'styled-components';
 import { 
   Card, Avatar, Typography, Space, Modal, Button, Form as AntForm, 
-  Input, Select, Switch, DatePicker, Divider, message, FormInstance 
+  Input, Select, Switch, DatePicker, Divider, message, FormInstance, Popconfirm 
 } from 'antd';
 import { Store } from 'antd/lib/form/interface';
 import { EditOutlined, DeleteOutlined, UserOutlined } from '@ant-design/icons';
@@ -80,7 +80,7 @@ class Form extends Component<IFormProps, IFormState> {
 
   initializeData() {
     if (this.props.staffId) {
-      // Initialize 'edit' form values.
+      // Initialize 'edit' form values.     // TODO: the values are incomplete???
       ipcRenderer.once('staffFormQuery', (event, data) => this.setState({ initialValues: { ...data[0] } }));
       ipcRenderer.send('queryValues', formQuery, [this.props.staffId], 'staffFormQuery');
     }
@@ -118,7 +118,7 @@ class Form extends Component<IFormProps, IFormState> {
   render() {
     return (
       <FormStyles ref={this.formRef} labelCol={{ span: 5 }}
-        onFinish={this.handleSubmit} /* onFinishFailed={() => } TODO: scroll to top on fail */
+        onFinish={this.handleSubmit} /* onFinishFailed={() => something} // TODO: scroll to top on fail */
         initialValues={this.state.initialValues}>
         <Title level={4}>Account Details</Title>
         <Item label="Username" name="staffid" 
@@ -269,7 +269,11 @@ class Staff extends Component<{}, IStaffState> {
               onClick={() => this.handleView(staff.staffid)} 
               actions={[
                 <EditOutlined onClick={e => { e.stopPropagation(); this.handleEdit(staff.staffid); }}>Edit</EditOutlined>,
-                <DeleteOutlined onClick={e => { e.stopPropagation(); this.handleDelete(staff.staffid); /* TODO: pop confirm */ }}>Delete</DeleteOutlined>
+                <Popconfirm title="Are you sure you would like to delete this user?"
+                  onConfirm={e => { e?.stopPropagation(); this.handleDelete(staff.staffid) }}
+                  onCancel={e => e?.stopPropagation()}>
+                  <DeleteOutlined onClick={e => e.stopPropagation()}>Delete</DeleteOutlined>
+                </Popconfirm>
               ]}>
               <Meta
                 avatar={<Avatar size={64} shape="square" icon={<UserOutlined />} /* TODO: images */ />}
@@ -302,8 +306,12 @@ export default Staff;
 
 const StaffStyles = styled.div`
   display: grid;
-  grid-template-columns: repeat(4, minmax(300px, 1fr));
+  grid-template-columns: repeat(3, minmax(300px, 1fr));
   gap: 20px;
+
+  @media (min-width: 1600px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
 `;
 
 const FormStyles = styled(AntForm)`

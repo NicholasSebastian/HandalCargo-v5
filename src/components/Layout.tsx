@@ -7,6 +7,7 @@ import Header from './Header';
 import Sidebar from './Sidebar';
 
 import Dashboard from '../pages/Dashboard';
+import Welcome from '../pages/Welcome';
 import Profile from '../pages/Profile';
 import ContainerGroups from '../pages/ContainerGroups';
 import Carriers from '../pages/Carriers';
@@ -17,7 +18,8 @@ import Currencies from '../pages/Currencies';
 import ProductDetails from '../pages/ProductDetails';
 import Staff from '../pages/Staff';
 import StaffGroups from '../pages/StaffGroups';
-
+import AccessLevels from '../pages/AccessLevels';
+  
 const { Content } = AntLayout;
 const { TabPane } = Tabs;
 
@@ -35,6 +37,7 @@ interface IPage {
 
 const pages: Array<IPage> = [
   { key: 'dashboard', title: 'Dashboard', content: <Dashboard /> },
+  { key: 'welcome', title: 'Welcome', content: <Welcome /> },
   { key: 'profile', title: 'Profile', content: <Profile /> },
   { key: 'containerGroups', title: 'Container Groups', content: <ContainerGroups /> },
   { key: 'carriers', title: 'Carriers', content: <Carriers /> },
@@ -44,7 +47,8 @@ const pages: Array<IPage> = [
   { key: 'currencies', title: 'Currencies', content: <Currencies /> },
   { key: 'productDetails', title: 'Product Details', content: <ProductDetails /> },
   { key: 'staff', title: 'Staff', content: <Staff /> },
-  { key: 'staffGroups', title: 'Staff Groups', content: <StaffGroups /> }
+  { key: 'staffGroups', title: 'Staff Groups', content: <StaffGroups /> },
+  { key: 'accessLevels', title: 'Access Levels', content: <AccessLevels /> }
 ];
 
 const pageContext = createContext('');
@@ -52,12 +56,16 @@ const pageContext = createContext('');
 class Layout extends Component<{}, ILayoutState> {
   constructor(props: {}) {
     super(props);
-    const defaultPage = pages[0]
+
+    const { level } = JSON.parse(window.sessionStorage.getItem('profile')!);
+    const defaultPage = level > 1 ? pages[0] : pages[1];
+
     this.state = {
       activeTab: defaultPage.key,
       tabs: [defaultPage],
       collapse: false
     };
+    
     this.toggleCollapse = this.toggleCollapse.bind(this);
     this.changeToPage = this.changeToPage.bind(this);
     this.handleTab = this.handleTab.bind(this);

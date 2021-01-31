@@ -1,7 +1,7 @@
 import React, { Component, createRef } from 'react';
 import { ipcRenderer } from 'electron';
 import styled from 'styled-components';
-import { List, Button, Modal, Input, Form as AntForm, message, FormInstance, InputNumber } from 'antd';
+import { List, Button, Modal, Input, Form as AntForm, message, FormInstance, InputNumber, Popconfirm } from 'antd';
 import { Store } from 'antd/lib/form/interface';
 import { PlusOutlined } from '@ant-design/icons';
 
@@ -149,14 +149,19 @@ class Template extends Component<ITemplateProps, ITemplateState> {
 
   refreshList() {
     ipcRenderer.once('listQuery', (event, data) => {
-      this.setState({ listData: data.map((obj: Object): IListEntry => {
-        const arrayForm = Object.values(obj);
-        return {
-          id: arrayForm[0],
-          name: arrayForm[1],
-          extra: arrayForm[2]
-        }
-      }) });
+      this.setState({ listData: data
+        .map((obj: Object): IListEntry => {
+          const arrayForm = Object.values(obj);
+          return {
+            id: arrayForm[0],
+            name: arrayForm[1],
+            extra: arrayForm[2]
+          }
+        })
+        .sort((first: IListEntry, second: IListEntry) => {
+          return (first.id as number) - (second.id as number);
+        })
+      });
     });
     ipcRenderer.send('query', this.props.queries.tableQuery, 'listQuery');
   }
@@ -199,7 +204,7 @@ class Template extends Component<ITemplateProps, ITemplateState> {
         <PageEffect function={this.refreshList} pageKey={this.props.pageKey} />
         <TemplateStyles>
           <div>
-            <Search placeholder="Search" allowClear 
+            <Search placeholder="Search" allowClear
               style={{ width: 300 }}
               onSearch={value => this.setState({ search: value })} />
           </div>
@@ -207,18 +212,24 @@ class Template extends Component<ITemplateProps, ITemplateState> {
           <List size="small"
             loading={this.state.listData.length === 0}
             dataSource={this.state.listData}
-            renderItem={entry => (
-              <Item actions={[
-                <Button onClick={() => this.handleEdit(entry.id)}>Edit</Button>,
-                <Button onClick={() => this.handleDelete(entry.id)} /* TODO: pop confirm */ >Delete</Button>
-              ]}>
-                <ItemStyles>
-                  <div>{entry.id}</div>
-                  <div>{entry.name}</div>
-                  {entry.extra && <div>{entry.extra}</div>}
-                </ItemStyles>
-              </Item>
-            )} />
+            renderItem={entry => {
+              return new RegExp(this.state.search, 'i').test(entry.name) && (
+                <Item actions={[
+                  <Button onClick={() => this.handleEdit(entry.id)}>Edit</Button>,
+                  <Popconfirm placement='left'
+                    title="Are you sure you would like to delete this entry?"
+                    onConfirm={() => this.handleDelete(entry.id)}>
+                    <Button>Delete</Button>
+                  </Popconfirm>
+                ]}>
+                  <ItemStyles>
+                    <div>{entry.id}</div>
+                    <div>{entry.name}</div>
+                    {entry.extra && <div>{entry.extra}</div>}
+                  </ItemStyles>
+                </Item>
+              );
+            }} />
         </TemplateStyles>
         <Modal centered maskClosable width={600} footer={null}
           bodyStyle={{ paddingTop: 55 }}
