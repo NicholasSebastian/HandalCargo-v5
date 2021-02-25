@@ -183,7 +183,8 @@ class Template extends Component<ITemplateProps, ITemplateState> {
   handleEdit(entryId: string | number) {
     this.setState({ 
       modal: 
-        <Form closeModal={this.closeModal} 
+        <Form key={entryId}
+          closeModal={this.closeModal} 
           queries={this.props.queries} 
           formItems={this.props.formItems} 
           entryId={entryId} /> 

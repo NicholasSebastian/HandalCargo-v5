@@ -17,6 +17,7 @@ class Window {
       height: loginWindowSize.height,
       resizable: false,
       icon: '../src/assets/images/icon.png',
+      backgroundColor: '#FFF',
       webPreferences: {
         nodeIntegration: true
       },

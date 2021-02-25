@@ -67,7 +67,9 @@ class Form extends Component<IFormProps, IFormState> {
     this.initializeData();
 
     // Initialize staff group values for dropdown options.
-    ipcRenderer.once('staffForm_staffGroupQuery', (event, data) => this.setState({ staffGroups: data }));
+    ipcRenderer.once('staffForm_staffGroupQuery', (event, data) => {
+      this.setState({ staffGroups: data });
+    });
     ipcRenderer.send('query', staffGroup.tableQuery, 'staffForm_staffGroupQuery');
   }
 
@@ -80,8 +82,11 @@ class Form extends Component<IFormProps, IFormState> {
 
   initializeData() {
     if (this.props.staffId) {
-      // Initialize 'edit' form values.     // TODO: the values are incomplete???
-      ipcRenderer.once('staffFormQuery', (event, data) => this.setState({ initialValues: { ...data[0] } }));
+      // Initialize 'edit' form values.
+      ipcRenderer.once('staffFormQuery', (event, data) => {
+        console.log(data);
+        this.setState({ initialValues: data[0] });
+      });
       ipcRenderer.send('queryValues', formQuery, [this.props.staffId], 'staffFormQuery');
     }
     else {
@@ -244,7 +249,7 @@ class Staff extends Component<{}, IStaffState> {
   }
 
   handleEdit(staffId: string) {
-    this.setState({ modal: <Form closeModal={this.closeModal} staffId={staffId} /> });
+    this.setState({ modal: <Form key={staffId} closeModal={this.closeModal} staffId={staffId} /> });
   }
 
   handleDelete(staffId: string) {

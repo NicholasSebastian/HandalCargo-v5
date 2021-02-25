@@ -9,6 +9,7 @@ import Sidebar from './Sidebar';
 import Dashboard from '../pages/Dashboard';
 import Welcome from '../pages/Welcome';
 import Profile from '../pages/Profile';
+import AirCargo from '../pages/AirCargo';
 import ContainerGroups from '../pages/ContainerGroups';
 import Carriers from '../pages/Carriers';
 import Routes from '../pages/Route';
@@ -19,6 +20,7 @@ import ProductDetails from '../pages/ProductDetails';
 import Staff from '../pages/Staff';
 import StaffGroups from '../pages/StaffGroups';
 import AccessLevels from '../pages/AccessLevels';
+import Mail from '../pages/Mail';
   
 const { Content } = AntLayout;
 const { TabPane } = Tabs;
@@ -39,6 +41,7 @@ const pages: Array<IPage> = [
   { key: 'dashboard', title: 'Dashboard', content: <Dashboard /> },
   { key: 'welcome', title: 'Welcome', content: <Welcome /> },
   { key: 'profile', title: 'Profile', content: <Profile /> },
+  { key: 'airCargo', title: 'Air Cargo', content: <AirCargo /> },
   { key: 'containerGroups', title: 'Container Groups', content: <ContainerGroups /> },
   { key: 'carriers', title: 'Carriers', content: <Carriers /> },
   { key: 'routes', title: 'Routes', content: <Routes /> },
@@ -48,7 +51,8 @@ const pages: Array<IPage> = [
   { key: 'productDetails', title: 'Product Details', content: <ProductDetails /> },
   { key: 'staff', title: 'Staff', content: <Staff /> },
   { key: 'staffGroups', title: 'Staff Groups', content: <StaffGroups /> },
-  { key: 'accessLevels', title: 'Access Levels', content: <AccessLevels /> }
+  { key: 'accessLevels', title: 'Access Levels', content: <AccessLevels /> },
+  { key: 'mail', title: 'Messages', content: <Mail /> }
 ];
 
 const pageContext = createContext('');

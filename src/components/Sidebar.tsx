@@ -98,8 +98,8 @@ class Sidebar extends Component<ISidebarProps, ISidebarState> {
           onOpenChange={this.handleSubMenuOpen}
           onClick={({ key }) => this.props.changeToPage(key.toString())}>
           <SubMenu icon={<DropboxOutlined/>} title="Shipping">
-            <Item key="airFreight">Air Freight</Item>
-            <Item key="seaCargo">Sea Cargo</Item>
+            <Item key="airCargo">Air Cargo</Item>
+            <Item key="seaFreight">Sea Freight</Item>
             <Item key="invoiceEntry">Invoice Entry</Item>
             <Item key="payment">Payment</Item>
             <Item key="customers">Customers</Item>

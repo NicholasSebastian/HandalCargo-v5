@@ -1,4 +1,11 @@
 {
+  "airCargo": {
+    "tableQuery": "SELECT `tgltiba`, `no`, `kode`, `rute`, `pesawat`, `totalmuatan`, `totalberat[hb]` FROM `aircargo`",
+    "formQuery": "SELECT * FROM `aircargo` WHERE `no` = ?",
+    "insertQuery": "INSERT INTO `aircargo` (``, ``, ``) VALUES (?, ?, ?)",
+    "updateQuery": "UPDATE `aircargo` SET `` = ?, `` = ? WHERE `no` = ?",
+    "deleteQuery": "DELETE FROM `aircargo` WHERE `no` = ?"
+  },
   "containerGroup": {
     "tableQuery": "SELECT `containercode`, `containerdesc`, `size` FROM `kelcontainer`",
     "formQuery": "SELECT `containercode`, `containerdesc`, `size` FROM `kelcontainer` WHERE `containercode` = ?",
@@ -51,7 +58,7 @@
   "staff": {
     "tableQuery": "SELECT `staffid`, `staffname`, `groupname`, `phonenum`, `status` FROM `staff` LEFT JOIN `staffgroup` ON `staff`.`groupcode` = `staffgroup`.`stfgrcode`",
     "viewQuery": "SELECT * FROM `staff` LEFT JOIN `staffgroup` ON `staff`.`groupcode` = `staffgroup`.`stfgrcode` WHERE `staffid` = ?",
-    "formQuery": "SELECT `staffid`, `level`, `status`, `staffname`, `gender`, `placeofbirth`, `dateofbirth`, `groupcode`, `dateofemployment` FROM `staff` WHERE `staffid` = ?",
+    "formQuery": "SELECT `staffid`, `level`, `status`, `staffname`, `gender`, `phonenum`, `address1`, `district`, `city`, `placeofbirth`, `dateofbirth`, `groupcode`, `dateofemployment`, `salary`, `othr`, `foodallowance`, `bonus`, `dilligencebonus` FROM `staff` WHERE `staffid` = ?",
     "insertQuery": "INSERT INTO `staff` (`staffid`, `pwd`, `level`, `status`, `staffname`, `gender`, `phonenum`, `address1`, `district`, `city`, `placeofbirth`, `dateofbirth`, `groupcode`, `dateofemployment`, `salary`, `othr`, `foodallowance`, `bonus`, `dilligencebonus`, `pwd_iv`, `pwd_salt`, `profilepic`, `profilepictype`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
     "updateQuery": "UPDATE `staff` SET `staffid` = ?, `pwd` = ?, `level` = ?, `status` = ?, `staffname` = ?, `gender` = ?, `phonenum` = ?, `address1` = ?, `district` = ?, `city` = ?, `placeofbirth` = ?, `dateofbirth` = ?, `groupcode` = ?, `dateofemployment` = ?, `salary` = ?, `othr` = ?, `foodallowance` = ?, `bonus` = ?, `dilligencebonus` = ?, `pwd_iv` = ?, `pwd_salt` = ?, `profilepic` = ?, `profilepictype` = ? WHERE `staffid` = ?",
     "deleteQuery": "DELETE FROM `staff` WHERE `staffid` = ?"
