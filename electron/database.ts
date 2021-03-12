@@ -42,8 +42,8 @@ class Connection {
                 WHERE `staffid` = ?',
                 [username]
               )
-            windowInstance.onLogin()
             event.reply('login-success', profileInfo[0])
+            windowInstance.onLogin()
           }
           else {
             event.reply('login-failed', 'Invalid Password')
