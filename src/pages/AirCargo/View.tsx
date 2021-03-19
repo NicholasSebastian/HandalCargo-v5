@@ -16,7 +16,7 @@ const View: FC<IViewProps> = (props) => {
   };
 
   return (
-    <Descriptions title="View" labelStyle={{ fontWeight: 500 }}>
+    <Descriptions labelStyle={{ fontWeight: 500 }}>
       {Object.entries(processedData).map(([key, value]) => (
         <Item label={key} key={key}>{value}</Item>
       ))}

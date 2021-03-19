@@ -1,11 +1,12 @@
-import React, { Component, FunctionComponent } from 'react';
+import React, { Component, FunctionComponent, createRef } from 'react';
 import { ipcRenderer } from 'electron';
 import styled from 'styled-components';
-import { Table, Input, Modal, message, Space, Button } from 'antd';
+import { Table, Input, Modal, message, Space, Button, FormInstance, Popconfirm } from 'antd';
 import { ColumnsType } from 'antd/lib/table';
 import { PlusOutlined } from '@ant-design/icons';
 
 import PageEffect from './PageEffect';
+import { Store } from 'antd/lib/form/interface';
 
 const { Search } = Input;
 
@@ -41,6 +42,73 @@ interface IViewProps {
 interface IFormProps {
   closeModal: () => void
   data?: Object
+  formRef: React.RefObject<FormInstance>
+}
+
+interface IDataProps {
+  query: string
+  entryId: string | number
+  closeModal: () => void
+}
+
+interface IDataState {
+  initialValues: Store
+}
+
+function withFormRef(Comp: typeof Component) {
+  // I don't know why this is what it is.
+  return class Form extends Component<any, any> {
+    formRef: React.RefObject<FormInstance>;
+
+    constructor(props: any) {
+      super(props);
+      this.formRef = createRef();
+    }
+
+    render() {
+      return <Comp {...this.props} formRef={this.formRef} />;
+    }
+  }
+}
+
+function withData(Comp: typeof Component) {
+  return class Form extends Component<IDataProps, IDataState> {
+    formRef: React.RefObject<FormInstance>;
+
+    constructor(props: IDataProps) {
+      super(props);
+      this.formRef = createRef();
+      this.state = {
+        initialValues: {}
+      };
+      this.initializeData = this.initializeData.bind(this);
+    }
+
+    componentDidMount() {
+      this.initializeData();
+    }
+
+    componentDidUpdate(prevProps: IDataProps) {
+      if (prevProps !== this.props) {
+        this.initializeData();
+      }
+      this.formRef.current?.resetFields();
+    }
+
+    initializeData() {
+      const { query, entryId } = this.props;
+      ipcRenderer.once('formDataQuery', (event, data) => this.setState({ initialValues: { ...data[0] } }));
+      ipcRenderer.send('queryValues', query, [entryId], 'formDataQuery');
+    }
+
+    render() {
+      const { closeModal } = this.props;
+      const { initialValues } = this.state;
+      return (
+        <Comp data={initialValues} closeModal={closeModal} formRef={this.formRef} />
+      );
+    }
+  }
 }
 
 class Template extends Component<ITemplateProps, ITemplateState> {
@@ -81,24 +149,31 @@ class Template extends Component<ITemplateProps, ITemplateState> {
   }
 
   handleView(entryId: string | number) {
-    const { View, dataKey } = this.props;
+    const { View } = this.props;
     ipcRenderer.once('tableViewQuery', (event, data) => {
-      this.setState({ modal: <View data={data[0]} key={data[0][dataKey]} /> });
+      this.setState({ modal: <View key={entryId} data={data[0]} /> });
     });
     ipcRenderer.send('queryValues', this.props.queries.formQuery, [entryId], 'tableViewQuery');
   }
 
   handleAdd() {
-    const { Form, dataKey } = this.props;
-    this.setState({ modal: <Form closeModal={this.closeModal} /> });
+    const { Form } = this.props;
+    const FormWithFormRef = withFormRef(Form);
+    this.setState({ 
+      modal: <FormWithFormRef closeModal={this.closeModal} /> 
+    });
   }
 
   handleEdit(entryId: string | number) {
-    const { Form, dataKey } = this.props;
-    ipcRenderer.once('tableFormQuery', (event, data) => {
-      this.setState({ modal: <Form data={data[0]} closeModal={this.closeModal} key={data[0][dataKey]} /> });
+    const { Form, queries } = this.props;
+    const FormWithData = withData(Form);
+    this.setState({
+      modal: 
+        <FormWithData key={entryId}
+          query={queries.formQuery}
+          entryId={entryId}
+          closeModal={this.closeModal} />
     });
-    ipcRenderer.send('queryValues', this.props.queries.formQuery, [entryId], 'tableFormQuery');
   }
 
   handleDelete(entryId: string | number) {
@@ -117,7 +192,11 @@ class Template extends Component<ITemplateProps, ITemplateState> {
         render: (primaryKey: string | number) => (
           <Space>
             <Button onClick={e => { e.stopPropagation(); this.handleEdit(primaryKey); }}>Edit</Button>
-            <Button onClick={e => { e.stopPropagation(); this.handleDelete(primaryKey); }}>Delete</Button>
+            <Popconfirm placement="left"
+              title="Are you sure you would like to delete this entry?"
+              onConfirm={() => this.handleDelete(primaryKey)}>
+              <Button onClick={e => e.stopPropagation()}>Delete</Button>
+            </Popconfirm>
           </Space>
         )
       } 
@@ -143,8 +222,15 @@ class Template extends Component<ITemplateProps, ITemplateState> {
               }}
             }} />
         </TemplateStyles>
-        <Modal centered maskClosable width={600} footer={null}
-          bodyStyle={{ paddingTop: 50, paddingBottom: 20 }}
+        <Modal centered maskClosable width={1250} footer={null}
+          bodyStyle={{ 
+            paddingTop: 50, 
+            paddingBottom: 20, 
+            paddingLeft: 50,
+            paddingRight: 50,
+            maxHeight: '90vh', 
+            overflowY: 'auto' 
+          }}
           visible={this.state.modal !== null}
           onCancel={this.closeModal}>
           {this.state.modal}

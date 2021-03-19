@@ -198,6 +198,10 @@ const FormStyles = styled(AntForm)`
   width: 700px;
   margin: 0 auto 5px auto;
 
+  .ant-form-item {
+    margin-bottom: 16px;
+  }
+
   > h4 {
     margin-bottom: 20px;
   }

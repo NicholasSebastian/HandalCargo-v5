@@ -10,8 +10,8 @@ class Carriers extends Component {
         pageKey="carriers" 
         queries={carriers}
         formItems={[
-          { label: 'Carrier Code', key: 'penguruscode' },
-          { label: 'Name', key: 'pengurusname' }
+          { label: 'Carrier Code', key: 'shippercode' },
+          { label: 'Name', key: 'name' }
         ]} />
 		);
 	}
