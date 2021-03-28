@@ -5,22 +5,7 @@ import { Layout as AntLayout, Tabs, message, PageHeader } from 'antd';
 
 import Header from './Header';
 import Sidebar from './Sidebar';
-
-import Dashboard from '../pages/Dashboard';
-import Welcome from '../pages/Welcome';
-import Profile from '../pages/Profile';
-import AirCargo from '../pages/AirCargo/Index';
-import ContainerGroups from '../pages/ContainerGroups';
-import Carriers from '../pages/Carriers';
-import Routes from '../pages/Route';
-import Handlers from '../pages/Handlers';
-import Planes from '../pages/Planes';
-import Currencies from '../pages/Currencies';
-import ProductDetails from '../pages/ProductDetails';
-import Staff from '../pages/Staff/Index';
-import StaffGroups from '../pages/StaffGroups';
-import AccessLevels from '../pages/AccessLevels';
-import Mail from '../pages/Mail';
+import pages from '../Pages';
   
 const { Content } = AntLayout;
 const { TabPane } = Tabs;
@@ -36,24 +21,6 @@ interface IPage {
   title: string
   content: JSX.Element
 }
-
-const pages: Array<IPage> = [
-  { key: 'dashboard', title: 'Dashboard', content: <Dashboard /> },
-  { key: 'welcome', title: 'Welcome', content: <Welcome /> },
-  { key: 'profile', title: 'Profile', content: <Profile /> },
-  { key: 'airCargo', title: 'Air Cargo', content: <AirCargo /> },
-  { key: 'containerGroups', title: 'Container Groups', content: <ContainerGroups /> },
-  { key: 'carriers', title: 'Carriers', content: <Carriers /> },
-  { key: 'routes', title: 'Routes', content: <Routes /> },
-  { key: 'handlers', title: 'Handlers', content: <Handlers /> },
-  { key: 'planes', title: 'Planes', content: <Planes /> },
-  { key: 'currencies', title: 'Currencies', content: <Currencies /> },
-  { key: 'productDetails', title: 'Product Details', content: <ProductDetails /> },
-  { key: 'staff', title: 'Staff', content: <Staff /> },
-  { key: 'staffGroups', title: 'Staff Groups', content: <StaffGroups /> },
-  { key: 'accessLevels', title: 'Access Levels', content: <AccessLevels /> },
-  { key: 'mail', title: 'Messages', content: <Mail /> }
-];
 
 const pageContext = createContext('');
 
@@ -79,8 +46,9 @@ class Layout extends Component<{}, ILayoutState> {
   }
 
   componentDidMount() {
-    ipcRenderer.on('prompt', (event, text) => {
+    ipcRenderer.on('prompt', (event, text, replyKey) => {
       message.error(text);
+      ipcRenderer.removeAllListeners(replyKey);
     });
   }
 
@@ -169,7 +137,7 @@ class Layout extends Component<{}, ILayoutState> {
   }
 }
 
-export { pageContext };
+export { pageContext, IPage };
 export default Layout;
 
 const LayoutStyles = styled(AntLayout)`

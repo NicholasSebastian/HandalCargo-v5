@@ -27,8 +27,11 @@ interface IProfile {
   dilligencebonus: string // until here
 }
 
-interface ITemplateProps {
+interface ITemplateData {
   profile: IProfile,
+}
+
+interface ITemplateProps extends ITemplateData {
   showSalary?: boolean
 }
 
@@ -82,7 +85,7 @@ class Template extends PureComponent<ITemplateProps, {}> {
   }
 }
 
-export { IProfile };
+export { IProfile, ITemplateData };
 export default Template;
 
 const TemplateStyles = styled.div`

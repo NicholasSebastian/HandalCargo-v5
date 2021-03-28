@@ -62,7 +62,7 @@ class Connection {
         .then((data: Array<any>) => {
           event.reply(replyKey, data)
         })
-        .catch(error => event.reply('prompt', error.message))
+        .catch(error => event.reply('prompt', error.message, replyKey))
     } else {
       Connection.handleConnectionError()
     }
@@ -75,7 +75,7 @@ class Connection {
         .then((data: Array<any>) => {
           event.reply(replyKey, data)
         })
-        .catch(error => event.reply('prompt', error.message))
+        .catch(error => event.reply('prompt', error.message, replyKey))
     } else {
       Connection.handleConnectionError()
     }

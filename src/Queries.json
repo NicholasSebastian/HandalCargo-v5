@@ -4,7 +4,20 @@
     "formQuery": "SELECT * FROM `aircargo` WHERE `no` = ?",
     "insertQuery": "INSERT INTO `aircargo` (``, ``, ``) VALUES (?, ?, ?)",
     "updateQuery": "UPDATE `aircargo` SET `` = ?, `` = ? WHERE `no` = ?",
-    "deleteQuery": "DELETE FROM `aircargo` WHERE `no` = ?"
+    "deleteQuery": "DELETE FROM `aircargo` WHERE `no` = ?",
+    "markingTableQuery": "SELECT `no`, `marking`, `qty`, `list[kg]`, `hb[kg]`, `standart[kg]`, `vol.charge`, `lunas`, `sisa`, `suratjalan`, `faktur` FROM `aircargomarking` WHERE `noaircargo` = ?",
+    "markingInsertQuery": "INSERT INTO `aircargomarking` (`noaircargo`, `marking`, `qty`, `list[kg]`, `hb[kg]`, `standart[kg]`, `vol.charge`, `lunas`, `sisa`, `suratjalan`, `faktur`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    "markingDeleteQuery": "DELETE FROM `aircargomarking` WHERE `noaircargo` = ?"
+  },
+  "seaFreight": {
+    "tableQuery": "",
+    "formQuery": "",
+    "insertQuery": "",
+    "updateQuery": "",
+    "deleteQuery": "",
+    "markingTableQuery": "",
+    "markingInsertQuery": "",
+    "markingDeleteQuery": ""
   },
   "containerGroup": {
     "tableQuery": "SELECT `containercode`, `containerdesc`, `size` FROM `kelcontainer`",

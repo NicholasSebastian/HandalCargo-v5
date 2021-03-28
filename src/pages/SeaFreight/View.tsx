@@ -14,7 +14,7 @@ const View: FC<IViewProps> = (props) => {
     tglmuat: data['tglmuat'].toString().substr(4, 11),
     tgltiba: data['tgltiba'].toString().substr(4, 11)
   };
-  
+
   return (
     <Descriptions labelStyle={{ fontWeight: 500 }}>
       {Object.entries(processedData).map(([key, value]) => (

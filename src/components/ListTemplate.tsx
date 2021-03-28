@@ -1,11 +1,13 @@
-import React, { Component, createRef } from 'react';
+import React, { Component } from 'react';
 import { ipcRenderer } from 'electron';
 import styled from 'styled-components';
-import { List, Button, Modal, Input, Form as AntForm, message, FormInstance, InputNumber, Popconfirm } from 'antd';
-import { Store } from 'antd/lib/form/interface';
+import { List, Button, Modal, Input, message, Popconfirm } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 
 import PageEffect from './PageEffect';
+import Form, { IFormItem } from './ListTemplateForm';
+
+import instanceOfKey from '../utils/uniqueKey';
 
 const { Item } = List;
 const { Search } = Input;
@@ -14,11 +16,6 @@ interface IListEntry {
   id: string | number
   name: string
   extra?: string
-}
-
-interface IFormItem {
-  label: string
-  key: string
 }
 
 interface IQueries {
@@ -38,99 +35,14 @@ interface ITemplateProps {
 interface ITemplateState {
   listData: Array<IListEntry>
   search: string
-  modal: JSX.Element | null
+  modal: TModal | null
 }
 
-interface IFormProps {
-  closeModal: () => void
+interface IFormData {
   entryId?: string | number
-  queries: IQueries
-  formItems: Array<IFormItem>
 }
 
-interface IFormState {
-  initialValues: Store
-}
-
-class Form extends Component<IFormProps, IFormState> {
-  formRef: React.RefObject<FormInstance>;
-
-  constructor(props: IFormProps) {
-    super(props);
-    this.state = {
-      initialValues: {}
-    };
-    this.formRef = createRef();
-    this.initializeData = this.initializeData.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
-
-  componentDidMount() {
-    this.initializeData();
-  }
-
-  componentDidUpdate(prevProps: IFormProps) {
-    if (this.props.entryId !== prevProps.entryId) {
-      this.initializeData();
-    }
-    this.formRef.current?.resetFields();
-  }
-
-  initializeData() {
-    if (this.props.entryId) {
-      // Initialize 'edit' form values.
-      ipcRenderer.once('listFormQuery', (event, data) => this.setState({ initialValues: { ...data[0] } }));
-      ipcRenderer.send('queryValues', this.props.queries.formQuery, [this.props.entryId], 'listFormQuery');
-    }
-    else {
-      // Initialize 'add' form values; Clear the fields.
-      this.setState({ initialValues: {} });
-    }
-  }
-
-  handleSubmit(values: any) {
-    const rawValues = Object.values(values);
-    if (this.props.entryId) {
-      // Edit form on submit.
-      ipcRenderer.once('listUpdateQuery', () => {
-        message.success(`'${rawValues[1]}' successfully updated`);
-        this.props.closeModal();
-      });
-      ipcRenderer.send('queryValues', this.props.queries.updateQuery, [...rawValues, this.props.entryId], 'listUpdateQuery');
-    }
-    else {
-      // Add form on submit.
-      ipcRenderer.once('listInsertQuery', () => {
-        message.success('Entry successfully added');
-        this.props.closeModal();
-      });
-      ipcRenderer.send('queryValues', this.props.queries.insertQuery, rawValues, 'listInsertQuery');
-    }
-  }
-
-  render() {
-    const { Item } = AntForm;
-    return (
-      <FormStyles ref={this.formRef} labelCol={{ span: 6 }}
-        onFinish={this.handleSubmit} initialValues={this.state.initialValues}>
-        <Item label={this.props.formItems[0].label} name={this.props.formItems[0].key}
-          rules={[{ required: true, message: `${this.props.formItems[0].label} is required` }]}>
-          <InputNumber min={0} />
-        </Item>
-        <Item label={this.props.formItems[1].label} name={this.props.formItems[1].key}
-          rules={[{ required: true, message: `${this.props.formItems[1].label} is required` }]}>
-          <Input />
-        </Item>
-        {this.props.formItems[2] &&
-          <Item label={this.props.formItems[2].label} name={this.props.formItems[2].key}>
-            <Input />
-          </Item>
-        }
-        <Item><Button type="primary" htmlType="submit">Submit</Button></Item>
-      </FormStyles>
-    );
-  }
-}
+type TModal = IFormData & { key?: string | number };
 
 class Template extends Component<ITemplateProps, ITemplateState> {
   constructor(props: ITemplateProps) {
@@ -173,21 +85,16 @@ class Template extends Component<ITemplateProps, ITemplateState> {
 
   handleAdd() {
     this.setState({ 
-      modal: 
-        <Form closeModal={this.closeModal} 
-          queries={this.props.queries} 
-          formItems={this.props.formItems} /> 
+      modal: {} 
     });
   }
 
   handleEdit(entryId: string | number) {
     this.setState({ 
-      modal: 
-        <Form key={entryId}
-          closeModal={this.closeModal} 
-          queries={this.props.queries} 
-          formItems={this.props.formItems} 
-          entryId={entryId} /> 
+      modal: {
+        key: instanceOfKey(entryId),
+        entryId
+      }
     });
   }
 
@@ -200,6 +107,16 @@ class Template extends Component<ITemplateProps, ITemplateState> {
   }
 
   render() {
+    const { queries, formItems } = this.props;
+    let modalComponent: JSX.Element | null = null;
+    if (this.state.modal) {
+      modalComponent = 
+        <Form {...this.state.modal} 
+          closeModal={this.closeModal} 
+          queries={queries} 
+          formItems={formItems} />
+    }
+
     return (
       <>
         <PageEffect function={this.refreshList} pageKey={this.props.pageKey} />
@@ -213,8 +130,8 @@ class Template extends Component<ITemplateProps, ITemplateState> {
           <List size="small"
             loading={this.state.listData.length === 0}
             dataSource={this.state.listData}
-            renderItem={entry => {
-              return new RegExp(this.state.search, 'i').test(entry.name) && (
+            renderItem={entry => (
+              new RegExp(this.state.search, 'i').test(entry.name) && (
                 <Item actions={[
                   <Button onClick={() => this.handleEdit(entry.id)}>Edit</Button>,
                   <Popconfirm placement='left'
@@ -229,20 +146,21 @@ class Template extends Component<ITemplateProps, ITemplateState> {
                     {entry.extra && <div>{entry.extra}</div>}
                   </ItemStyles>
                 </Item>
-              );
-            }} />
+              )
+            )} />
         </TemplateStyles>
         <Modal centered maskClosable width={600} footer={null}
           bodyStyle={{ paddingTop: 55 }}
           visible={this.state.modal !== null}
           onCancel={this.closeModal}>
-          {this.state.modal}
+          {modalComponent}
         </Modal>
       </>
     );
   }
 }
 
+export { IQueries, IFormData };
 export default Template;
 
 const TemplateStyles = styled.div`
@@ -272,14 +190,5 @@ const ItemStyles = styled.div`
 
   > div:not(:first-child) {
     width: 200px;
-  }
-`;
-
-const FormStyles = styled(AntForm)`
-  width: 500px;
-  margin: 0 auto;
-
-  > div:last-child {
-    text-align: right;
   }
 `;

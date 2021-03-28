@@ -1,12 +1,14 @@
-import React, { Component, FunctionComponent, createRef } from 'react';
+import React, { Component, FunctionComponent } from 'react';
 import { ipcRenderer } from 'electron';
 import styled from 'styled-components';
-import { Table, Input, Modal, message, Space, Button, FormInstance, Popconfirm } from 'antd';
+import { Table, Input, Modal, message, Space, Button, Popconfirm } from 'antd';
 import { ColumnsType } from 'antd/lib/table';
 import { PlusOutlined } from '@ant-design/icons';
 
 import PageEffect from './PageEffect';
-import { Store } from 'antd/lib/form/interface';
+import Loading from './Loading';
+
+import instanceOfKey from '../utils/uniqueKey';
 
 const { Search } = Input;
 
@@ -26,90 +28,31 @@ interface ITemplateProps {
   queries: IQueries
   columns: ColumnsType<object>
   View: FunctionComponent<IViewProps>
-  Form: typeof Component // Component<IFormProps, IFormState>
+  Form: typeof Component
 }
 
 interface ITemplateState {
   tableData: Array<Object>
   search: string
-  modal: JSX.Element | null
+  modal: TModal | null
 }
 
 interface IViewProps {
   data: Object
 }
 
-interface IFormProps {
+interface IFormData {
+  entryId?: string | number
+}
+
+interface IFormProps extends IFormData {
   closeModal: () => void
-  data?: Object
-  formRef: React.RefObject<FormInstance>
+  query?: string
 }
 
-interface IDataProps {
-  query: string
-  entryId: string | number
-  closeModal: () => void
-}
-
-interface IDataState {
-  initialValues: Store
-}
-
-function withFormRef(Comp: typeof Component) {
-  // I don't know why this is what it is.
-  return class Form extends Component<any, any> {
-    formRef: React.RefObject<FormInstance>;
-
-    constructor(props: any) {
-      super(props);
-      this.formRef = createRef();
-    }
-
-    render() {
-      return <Comp {...this.props} formRef={this.formRef} />;
-    }
-  }
-}
-
-function withData(Comp: typeof Component) {
-  return class Form extends Component<IDataProps, IDataState> {
-    formRef: React.RefObject<FormInstance>;
-
-    constructor(props: IDataProps) {
-      super(props);
-      this.formRef = createRef();
-      this.state = {
-        initialValues: {}
-      };
-      this.initializeData = this.initializeData.bind(this);
-    }
-
-    componentDidMount() {
-      this.initializeData();
-    }
-
-    componentDidUpdate(prevProps: IDataProps) {
-      if (prevProps !== this.props) {
-        this.initializeData();
-      }
-      this.formRef.current?.resetFields();
-    }
-
-    initializeData() {
-      const { query, entryId } = this.props;
-      ipcRenderer.once('formDataQuery', (event, data) => this.setState({ initialValues: { ...data[0] } }));
-      ipcRenderer.send('queryValues', query, [entryId], 'formDataQuery');
-    }
-
-    render() {
-      const { closeModal } = this.props;
-      const { initialValues } = this.state;
-      return (
-        <Comp data={initialValues} closeModal={closeModal} formRef={this.formRef} />
-      );
-    }
-  }
-}
+type TViewMode = { mode: "view" } & IViewProps;
+type TFormMode = { mode: "form" } & IFormData;
+type TModal = (TViewMode | TFormMode) & { key?: string | number };
 
 class Template extends Component<ITemplateProps, ITemplateState> {
   constructor(props: ITemplateProps) {
@@ -132,7 +75,7 @@ class Template extends Component<ITemplateProps, ITemplateState> {
       this.setState({ 
         tableData: data.map(entry => {
           const processedEntries = Object.entries(entry).map(([key, value]) => {
-            const newValue = (typeof value === 'object') ? value.toString().substr(4, 11) : value;
+            const newValue = (typeof value === 'object') ? value.toString().substr(4, 11) : value; // dates
             return [key, newValue];
           });
           const processedObject = Object.fromEntries(processedEntries);
@@ -149,30 +92,33 @@ class Template extends Component<ITemplateProps, ITemplateState> {
   }
 
   handleView(entryId: string | number) {
-    const { View } = this.props;
     ipcRenderer.once('tableViewQuery', (event, data) => {
-      this.setState({ modal: <View key={entryId} data={data[0]} /> });
+      this.setState({ 
+        modal: {
+          mode: "view",
+          key: instanceOfKey(entryId),
+          data: data[0]
+        }
+      });
     });
     ipcRenderer.send('queryValues', this.props.queries.formQuery, [entryId], 'tableViewQuery');
   }
 
   handleAdd() {
-    const { Form } = this.props;
-    const FormWithFormRef = withFormRef(Form);
     this.setState({ 
-      modal: <FormWithFormRef closeModal={this.closeModal} /> 
+      modal: { 
+        mode: 'form' 
+      }
     });
   }
 
   handleEdit(entryId: string | number) {
-    const { Form, queries } = this.props;
-    const FormWithData = withData(Form);
     this.setState({
-      modal: 
-        <FormWithData key={entryId}
-          query={queries.formQuery}
-          entryId={entryId}
-          closeModal={this.closeModal} />
+      modal: {
+        mode: 'form',
+        key: instanceOfKey(entryId),
+        entryId
+      }
     });
   }
 
@@ -185,6 +131,9 @@ class Template extends Component<ITemplateProps, ITemplateState> {
   }
 
   render() {
+    const { View, Form, queries } = this.props;
+    const { tableData, modal, search } = this.state;
+
     const columns = [ 
       ...this.props.columns, 
       {
@@ -202,18 +151,36 @@ class Template extends Component<ITemplateProps, ITemplateState> {
       } 
     ];
 
+    let modalComponent: JSX.Element | null = null;
+    if (modal) {
+      const { key } = modal;
+      switch (modal.mode) {
+        case 'view':
+          const { data } = modal;
+          modalComponent = <View key={key} data={data} />
+          break;
+        case 'form':
+          const { entryId } = modal;
+          const { formQuery } = queries;
+          modalComponent = 
+            <Form key={key} entryId={entryId} query={formQuery} 
+              closeModal={this.closeModal} />
+          break;
+      }
+    }
+
     return (
       <>
         <PageEffect function={this.refreshTable} pageKey={this.props.pageKey} />
+        {tableData.length > 0 ?
         <TemplateStyles>
-          <Search placeholder="Search" allowClear
-            style={{ width: 300 }}
+          <Search placeholder="Search" allowClear style={{ width: 300 }}
             onSearch={value => this.setState({ search: value })} />
           <br />
           <Button icon={<PlusOutlined />} onClick={this.handleAdd}>Add Record</Button> 
           <Table columns={columns} 
-            dataSource={this.state.tableData.filter(entry => (
-              new RegExp(this.state.search, 'i').test(entry[this.props.dataKey])
+            dataSource={tableData.filter(entry => (
+              new RegExp(search, 'i').test(entry[this.props.dataKey])
             ))}
             onRow={(record: Object, rowIndex) => {
               return { onClick: e => {
@@ -221,7 +188,9 @@ class Template extends Component<ITemplateProps, ITemplateState> {
                 this.handleView(primaryKey);
               }}
             }} />
-        </TemplateStyles>
+        </TemplateStyles> :
+        <Loading />
+        }
         <Modal centered maskClosable width={1250} footer={null}
           bodyStyle={{ 
             paddingTop: 50, 
@@ -231,9 +200,9 @@ class Template extends Component<ITemplateProps, ITemplateState> {
             maxHeight: '90vh', 
             overflowY: 'auto' 
           }}
-          visible={this.state.modal !== null}
+          visible={modal !== null}
           onCancel={this.closeModal}>
-          {this.state.modal}
+          {modalComponent}
         </Modal>
       </>
     );

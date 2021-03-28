@@ -8,9 +8,10 @@ import { EditOutlined, DeleteOutlined, UserOutlined } from '@ant-design/icons';
 
 import PageEffect from '../../components/PageEffect';
 import Loading from '../../components/Loading';
-import ProfileView from '../../components/ProfileTemplate';
+import ProfileView, { ITemplateData as IViewData } from '../../components/ProfileTemplate';
+import Form, { IFormData } from './Form';
 
-import Form from './Form';
+import instanceOfKey from '../../utils/uniqueKey';
 
 import { staff } from '../../Queries.json';
 const { tableQuery, viewQuery, deleteQuery } = staff;
@@ -28,8 +29,12 @@ interface IStaffTableInfo {
 
 interface IStaffState {
   tableData: Array<IStaffTableInfo>
-  modal: JSX.Element | null
+  modal: TModal | null
 }
+
+type TViewMode = { mode: 'view' } & IViewData;
+type TFormMode = { mode: 'form' } & IFormData;
+type TModal = (TViewMode | TFormMode) & { key?: string | number };
 
 class Staff extends Component<{}, IStaffState> {
   constructor(props: {}) {
@@ -56,19 +61,35 @@ class Staff extends Component<{}, IStaffState> {
     this.refreshTable();
   }
 
-  handleAdd() {
-    this.setState({ modal: <Form closeModal={this.closeModal} /> });
-  }
-
   handleView(staffId: string) {
     ipcRenderer.once('staffViewQuery', (event, data) => {
-      this.setState({ modal: <ProfileView profile={data[0]} showSalary />});
+      this.setState({ 
+        modal: {
+          mode: 'view',
+          key: instanceOfKey(staffId),
+          profile: data[0]
+        }
+      });
     });
     ipcRenderer.send('queryValues', viewQuery, [staffId], 'staffViewQuery');
   }
 
+  handleAdd() {
+    this.setState({ 
+      modal: {
+        mode: 'form'
+      } 
+    });
+  }
+
   handleEdit(staffId: string) {
-    this.setState({ modal: <Form key={staffId} closeModal={this.closeModal} staffId={staffId} /> });
+    this.setState({ 
+      modal: {
+        mode: 'form',
+        key: instanceOfKey(staffId),
+        staffId
+      } 
+    });
   }
 
   handleDelete(staffId: string) {
@@ -80,15 +101,33 @@ class Staff extends Component<{}, IStaffState> {
   }
 
   render() {
+    const { tableData, modal } = this.state;
+
     const active = <span style={{ color: 'green' }}>Active</span>
     const inactive = <span style={{ color: 'red' }}>Inactive</span>
+
+    let modalComponent: JSX.Element | null = null;
+    if (modal) {
+      const { key } = modal;
+      switch (modal.mode) {
+        case 'view':
+          const { profile } = modal; 
+          modalComponent = <ProfileView key={key} profile={profile} showSalary />
+          break;
+        case 'form':
+          const { staffId } = modal;
+          modalComponent = <Form key={key} staffId={staffId} closeModal={this.closeModal} />
+          break;
+      }
+    }
+
     return (
       <>
         <PageEffect function={() => this.refreshTable()} pageKey='staff' />
-        {this.state.tableData.length > 0 ?
+        {tableData.length > 0 ?
         <StaffStyles>
           <Button type="dashed" style={{ height: '100%' }} onClick={this.handleAdd}>Add Staff</Button>
-          {this.state.tableData.map(staff => (
+          {tableData.map(staff => (
             <Card key={staff.staffid} hoverable 
               onClick={() => this.handleView(staff.staffid)} 
               actions={[
@@ -117,9 +156,9 @@ class Staff extends Component<{}, IStaffState> {
         }
         <Modal centered maskClosable width={900} footer={null}
           bodyStyle={{ paddingTop: 45, maxHeight: '90vh', overflowY: 'auto' }}
-          visible={this.state.modal !== null} 
+          visible={modal !== null} 
           onCancel={this.closeModal}>
-          {this.state.modal}
+          {modalComponent}
         </Modal>
       </>
     );

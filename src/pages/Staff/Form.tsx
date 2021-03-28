@@ -6,6 +6,8 @@ import {
   Form as AntForm, Button, Typography, message } from 'antd';
 import { Store } from 'antd/lib/form/interface';
 
+import scrollToTop from '../../utils/scrollModal';
+
 import { staff, staffGroup } from '../../Queries.json';
 const { formQuery, insertQuery, updateQuery } = staff;
 
@@ -19,9 +21,12 @@ interface IStaffGroup {
   groupname: string
 }
 
-interface IFormProps {
-  closeModal: () => void
+interface IFormData {
   staffId?: string
+}
+
+interface IFormProps extends IFormData {
+  closeModal: () => void
 }
 
 interface IFormState {
@@ -38,44 +43,42 @@ class Form extends Component<IFormProps, IFormState> {
       initialValues: {},
       staffGroups: []
     }
+    this.initializeData();
+
     this.formRef = createRef();
+
     this.initializeData = this.initializeData.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  componentDidMount() {
-    this.initializeData();
-
-    // Initialize staff group values for dropdown options.
-    ipcRenderer.once('staffForm_staffGroupQuery', (event, data) => {
-      this.setState({ staffGroups: data });
+  initializeData() {
+    ipcRenderer.once('staffForm_staffGroupQuery', (event, staffGroups) => {
+      const { staffId } = this.props;
+      if (staffId) {
+        // Initialize 'edit' form values.
+        ipcRenderer.once('staffFormQuery', (event, data) => {
+          this.setState({ 
+            initialValues: data[0],
+            staffGroups
+          });
+          this.formRef.current?.resetFields();
+        });
+        ipcRenderer.send('queryValues', formQuery, [staffId], 'staffFormQuery');
+      }
+      else {
+        // Initialize 'add' form values. Normally this would be blank.
+        this.setState({ 
+          initialValues: { status: true },
+          staffGroups
+        });
+        this.formRef.current?.resetFields();
+      }
     });
     ipcRenderer.send('query', staffGroup.tableQuery, 'staffForm_staffGroupQuery');
   }
 
-  componentDidUpdate(prevProps: IFormProps) {
-    if (this.props.staffId !== prevProps.staffId) {
-      this.initializeData();
-    }
-    this.formRef.current?.resetFields();
-  }
-
-  initializeData() {
-    if (this.props.staffId) {
-      // Initialize 'edit' form values.
-      ipcRenderer.once('staffFormQuery', (event, data) => {
-        console.log(data);
-        this.setState({ initialValues: data[0] });
-      });
-      ipcRenderer.send('queryValues', formQuery, [this.props.staffId], 'staffFormQuery');
-    }
-    else {
-      // Initialize 'add' form values. Normally this would be blank.
-      this.setState({ initialValues: { status: true } });
-    }
-  }
-
   handleSubmit(values: any) {
+    const { staffId, closeModal } = this.props;
     const encryptedPassword = ipcRenderer.sendSync('encrypt', values.pwd);
     const finalizedValues = { 
       ...values, 
@@ -87,24 +90,25 @@ class Form extends Component<IFormProps, IFormState> {
     };
     const rawValues = Object.values(finalizedValues).map(value => value || null);
 
-    if (this.props.staffId) {
+    if (staffId) {
       // Edit form on submit.
-      ipcRenderer.once('staffUpdateQuery', () => message.success(`Staff '${this.props.staffId}' successfully updated`));
-      ipcRenderer.send('queryValues', updateQuery, [...rawValues, this.props.staffId], 'staffUpdateQuery');
+      ipcRenderer.once('staffUpdateQuery', () => message.success(`Staff '${staffId}' successfully updated`));
+      ipcRenderer.send('queryValues', updateQuery, [...rawValues, staffId], 'staffUpdateQuery');
     }
     else {
       // Add form on submit.
       ipcRenderer.once('staffInsertQuery', () => message.success('Staff successfully added'));
       ipcRenderer.send('queryValues', insertQuery, rawValues, 'staffInsertQuery');
     }
-    this.props.closeModal();
+    closeModal();
   }
   
   render() {
+    const { initialValues } = this.state;
     return (
       <FormStyles ref={this.formRef} labelCol={{ span: 5 }}
-        onFinish={this.handleSubmit} /* onFinishFailed={() => something} // TODO: scroll to top on fail */
-        initialValues={this.state.initialValues}>
+        onFinish={this.handleSubmit} onFinishFailed={scrollToTop}
+        initialValues={initialValues}>
         <Title level={4}>Account Details</Title>
         <Item label="Username" name="staffid" 
           rules={[{ required: true, message: 'Username is required' }]}>
@@ -192,6 +196,7 @@ class Form extends Component<IFormProps, IFormState> {
   }
 }
 
+export { IFormData };
 export default Form;
 
 const FormStyles = styled(AntForm)`
