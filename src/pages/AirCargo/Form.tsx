@@ -171,8 +171,6 @@ class Form extends Component<IFormProps, IFormState> {
       return [newInsertQuery, flattenedValues];
     }
 
-    // TODO: Queries in the 'Queries.json' file.
-
     if (entryId) {
       // Edit form on submit.
       ipcRenderer.once('aircargoUpdateQuery', () => {

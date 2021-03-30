@@ -2,7 +2,6 @@ import React, { Component, createRef } from 'react';
 import { ipcRenderer } from 'electron';
 import styled from 'styled-components';
 import { Typography, Form as AntForm, Button, Input, DatePicker, Select } from 'antd';
-import moment from 'moment';
 
 import { IFormProps } from '../../components/TableTemplate';
 import MarkingTable from '../../components/MarkingTable';

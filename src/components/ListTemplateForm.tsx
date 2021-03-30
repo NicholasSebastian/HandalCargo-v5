@@ -4,7 +4,6 @@ import styled from 'styled-components';
 import { FormInstance, Form as AntForm, Input, InputNumber, Button, message } from 'antd';
 import { Store } from 'antd/lib/form/interface';
 
-import scrollToTop from '../utils/scrollModal';
 import { IQueries, IFormData } from './ListTemplate';
 
 interface IFormItem {

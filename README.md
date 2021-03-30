@@ -17,7 +17,6 @@ Uses Ant Design for UI components.
 
 - Dashboard
 - Language (English / Indonesian)
-- Form should scroll to the top on validation error?
 - Mail?
 
 ### Known Bugs and Issues
