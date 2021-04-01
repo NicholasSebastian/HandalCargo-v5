@@ -29,6 +29,7 @@ interface ITemplateProps {
   columns: ColumnsType<object>
   View: FunctionComponent<IViewProps>
   Form: typeof Component
+  extraData?: (data: Array<Object>) => Array<Object>
 }
 
 interface ITemplateState {
@@ -71,19 +72,13 @@ class Template extends Component<ITemplateProps, ITemplateState> {
   }
 
   refreshTable() {
+    const { dataKey, queries } = this.props;
     ipcRenderer.once('tableQuery', (event, data: Array<Object>) => {
       this.setState({ 
-        tableData: data.map(entry => {
-          const processedEntries = Object.entries(entry).map(([key, value]) => {
-            const newValue = (typeof value === 'object') ? value.toString().substr(4, 11) : value; // dates
-            return [key, newValue];
-          });
-          const processedObject = Object.fromEntries(processedEntries);
-          return { key: entry[this.props.dataKey], ...processedObject };
-        })
+        tableData: data.map(entry => ({ key: entry[dataKey], ...entry }))
       });
     });
-    ipcRenderer.send('query', this.props.queries.tableQuery, 'tableQuery');
+    ipcRenderer.send('query', queries.tableQuery, 'tableQuery');
   }
 
   closeModal() {
@@ -92,6 +87,7 @@ class Template extends Component<ITemplateProps, ITemplateState> {
   }
 
   handleView(entryId: string | number) {
+    const { queries } = this.props;
     ipcRenderer.once('tableViewQuery', (event, data) => {
       this.setState({ 
         modal: {
@@ -101,7 +97,7 @@ class Template extends Component<ITemplateProps, ITemplateState> {
         }
       });
     });
-    ipcRenderer.send('queryValues', this.props.queries.formQuery, [entryId], 'tableViewQuery');
+    ipcRenderer.send('queryValues', queries.formQuery, [entryId], 'tableViewQuery');
   }
 
   handleAdd() {
@@ -123,21 +119,22 @@ class Template extends Component<ITemplateProps, ITemplateState> {
   }
 
   handleDelete(entryId: string | number) {
+    const { queries } = this.props;
     ipcRenderer.once('tableDeleteQuery', () => {
       message.success(`Entry successfully deleted`);
       this.refreshTable();
     });
-    ipcRenderer.send('queryValues', this.props.queries.deleteQuery, [entryId], 'tableDeleteQuery');
+    ipcRenderer.send('queryValues', queries.deleteQuery, [entryId], 'tableDeleteQuery');
   }
 
   render() {
-    const { View, Form, queries } = this.props;
+    const { View, Form, queries, pageKey, dataKey, extraData } = this.props;
     const { tableData, modal, search } = this.state;
 
     const columns = [ 
       ...this.props.columns, 
       {
-        dataIndex: this.props.dataKey,
+        dataIndex: dataKey,
         render: (primaryKey: string | number) => (
           <Space>
             <Button onClick={e => { e.stopPropagation(); this.handleEdit(primaryKey); }}>Edit</Button>
@@ -169,22 +166,23 @@ class Template extends Component<ITemplateProps, ITemplateState> {
       }
     }
 
+    const processedData = extraData ? extraData(tableData) : tableData;
     return (
       <>
-        <PageEffect function={this.refreshTable} pageKey={this.props.pageKey} />
-        {tableData.length > 0 ?
+        <PageEffect function={this.refreshTable} pageKey={pageKey} />
+        {processedData.length > 0 ?
         <TemplateStyles>
           <Search placeholder="Search" allowClear style={{ width: 300 }}
             onSearch={value => this.setState({ search: value })} />
           <br />
           <Button icon={<PlusOutlined />} onClick={this.handleAdd}>Add Record</Button> 
           <Table columns={columns} 
-            dataSource={tableData.filter(entry => (
-              new RegExp(search, 'i').test(entry[this.props.dataKey])
+            dataSource={processedData.filter((entry: Object) => (
+              new RegExp(search, 'i').test(entry[dataKey])
             ))}
             onRow={(record: Object, rowIndex) => {
               return { onClick: e => {
-                const primaryKey = record[this.props.dataKey];
+                const primaryKey = record[dataKey];
                 this.handleView(primaryKey);
               }}
             }} />

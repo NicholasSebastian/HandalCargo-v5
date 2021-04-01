@@ -1,6 +1,6 @@
 {
   "airCargo": {
-    "tableQuery": "SELECT `tgltiba`, `no`, `kode`, `rute`, `pesawat`, `totalmuatan`, `totalberat[hb]` FROM `aircargo`",
+    "tableQuery": "SELECT * FROM `aircargo`",
     "formQuery": "SELECT * FROM `aircargo` WHERE `no` = ?",
     "insertQuery": "INSERT INTO `aircargo` (``, ``, ``) VALUES (?, ?, ?)",
     "updateQuery": "UPDATE `aircargo` SET `` = ?, `` = ? WHERE `no` = ?",
@@ -10,14 +10,14 @@
     "markingDeleteQuery": "DELETE FROM `aircargomarking` WHERE `noaircargo` = ?"
   },
   "seaFreight": {
-    "tableQuery": "",
-    "formQuery": "",
-    "insertQuery": "",
-    "updateQuery": "",
-    "deleteQuery": "",
-    "markingTableQuery": "",
-    "markingInsertQuery": "",
-    "markingDeleteQuery": ""
+    "tableQuery": "SELECT * FROM `seafreight`",
+    "formQuery": "SELECT * FROM `seafreight` WHERE `nocontainer` = ?",
+    "insertQuery": "INSERT INTO `seafreight` (``, ``, ``) VALUES (?, ?, ?)",
+    "updateQuery": "UPDATE `seafreight` SET `` = ?, `` = ? WHERE `nocontainer` = ?",
+    "deleteQuery": "DELETE FROM `seafreight` WHERE `nocontainer` = ?",
+    "markingTableQuery": "SELECT ``, ``, ``, `` FROM `seafreightmarking` WHERE `nocontainer` = ?",
+    "markingInsertQuery": "INSERT INTO `seafreightmarking` (``, ``, ``) VALUES (?, ?, ?)",
+    "markingDeleteQuery": "DELETE FROM `seafreightmarking` WHERE `nocontainer` = ?"
   },
   "containerGroup": {
     "tableQuery": "SELECT `containercode`, `containerdesc`, `size` FROM `kelcontainer`",

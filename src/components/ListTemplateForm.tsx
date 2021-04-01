@@ -29,12 +29,10 @@ class Form extends Component<IFormProps, IFormState> {
     this.state = {
       initialValues: {}
     };
-    this.initializeData();
-
     this.formRef = createRef();
-
     this.initializeData = this.initializeData.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.initializeData();
   }
 
   initializeData() {
@@ -51,7 +49,6 @@ class Form extends Component<IFormProps, IFormState> {
     else {
       // Initialize 'add' form values.
       this.setState({ initialValues: {} });
-      this.formRef.current?.resetFields();
     }
   }
 
@@ -84,7 +81,7 @@ class Form extends Component<IFormProps, IFormState> {
         onFinish={this.handleSubmit} initialValues={this.state.initialValues}>
         <Item label={this.props.formItems[0].label} name={this.props.formItems[0].key}
           rules={[{ required: true, message: `${this.props.formItems[0].label} is required` }]}>
-          <InputNumber min={0} />
+          <InputNumber min={0} type='number' />
         </Item>
         <Item label={this.props.formItems[1].label} name={this.props.formItems[1].key}
           rules={[{ required: true, message: `${this.props.formItems[1].label} is required` }]}>

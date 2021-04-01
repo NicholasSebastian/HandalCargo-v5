@@ -23,28 +23,28 @@ const MarkingTable: FunctionComponent<MarkingTableProps> = props => {
     const marking = markingRef.current?.state.value;
     const quantity = quantityRef.current?.state.value;
     const list = listRef.current?.state.value;
+
+    const newData = { 
+      key: data.length,
+      no: null,
+      marking,
+      qty: quantity,
+      'list[kg]': list,
+      'hb[kg]': null,
+      'standart[kg]': null,
+      'vol.charge': null,
+      lunas: false,
+      sisa: null,
+      suratjalan: null,
+      faktur: null
+    };
     
-    setData([
-      ...data,
-      { 
-        no: null,   // TODO: Figure out what to do with this 'no' field. Without this, handleDelete won't work.
-        marking,
-        qty: quantity,
-        'list[kg]': list,
-        'hb[kg]': null,
-        'standart[kg]': null,
-        'vol.charge': null,
-        lunas: false,
-        sisa: null,
-        suratjalan: null,
-        faktur: null
-      }
-    ]);
+    setData([...data, newData]);
     if (onUpdate) onUpdate();
   }
 
-  function handleDelete(primaryKey: string | number) {
-    const newData = data.filter(d => d.no !== primaryKey);
+  function handleDelete(index: number) {
+    const newData = [...data.slice(0, index), ...data.slice(index + 1)];
     setData(newData);
     if (onUpdate) onUpdate();
   }
@@ -60,13 +60,13 @@ const MarkingTable: FunctionComponent<MarkingTableProps> = props => {
       <Table pagination={false}
         dataSource={data} size='small' 
         columns={[
-          ...innerTableColumns,
+          ...markingColumns,
           {
             dataIndex: 'no',
-            render: (primaryKey: string | number) => (
+            render: (value, row, index) => (
               <Popconfirm placement="left"
                 title="Are you sure you would like to delete this entry?"
-                onConfirm={() => handleDelete(primaryKey)}>
+                onConfirm={() => handleDelete(index)}>
                 <Button danger icon={<DeleteOutlined />} />
               </Popconfirm>
             )
@@ -76,6 +76,7 @@ const MarkingTable: FunctionComponent<MarkingTableProps> = props => {
   );
 }
 
+export { markingColumns };
 export default MarkingTable;
 
 const ItemStyles = styled.div`
@@ -87,7 +88,7 @@ const ItemStyles = styled.div`
   }
 `;
 
-const innerTableColumns: ColumnsType<object> = [
+const markingColumns: ColumnsType<object> = [
   {
     title: 'No',
     dataIndex: 'no',
@@ -124,22 +125,25 @@ const innerTableColumns: ColumnsType<object> = [
     key: 'vol.charge'
   },
   {
-    title: 'Lunas',
+    title: 'Settled',
     dataIndex: 'lunas',
-    key: 'lunas'
+    key: 'lunas',
+    render: (value) => value ? 
+      <span style={{ color: 'green' }}>Paid Off</span> : 
+      <span style={{ color: 'red' }}>Not Settled</span>
   },
   {
-    title: 'Sisa',
+    title: 'Remainder',
     dataIndex: 'sisa',
     key: 'sisa'
   },
   {
-    title: 'Surat Jalan',
+    title: 'Delivery Orders',
     dataIndex: 'suratjalan',
     key: 'suratjalan'
   },
   {
-    title: 'Faktur',
+    title: 'Invoice',
     dataIndex: 'faktur',
     key: 'faktur'
   }

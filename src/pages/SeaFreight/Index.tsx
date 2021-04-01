@@ -1,55 +1,108 @@
 import React, { Component } from 'react';
+import { ipcRenderer } from 'electron';
 
 import Template from '../../components/TableTemplate';
 import View from './View';
 import Form from './Form';
 
-import { seaFreight } from '../../Queries.json';
+import { seaFreight, routes, handlers, carriers, containerGroup } from '../../Queries.json';
+const { tableQuery: routeQuery } = routes;
+const { tableQuery: handlerQuery } = handlers;
+const { tableQuery: carrierQuery } = carriers;
+const { tableQuery: containerGroupQuery } = containerGroup;
 
-class SeaFreight extends Component {
+interface ISeaFreightState {
+  routes: Array<any>
+  handlers: Array<any>
+  carriers: Array<any>
+  containerGroups: Array<any>
+}
+
+class SeaFreight extends Component<never, ISeaFreightState> {
+  constructor(props: never) {
+    super(props);
+    this.state = {
+      routes: [],
+      handlers: [],
+      carriers: [],
+      containerGroups: []
+    };
+    this.initializeData = this.initializeData.bind(this);
+    this.initializeData();
+  }
+
+  initializeData() {
+    ipcRenderer.once('routeQuery', (event, routes) => {
+      ipcRenderer.once('handlerQuery', (event, handlers) => {
+        ipcRenderer.once('carrierQuery', (event, carriers) => {
+          ipcRenderer.once('containerGroupQuery', (event, containerGroups) => {
+            this.setState({ routes, handlers, carriers, containerGroups });
+          });
+          ipcRenderer.send('query', containerGroupQuery, 'containerGroupQuery');
+        });
+        ipcRenderer.send('query', carrierQuery, 'carrierQuery');
+      });
+      ipcRenderer.send('query', handlerQuery, 'handlerQuery');
+    });
+    ipcRenderer.send('query', routeQuery, 'routeQuery');
+  }
+
   render() {
+    const { routes, handlers, carriers, containerGroups } = this.state;
     return (
       <Template
         pageKey="seaFreight"
-        dataKey="no"
+        dataKey="nocontainer"
         queries={seaFreight}
         View={View}
         Form={Form}
-        columns={[ // TODO: sorter
+        extraData={data => data.map(entry => {
+          const timeDifference = Math.abs(entry.tgltiba - entry.tglmuat);
+          const dateDifference = Math.ceil(timeDifference / (1000 * 60 * 60 * 24));
+          return { ...entry, lamatiba: dateDifference };
+        })}
+        columns={[ // TODO: sorters
           {
-            title: "",
-            dataIndex: "",
-            key: ""
+            title: "Arrival Date",
+            dataIndex: "tgltiba",
+            key: "tgltiba",
+            render: (date: Date) => date.toDateString(),
+            sorter: (a: any, b: any) => a.tgltiba - b.tgltiba
           },
           {
-            title: "",
-            dataIndex: "",
-            key: ""
+            title: "Container Number",
+            dataIndex: "nocontainer",
+            key: "nocontainer",
+            sorter: (a: any, b: any) => (a.nocontainer as string).localeCompare(b.nocontainer)
           },
           {
-            title: "",
-            dataIndex: "",
-            key: ""
+            title: "Route Description",
+            dataIndex: "rute",
+            key: "rute",
+            render: (routeId) => routes.find(route => route.rutecode === routeId)?.rutedesc
           },
           {
-            title: "",
-            dataIndex: "",
-            key: ""
+            title: "Handler",
+            dataIndex: "pengurus",
+            key: "pengurus",
+            render: (handlerId) => handlers.find(handler => handler.penguruscode === handlerId)?.pengurusname
           },
           {
-            title: "",
-            dataIndex: "",
-            key: ""
+            title: "Carrier",
+            dataIndex: "shipper",
+            key: "shipper",
+            render: (shipperId) => carriers.find(carrier => carrier.shippercode === shipperId)?.name
           },
           {
-            title: "",
-            dataIndex: "",
-            key: ""
+            title: "Container Group",
+            dataIndex: "kelcontainer",
+            key: "kelcontainer",
+            render: (containerId) => containerGroups.find(group => group.containercode === containerId)?.containerdesc
           },
           {
-            title: "",
-            dataIndex: "",
-            key: ""
+            title: "Days to Ship",
+            dataIndex: "lamatiba",
+            key: "lamatiba"
           }
         ]} />
     );

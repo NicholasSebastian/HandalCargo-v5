@@ -6,7 +6,7 @@ import * as url from 'url'
 import { connectionInstance } from './main'
 
 const loginWindowSize = { width: 550, height: 400 }
-const windowSize = { width: 1366, height: 768, minWidth: 1230, minHeight: 600 }
+const windowSize = { width: 1366, height: 768, minWidth: 1340, minHeight: 640 }
 
 class Window {
   window: Electron.BrowserWindow | null
@@ -39,7 +39,7 @@ class Window {
 
   public onLogin (): void {
     this.window?.setSize(windowSize.width, windowSize.height)
-    this.window?.setMinimumSize(windowSize.minWidth, windowSize.minHeight) // this is bugged. min size is 0, 0 for some reason wtf.
+    this.window?.setMinimumSize(windowSize.minWidth, windowSize.minHeight) // this is bugged. min size is 0, 0 for some reason...
     this.window?.setResizable(true)
     this.window?.center()
   }

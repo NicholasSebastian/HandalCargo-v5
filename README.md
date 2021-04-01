@@ -17,6 +17,7 @@ Uses Ant Design for UI components.
 
 - Dashboard
 - Language (English / Indonesian)
+- Images for Profiles
 - Mail?
 
 ### Known Bugs and Issues

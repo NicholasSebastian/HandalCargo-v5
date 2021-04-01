@@ -1,9 +1,10 @@
 import React, { FC, useState, useEffect } from 'react';
 import { ipcRenderer } from 'electron';
 import styled from 'styled-components';
-import { Card, Descriptions, List } from 'antd';
+import { Card, Descriptions, Table } from 'antd';
 
 import { IViewProps } from '../../components/TableTemplate';
+import { markingColumns } from '../../components/MarkingTable';
 import round from '../../utils/roundToTwo';
 
 import { airCargo, routes, planes, currencies } from '../../Queries.json';
@@ -25,13 +26,16 @@ const View: FC<IViewProps> = (props) => {
   const { data } = props;
   const { Item } = Descriptions;
 
-  const [viewData, setViewData] = useState<IViewState>(null);
+  const [extraData, setExtraData] = useState<IViewState>(null);
   useEffect(() => {
     ipcRenderer.once('routesQuery', (event, routes) => {
       ipcRenderer.once('planesQuery', (event, planes) => {
         ipcRenderer.once('currenciesQuery', (event, currencies) => {
           ipcRenderer.once('markingQuery', (event, markingData) => {
-            setViewData({ routes, planes, currencies, markingData });
+            setExtraData({ 
+              routes, planes, currencies, 
+              markingData: markingData.map((entry: Object, i: number) => ({ key: i, ...entry }))
+            });
           });
           ipcRenderer.send('queryValues', markingQuery, [data.no], 'markingQuery');
         });
@@ -48,9 +52,9 @@ const View: FC<IViewProps> = (props) => {
   const timeDifference = Math.abs(data.tgltiba - data.tglmuat);
   const dateDifference = Math.ceil(timeDifference / (1000 * 60 * 60 * 24));
 
-  const route = viewData?.routes.find((r: Object) => r.rutecode == data.rute).rutedesc as string;
-  const plane = viewData?.planes.find((p: Object) => p.pesawatcode == data.pesawat).pesawatdesc as string;
-  const currency = viewData?.currencies.find((c: Object) => c.currencycode == data.matauang).currencydesc as string;
+  const route = extraData?.routes.find((r: Object) => r.rutecode == data.rute).rutedesc as string;
+  const plane = extraData?.planes.find((p: Object) => p.pesawatcode == data.pesawat).pesawatdesc as string;
+  const currency = extraData?.currencies.find((c: Object) => c.currencycode == data.matauang).currencydesc as string;
 
   const freightCharge = data['freightcharge/kg'];
   const commissionCharge = data['komisi/kg'];
@@ -61,9 +65,9 @@ const View: FC<IViewProps> = (props) => {
   const clrnTotal = data.customclrn * data.brtclrn;
   const totalFees = freightTotal + commissionTotal + clrnTotal + data.biayatambahan + otherFees;
 
-  const totalQuantity = viewData?.markingData.map((d: Object) => d.qty).reduce((a: number, b: number) => a + b, 0);
-  const totalWeightList = viewData?.markingData.map((d: Object) => d['list[kg]']).reduce((a: number, b: number) => a + b, 0);
-  const totalWeightHb = viewData?.markingData.map((d: Object) => d['hb[kg]']).reduce((a: number, b: number) => a + b, 0);
+  const totalQuantity = extraData?.markingData.map((d: Object) => d.qty).reduce((a: number, b: number) => a + b, 0);
+  const totalWeightList = extraData?.markingData.map((d: Object) => d['list[kg]']).reduce((a: number, b: number) => a + b, 0);
+  const totalWeightHb = extraData?.markingData.map((d: Object) => d['hb[kg]']).reduce((a: number, b: number) => a + b, 0);
   const realDifference = round(totalWeightHb - totalWeightList);
   const masterDifference = round(totalWeightHb - data.brtclrn);
   
@@ -97,23 +101,14 @@ const View: FC<IViewProps> = (props) => {
           <Item label="Total Fees">{totalFees}</Item>
         </Descriptions>
       </Card>
-      <Card>
-        <Descriptions title="Markings" labelStyle={{ fontWeight: 500 }}>
-          <List size='small'
-            loading={!viewData}
-            dataSource={viewData?.markingData}
-            renderItem={(entry: Object) => (
-              <List.Item>
-                {/* {Object.values(entry).map((field, i) => (
-                  <div key={i}>{field}</div>
-                ))} */}
-                <div>{JSON.stringify(entry)}</div>
-              </List.Item>
-            )} />
-        </Descriptions>
+      <Card title="Markings">
+        <Table size='small' pagination={false}
+          columns={markingColumns}
+          dataSource={extraData?.markingData}
+          loading={extraData === null} />
       </Card>
       <Card>
-        <Descriptions title="Additional Details" labelStyle={{ fontWeight: 500 }}>
+        <Descriptions title="Summary" labelStyle={{ fontWeight: 500 }}>
           <Item label="Total Quantity">{totalQuantity}</Item>
           <Item label="Total Weight (List)">{totalWeightList}</Item>
           <Item label="Total Weight (HB)">{totalWeightHb}</Item>

@@ -1,7 +1,7 @@
 import React, { Component, createRef } from 'react';
 import { ipcRenderer } from 'electron';
 import styled from 'styled-components';
-import { Typography, Form as AntForm, Button, Input, DatePicker, Select, FormInstance, message } from 'antd';
+import { Typography, Form as AntForm, Button, Input, InputNumber, DatePicker, Select, FormInstance, message } from 'antd';
 import { Store } from 'antd/lib/form/interface';
 import moment from 'moment';
 
@@ -51,16 +51,13 @@ class Form extends Component<IFormProps, IFormState> {
       currencies: [],
       markingData: []
     };
-    this.initializeData();
-
+    
     this.formRef = createRef();
-
     this.daysToShipRef = createRef();
     this.freightTotalRef = createRef();
     this.commissionTotalRef = createRef();
     this.clrnTotalRef = createRef();
     this.totalFeesRef = createRef();
-
     this.totalQuantityRef = createRef();
     this.totalWeightHbRef = createRef();
     this.totalWeightListRef = createRef();
@@ -70,6 +67,8 @@ class Form extends Component<IFormProps, IFormState> {
     this.handleSubmit = this.handleSubmit.bind(this);
     this.calculateValues = this.calculateValues.bind(this);
     this.calculateMarkingValues = this.calculateMarkingValues.bind(this);
+
+    this.initializeData();
   }
 
   initializeData() {
@@ -88,6 +87,7 @@ class Form extends Component<IFormProps, IFormState> {
                 });
                 this.formRef.current?.resetFields();
                 this.calculateValues();
+                this.calculateMarkingValues();
               });
               ipcRenderer.send('queryValues', markingTableQuery, [data[0].no], 'markingTableQuery');
             });
@@ -243,21 +243,39 @@ class Form extends Component<IFormProps, IFormState> {
                 ))}
               </Select>
             </Item>
-            <Item label="Exchange Rate" name="kurs"><Input /></Item>
+            <Item label="Exchange Rate" name="kurs">
+              <InputNumber type='number' style={{ width: '100%' }} />
+            </Item>
             <Item label="Description" name="keterangan"><TextArea /></Item>
           </div>
           <div>
-            <Item label="Charge/Kg" name="freightcharge/kg"><Input /></Item>
-            <Item label="Freight Weight" name="brtfreight"><Input addonAfter="Kg" /></Item>
+            <Item label="Charge/Kg" name="freightcharge/kg">
+              <InputNumber type='number' style={{ width: '100%' }} />
+            </Item>
+            <Item label="Freight Weight" name="brtfreight">
+              <InputNumber type='number' style={{ width: '100%' }} />
+            </Item>
             <Item label="Freight Total"><Input ref={this.freightTotalRef} disabled /></Item>
-            <Item label="Commission/Kg" name="komisi/kg"><Input /></Item>
-            <Item label="Commission Weight" name="brtkomisi"><Input addonAfter="Kg" /></Item>
+            <Item label="Commission/Kg" name="komisi/kg">
+              <InputNumber type='number' style={{ width: '100%' }} />
+            </Item>
+            <Item label="Commission Weight" name="brtkomisi">
+              <InputNumber type='number' style={{ width: '100%' }} />
+            </Item>
             <Item label="Commission Total"><Input ref={this.commissionTotalRef} disabled /></Item>
-            <Item label="Custom Clrn" name="customclrn"><Input /></Item>
-            <Item label="Clrn Weight" name="brtclrn"><Input addonAfter="Kg" /></Item>
+            <Item label="Custom Clrn" name="customclrn">
+              <InputNumber type='number' style={{ width: '100%' }} />
+            </Item>
+            <Item label="Clrn Weight" name="brtclrn">
+              <InputNumber type='number' style={{ width: '100%' }} />
+            </Item>
             <Item label="Clrn Total"><Input ref={this.clrnTotalRef} disabled /></Item>
-            <Item label="Additional Fees" name="biayatambahan"><Input /></Item>
-            <Item label="Other Fees" name="biayalain-lain"><Input /></Item>
+            <Item label="Additional Fees" name="biayatambahan">
+              <InputNumber type='number' style={{ width: '100%' }} />
+            </Item>
+            <Item label="Other Fees" name="biayalain-lain">
+              <InputNumber type='number' style={{ width: '100%' }} />
+            </Item>
             <Item label="Total Fees"><Input ref={this.totalFeesRef} disabled /></Item>
           </div>
         </DoubleColumns>

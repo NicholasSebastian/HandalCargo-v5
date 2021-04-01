@@ -6,16 +6,16 @@ import { Typography, Form as AntForm, Button, Input, DatePicker, Select } from '
 import { IFormProps } from '../../components/TableTemplate';
 import MarkingTable from '../../components/MarkingTable';
 
-import { airCargo, routes, planes, currencies } from '../../Queries.json';
+import { seaFreight, routes, planes, currencies } from '../../Queries.json';
 const { insertQuery, updateQuery, 
-  markingTableQuery, markingInsertQuery, markingDeleteQuery } = airCargo;
+  markingTableQuery, markingInsertQuery, markingDeleteQuery } = seaFreight;
 
 const { Title } = Typography;
 const { Option } = Select;
 const { TextArea } = Input;
 
 interface IFormState {
-
+  // here
 }
 
 class Form extends Component<IFormProps, IFormState> {

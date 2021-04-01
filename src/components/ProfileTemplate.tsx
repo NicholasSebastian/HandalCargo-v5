@@ -20,11 +20,11 @@ interface IProfile {
   dateofemployment: any
   profilepic: any
   profilepictype: string
-  salary: string // here
+  salary: string
   othr: string
   foodallowance: string
   bonus: string
-  dilligencebonus: string // until here
+  dilligencebonus: string
 }
 
 interface ITemplateData {
