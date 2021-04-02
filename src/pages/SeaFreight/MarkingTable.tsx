@@ -40,7 +40,9 @@ const MarkingTable: FunctionComponent<MarkingTableProps> = props => {
       'cust[m3]': null,
       'cust[kg]': null,
       lunas: false,
-      // maybe there should be more
+      sisa: null,
+      suratjalan: null,
+      faktur: null
     };
     
     setData([...data, newData]);
@@ -156,5 +158,19 @@ const markingColumns: ColumnsType<object> = [
       <span style={{ color: 'green' }}>Paid Off</span> : 
       <span style={{ color: 'red' }}>Not Settled</span>
   },
-  // I think there should be more here
+  {
+    title: 'Remainder',
+    dataIndex: 'sisa',
+    key: 'sisa'
+  },
+  {
+    title: 'Delivery Orders',
+    dataIndex: 'suratjalan',
+    key: 'suratjalan'
+  },
+  {
+    title: 'Invoice',
+    dataIndex: 'faktur',
+    key: 'faktur'
+  }
 ];

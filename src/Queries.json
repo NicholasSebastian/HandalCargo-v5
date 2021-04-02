@@ -68,6 +68,13 @@
     "updateQuery": "UPDATE `keteranganbrg` SET `brgcode` = ?, `brgdesc` = ? WHERE `brgcode` = ?",
     "deleteQuery": "DELETE FROM `keteranganbrg` WHERE `brgcode` = ?"
   },
+  "expedition": {
+    "tableQuery": "SELECT `expedisicode`, `expedisiname`, `rutename`, `alamat`, `phone1`, `phone2`, `fax`, `keterangan` FROM `expedisi`",
+    "formQuery": "SELECT `expedisicode`, `expedisiname`, `rutename`, `alamat`, `phone1`, `phone2`, `fax`, `keterangan` FROM `expedisi` WHERE `expedisicode` = ?",
+    "insertQuery": "INSERT INTO `expedisi` (`expedisicode`, `expedisiname`, `rutename`, `alamat`, `phone1`, `phone2`, `fax`, `keterangan`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+    "updateQuery": "UPDATE `expedisi` SET `expedisicode` = ?, `expedisiname` = ?, `rutename` = ?, `alamat` = ?, `phone1` = ?, `phone2` = ?, `fax` = ?, `keterangan` = ? WHERE `expedisicode` = ?",
+    "deleteQuery": "DELETE FROM `expedisi` WHERE `expedisicode` = ?"
+  },
   "staff": {
     "tableQuery": "SELECT `staffid`, `staffname`, `groupname`, `phonenum`, `status` FROM `staff` LEFT JOIN `staffgroup` ON `staff`.`groupcode` = `staffgroup`.`stfgrcode`",
     "viewQuery": "SELECT * FROM `staff` LEFT JOIN `staffgroup` ON `staff`.`groupcode` = `staffgroup`.`stfgrcode` WHERE `staffid` = ?",

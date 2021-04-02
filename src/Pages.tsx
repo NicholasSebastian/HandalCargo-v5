@@ -13,6 +13,7 @@ import Handlers from './pages/Handlers';
 import Planes from './pages/Planes';
 import Currencies from './pages/Currencies';
 import ProductDetails from './pages/ProductDetails';
+import Expedition from './pages/Expedition';
 import Staff from './pages/Staff/Index';
 import StaffGroups from './pages/StaffGroups';
 import AccessLevels from './pages/AccessLevels';
@@ -31,6 +32,7 @@ const pages: Array<IPage> = [
   { key: 'planes', title: 'Planes', content: <Planes /> },
   { key: 'currencies', title: 'Currencies', content: <Currencies /> },
   { key: 'productDetails', title: 'Product Details', content: <ProductDetails /> },
+  { key: 'expeditions', title: 'Expedition', content: <Expedition /> },
   { key: 'staff', title: 'Staff', content: <Staff /> },
   { key: 'staffGroups', title: 'Staff Groups', content: <StaffGroups /> },
   { key: 'accessLevels', title: 'Access Levels', content: <AccessLevels /> },

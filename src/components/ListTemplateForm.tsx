@@ -41,14 +41,10 @@ class Form extends Component<IFormProps, IFormState> {
     if (entryId) {
       // Initialize 'edit' form values.
       ipcRenderer.once('listFormQuery', (event, data) => {
-        this.setState({ initialValues: { ...data[0] } });
+        this.setState({ initialValues: data[0] });
         this.formRef.current?.resetFields();
       });
       ipcRenderer.send('queryValues', formQuery, [entryId], 'listFormQuery');
-    }
-    else {
-      // Initialize 'add' form values.
-      this.setState({ initialValues: {} });
     }
   }
 

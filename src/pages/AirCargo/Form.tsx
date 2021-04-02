@@ -13,7 +13,7 @@ import { objectDatesToMoment, objectMomentToDates } from '../../utils/momentConv
 import scrollToTop from '../../utils/scrollModal';
 
 import { airCargo, routes, planes, currencies } from '../../Queries.json';
-const { insertQuery, updateQuery, markingTableQuery, markingInsertQuery, markingDeleteQuery } = airCargo;
+const { formQuery, insertQuery, updateQuery, markingTableQuery, markingInsertQuery, markingDeleteQuery } = airCargo;
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -76,7 +76,7 @@ class Form extends Component<IFormProps, IFormState> {
     ipcRenderer.once('routesQuery', (event, routes) => {
       ipcRenderer.once('planesQuery', (event, planes) => {
         ipcRenderer.once('currenciesQuery', (event, currencies) => {
-          const { entryId, query } = this.props;
+          const { entryId } = this.props;
           if (entryId) {
             // Initialize 'edit' form values.
             ipcRenderer.once('formQuery', (event, data) => {
@@ -92,7 +92,7 @@ class Form extends Component<IFormProps, IFormState> {
               });
               ipcRenderer.send('queryValues', markingTableQuery, [data[0].no], 'markingTableQuery');
             });
-            ipcRenderer.send('queryValues', query, [entryId], 'formQuery');
+            ipcRenderer.send('queryValues', formQuery, [entryId], 'formQuery');
           }
           else {
             // Initialize 'add' form values.
@@ -212,7 +212,7 @@ class Form extends Component<IFormProps, IFormState> {
       <FormStyles ref={this.formRef} labelCol={{ span: 6 }}
         onFinish={this.handleSubmit} onFieldsChange={this.calculateValues}
         onFinishFailed={scrollToTop} initialValues={initialValues}>
-        <Title level={4}>Uhhh stuff</Title>
+        <Title level={4}>Air Cargo</Title>
         <DoubleColumns>
           <div>
             <Item label="Airway Bill No" name='no'

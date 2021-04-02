@@ -27,9 +27,10 @@ interface ITemplateProps {
   dataKey: string
   queries: IQueries
   columns: ColumnsType<object>
-  View: FunctionComponent<IViewProps>
+  View?: FunctionComponent<IViewProps>
   Form: typeof Component
   extraData?: (data: Array<Object>) => Array<Object>
+  width?: number
 }
 
 interface ITemplateState {
@@ -48,7 +49,6 @@ interface IFormData {
 
 interface IFormProps extends IFormData {
   closeModal: () => void
-  query?: string
 }
 
 type TViewMode = { mode: "view" } & IViewProps;
@@ -128,7 +128,7 @@ class Template extends Component<ITemplateProps, ITemplateState> {
   }
 
   render() {
-    const { View, Form, queries, pageKey, dataKey, extraData } = this.props;
+    const { View, Form, pageKey, dataKey, extraData, width } = this.props;
     const { tableData, modal, search } = this.state;
 
     const columns = [ 
@@ -150,18 +150,14 @@ class Template extends Component<ITemplateProps, ITemplateState> {
 
     let modalComponent: JSX.Element | null = null;
     if (modal) {
-      const { key } = modal;
-      switch (modal.mode) {
-        case 'view':
-          const { data } = modal;
-          modalComponent = <View key={key} data={data} />
-          break;
-        case 'form':
-          const { entryId } = modal;
-          const { formQuery } = queries;
-          modalComponent = 
-            <Form key={key} entryId={entryId} query={formQuery} closeModal={this.closeModal} />
-          break;
+      const { key, mode } = modal;
+      if (View === undefined || mode === 'form') {
+        const { entryId } = modal as never;
+        modalComponent = <Form key={key} entryId={entryId} closeModal={this.closeModal} />
+      }
+      else if (mode === 'view') {
+        const { data } = modal as never;
+        modalComponent = <View key={key} data={data} />
       }
     }
 
@@ -179,16 +175,16 @@ class Template extends Component<ITemplateProps, ITemplateState> {
             dataSource={processedData.filter((entry: Object) => (
               new RegExp(search, 'i').test(entry[dataKey])
             ))}
-            onRow={(record: Object, rowIndex) => {
-              return { onClick: e => {
+            onRow={(record: Object, rowIndex) => ({
+              onClick: View && (e => {
                 const primaryKey = record[dataKey];
                 this.handleView(primaryKey);
-              }}
-            }} />
-        </TemplateStyles> :
-        <Loading />
+              })
+            })} />
+        </TemplateStyles> : <Loading />
         }
-        <Modal centered maskClosable width={1250} footer={null}
+        <Modal centered maskClosable width={width || 1250} footer={null}
+          visible={modal !== null} onCancel={this.closeModal}
           bodyStyle={{ 
             paddingTop: 50, 
             paddingBottom: 20, 
@@ -196,9 +192,7 @@ class Template extends Component<ITemplateProps, ITemplateState> {
             paddingRight: 50,
             maxHeight: '90vh', 
             overflowY: 'auto' 
-          }}
-          visible={modal !== null}
-          onCancel={this.closeModal}>
+          }}>
           {modalComponent}
         </Modal>
       </>

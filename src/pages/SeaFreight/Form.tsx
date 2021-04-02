@@ -11,8 +11,8 @@ import MarkingTable from './MarkingTable';
 import { objectDatesToMoment, objectMomentToDates } from '../../utils/momentConverter';
 import scrollToTop from '../../utils/scrollModal';
 
-import { seaFreight, routes, planes, currencies } from '../../Queries.json';
-const { insertQuery, updateQuery, markingTableQuery, markingInsertQuery, markingDeleteQuery } = seaFreight;
+import { seaFreight, containerGroup, carriers, routes, handlers, currencies } from '../../Queries.json';
+const { formQuery, insertQuery, updateQuery, markingTableQuery, markingInsertQuery, markingDeleteQuery } = seaFreight;
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -29,7 +29,7 @@ interface IFormState {
 }
 
 class Form extends Component<IFormProps, IFormState> {
-  // Declare Refs here
+  // TODO: Declare Refs here
   formRef: React.RefObject<FormInstance>;
 
   constructor(props: IFormProps) {
@@ -44,7 +44,7 @@ class Form extends Component<IFormProps, IFormState> {
       currencies: []
     };
 
-    // Define Refs here
+    // TODO: Define Refs here
     this.formRef = createRef();
 
     this.initializeData = this.initializeData.bind(this);
@@ -56,20 +56,20 @@ class Form extends Component<IFormProps, IFormState> {
   }
 
   initializeData() {
-    // Initialize state values.
+    // TODO: Initialize state values.
   }
 
   handleSubmit(values: any) {
-    // Submit values to database here.
+    // TODO: Submit values to database here.
   }
 
   calculateValues() {
-    // Calculate Days to Ship
-    // Calculate Total Fees
+    // TODO: Calculate Days to Ship
+    // TODO: Calculate Total Fees
   }
 
   calculateMarkingValues() {
-    // Calculate Marking Values Totals
+    // TODO: Calculate Marking Values Totals
   }
 
   render() {
@@ -82,6 +82,7 @@ class Form extends Component<IFormProps, IFormState> {
         onFinish={this.handleSubmit} onFieldsChange={this.calculateValues}
         onFinishFailed={scrollToTop} initialValues={initialValues}>
         {/* here */}
+        <Item><Button type="primary" htmlType="submit">Submit</Button></Item>
       </FormStyles>
     );
   }
@@ -90,5 +91,9 @@ class Form extends Component<IFormProps, IFormState> {
 export default Form;
 
 const FormStyles = styled(AntForm)`
-  // Here
+  // TODO: Here
+
+  > div:last-child {
+    text-align: right;
+  }
 `;
