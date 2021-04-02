@@ -160,8 +160,7 @@ class Template extends Component<ITemplateProps, ITemplateState> {
           const { entryId } = modal;
           const { formQuery } = queries;
           modalComponent = 
-            <Form key={key} entryId={entryId} query={formQuery} 
-              closeModal={this.closeModal} />
+            <Form key={key} entryId={entryId} query={formQuery} closeModal={this.closeModal} />
           break;
       }
     }

@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { Card, Descriptions, Table } from 'antd';
 
 import { IViewProps } from '../../components/TableTemplate';
-import { markingColumns } from '../../components/MarkingTable';
+import { markingColumns } from './MarkingTable';
 import round from '../../utils/roundToTwo';
 
 import { airCargo, routes, planes, currencies } from '../../Queries.json';
@@ -13,13 +13,11 @@ const { tableQuery: routeQuery } = routes;
 const { tableQuery: planeQuery } = planes;
 const { tableQuery: currencyQuery } = currencies;
 
-type Object = { [key: string]: any };
-
 type IViewState = null | {
-  routes: any
-  planes: any
-  currencies: any
-  markingData: any
+  routes: Array<any>
+  planes: Array<any>
+  currencies: Array<any>
+  markingData: Array<any>
 };
 
 const View: FC<IViewProps> = (props) => {
@@ -32,10 +30,7 @@ const View: FC<IViewProps> = (props) => {
       ipcRenderer.once('planesQuery', (event, planes) => {
         ipcRenderer.once('currenciesQuery', (event, currencies) => {
           ipcRenderer.once('markingQuery', (event, markingData) => {
-            setExtraData({ 
-              routes, planes, currencies, 
-              markingData: markingData.map((entry: Object, i: number) => ({ key: i, ...entry }))
-            });
+            setExtraData({ routes, planes, currencies, markingData });
           });
           ipcRenderer.send('queryValues', markingQuery, [data.no], 'markingQuery');
         });
@@ -46,15 +41,15 @@ const View: FC<IViewProps> = (props) => {
     ipcRenderer.send('query', routeQuery, 'routesQuery');
   }, []);
 
-  const shipmentDate = data.tglmuat.toString().substr(4, 11);
-  const arrivalDate = data.tgltiba.toString().substr(4, 11);
+  const shipmentDate = (data.tglmuat as Date).toDateString();
+  const arrivalDate = (data.tgltiba as Date).toDateString();
 
   const timeDifference = Math.abs(data.tgltiba - data.tglmuat);
   const dateDifference = Math.ceil(timeDifference / (1000 * 60 * 60 * 24));
 
-  const route = extraData?.routes.find((r: Object) => r.rutecode == data.rute).rutedesc as string;
-  const plane = extraData?.planes.find((p: Object) => p.pesawatcode == data.pesawat).pesawatdesc as string;
-  const currency = extraData?.currencies.find((c: Object) => c.currencycode == data.matauang).currencydesc as string;
+  const route = extraData?.routes.find((r: any) => r.rutecode == data.rute).rutedesc as string;
+  const plane = extraData?.planes.find((p: any) => p.pesawatcode == data.pesawat).pesawatdesc as string;
+  const currency = extraData?.currencies.find((c: any) => c.currencycode == data.matauang).currencydesc as string;
 
   const freightCharge = data['freightcharge/kg'];
   const commissionCharge = data['komisi/kg'];
@@ -64,13 +59,14 @@ const View: FC<IViewProps> = (props) => {
   const commissionTotal = commissionCharge * data.brtkomisi;
   const clrnTotal = data.customclrn * data.brtclrn;
   const totalFees = freightTotal + commissionTotal + clrnTotal + data.biayatambahan + otherFees;
+  
+  const markingDataWithKeys = extraData?.markingData.map((entry: object, i: number) => ({ key: i, ...entry }));
 
-  const totalQuantity = extraData?.markingData.map((d: Object) => d.qty).reduce((a: number, b: number) => a + b, 0);
-  const totalWeightList = extraData?.markingData.map((d: Object) => d['list[kg]']).reduce((a: number, b: number) => a + b, 0);
-  const totalWeightHb = extraData?.markingData.map((d: Object) => d['hb[kg]']).reduce((a: number, b: number) => a + b, 0);
+  const totalQuantity = extraData?.markingData.map((d: any) => d.qty).reduce((a: number, b: number) => a + b, 0);
+  const totalWeightList = extraData?.markingData.map((d: any) => d['list[kg]']).reduce((a: number, b: number) => a + b, 0);
+  const totalWeightHb = extraData?.markingData.map((d: any) => d['hb[kg]']).reduce((a: number, b: number) => a + b, 0);
   const realDifference = round(totalWeightHb - totalWeightList);
   const masterDifference = round(totalWeightHb - data.brtclrn);
-  
   return (
     <ViewStyles>
       <Card title="Shipping Information">
@@ -104,7 +100,7 @@ const View: FC<IViewProps> = (props) => {
       <Card title="Markings">
         <Table size='small' pagination={false}
           columns={markingColumns}
-          dataSource={extraData?.markingData}
+          dataSource={markingDataWithKeys}
           loading={extraData === null} />
       </Card>
       <Card>

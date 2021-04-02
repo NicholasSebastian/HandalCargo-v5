@@ -44,7 +44,7 @@ class AirCargo extends Component<never, IAirCargoState> {
         queries={airCargo} 
         View={View}
         Form={Form}
-        columns={[ // TODO: sorters
+        columns={[
           {
             title: 'Arrival Date',
             dataIndex: 'tgltiba',
@@ -61,19 +61,22 @@ class AirCargo extends Component<never, IAirCargoState> {
           {
             title: 'Item Code',
             dataIndex: 'kode',
-            key: 'kode'
+            key: 'kode',
+            sorter: (a: any, b: any) => (a.kode as string).localeCompare(b.kode)
           },
           {
             title: 'Route Description',
             dataIndex: 'rute',
             key: 'rute',
-            render: (routeId) => routes.find(route => route.rutecode === routeId)?.rutedesc
+            render: (routeId) => routes.find(route => route.rutecode === routeId)?.rutedesc,
+            sorter: (a: any, b: any) => a.rute - b.rute
           },
           {
             title: 'Airplane',
             dataIndex: 'pesawat',
             key: 'pesawat',
-            render: (planeId) => planes.find(plane => plane.pesawatcode === planeId)?.pesawatdesc
+            render: (planeId) => planes.find(plane => plane.pesawatcode === planeId)?.pesawatdesc,
+            sorter: (a: any, b: any) => a.pesawat - b.pesawat
           }
         ]} />
 		);

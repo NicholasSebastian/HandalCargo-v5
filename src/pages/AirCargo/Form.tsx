@@ -6,7 +6,7 @@ import { Store } from 'antd/lib/form/interface';
 import moment from 'moment';
 
 import { IFormProps } from '../../components/TableTemplate';
-import MarkingTable from '../../components/MarkingTable';
+import MarkingTable from './MarkingTable';
 
 import round from '../../utils/roundToTwo';
 import { objectDatesToMoment, objectMomentToDates } from '../../utils/momentConverter';
@@ -46,10 +46,10 @@ class Form extends Component<IFormProps, IFormState> {
     super(props);
     this.state = {
       initialData: {},
+      markingData: [],
       routes: [],
       planes: [],
-      currencies: [],
-      markingData: []
+      currencies: []
     };
     
     this.formRef = createRef();
@@ -64,6 +64,7 @@ class Form extends Component<IFormProps, IFormState> {
     this.realDifferenceRef = createRef();
     this.masterDifferenceRef = createRef();
 
+    this.initializeData = this.initializeData.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.calculateValues = this.calculateValues.bind(this);
     this.calculateMarkingValues = this.calculateMarkingValues.bind(this);
@@ -105,50 +106,6 @@ class Form extends Component<IFormProps, IFormState> {
       ipcRenderer.send('query', planes.tableQuery, 'planesQuery');
     });
     ipcRenderer.send('query', routes.tableQuery, 'routesQuery');
-  }
-
-  calculateValues() { 
-    const data = this.formRef.current?.getFieldsValue(true);
-    if (data) {
-      const tglmuat = moment(data.tglmuat);
-      const tgltiba = moment(data.tgltiba);
-      const daysToShip = tgltiba.diff(tglmuat, 'days');
-      this.daysToShipRef.current?.setState({ value: daysToShip || "" });
-
-      const freightTotal = data["freightcharge/kg"] * data.brtfreight;
-      this.freightTotalRef.current?.setState({ value: freightTotal || 0 });
-
-      const commissionTotal = data["komisi/kg"] * data.brtkomisi;
-      this.commissionTotalRef.current?.setState({ value: commissionTotal || 0 });
-
-      const clrnTotal = data.customclrn * data.brtclrn;
-      this.clrnTotalRef.current?.setState({ value: clrnTotal || 0 });
-
-      const additionalFees = parseInt(data.biayatambahan);
-      const otherFees = parseInt(data["biayalain-lain"]);
-      const totalFees = (freightTotal || 0) + (commissionTotal || 0) + (clrnTotal || 0) + (additionalFees || 0) + (otherFees || 0);
-      this.totalFeesRef.current?.setState({ value: totalFees || 0 });
-    }
-  }
-
-  calculateMarkingValues() {
-    const { markingData } = this.state;
-
-    const totalQuantity = markingData.map(d => d.qty).reduce((a, b) => a + b, 0) as number;
-    this.totalQuantityRef.current?.setState({ value: totalQuantity || 0 });
-
-    const totalWeightList = markingData.map(d => d['list[kg]']).reduce((a, b) => a + b, 0) as number;
-    this.totalWeightListRef.current?.setState({ value: totalWeightList || 0 });
-
-    const totalWeightHb = markingData.map(d => d['hb[kg]']).reduce((a, b) => a + b, 0) as number;
-    this.totalWeightHbRef.current?.setState({ value: totalWeightHb || 0 });
-
-    const realDifference = round(totalWeightHb - totalWeightList);
-    this.realDifferenceRef.current?.setState({ value: realDifference || 0 });
-
-    const clrnWeight = this.formRef.current?.getFieldValue('brtclrn');
-    const masterDifference = round(totalWeightHb - clrnWeight);
-    this.masterDifferenceRef.current?.setState({ value: masterDifference || 0 });
   }
 
   handleSubmit(values: any) {
@@ -200,6 +157,50 @@ class Form extends Component<IFormProps, IFormState> {
       });
       ipcRenderer.send('queryValues', insertQuery, rawValues, 'aircargoInsertQuery');
     }
+  }
+
+  calculateValues() { 
+    const data = this.formRef.current?.getFieldsValue(true);
+    if (data) {
+      const tglmuat = moment(data.tglmuat);
+      const tgltiba = moment(data.tgltiba);
+      const daysToShip = tgltiba.diff(tglmuat, 'days');
+      this.daysToShipRef.current?.setState({ value: daysToShip || "" });
+
+      const freightTotal = data["freightcharge/kg"] * data.brtfreight;
+      this.freightTotalRef.current?.setState({ value: freightTotal || 0 });
+
+      const commissionTotal = data["komisi/kg"] * data.brtkomisi;
+      this.commissionTotalRef.current?.setState({ value: commissionTotal || 0 });
+
+      const clrnTotal = data.customclrn * data.brtclrn;
+      this.clrnTotalRef.current?.setState({ value: clrnTotal || 0 });
+
+      const additionalFees = parseInt(data.biayatambahan);
+      const otherFees = parseInt(data["biayalain-lain"]);
+      const totalFees = (freightTotal || 0) + (commissionTotal || 0) + (clrnTotal || 0) + (additionalFees || 0) + (otherFees || 0);
+      this.totalFeesRef.current?.setState({ value: totalFees || 0 });
+    }
+  }
+
+  calculateMarkingValues() {
+    const { markingData } = this.state;
+
+    const totalQuantity = markingData.map(d => d.qty).reduce((a, b) => a + b, 0) as number;
+    this.totalQuantityRef.current?.setState({ value: totalQuantity || 0 });
+
+    const totalWeightList = markingData.map(d => d['list[kg]']).reduce((a, b) => a + b, 0) as number;
+    this.totalWeightListRef.current?.setState({ value: totalWeightList || 0 });
+
+    const totalWeightHb = markingData.map(d => d['hb[kg]']).reduce((a, b) => a + b, 0) as number;
+    this.totalWeightHbRef.current?.setState({ value: totalWeightHb || 0 });
+
+    const realDifference = round(totalWeightHb - totalWeightList);
+    this.realDifferenceRef.current?.setState({ value: realDifference || 0 });
+
+    const clrnWeight = this.formRef.current?.getFieldValue('brtclrn');
+    const masterDifference = round(totalWeightHb - clrnWeight);
+    this.masterDifferenceRef.current?.setState({ value: masterDifference || 0 });
   }
 
   render() {

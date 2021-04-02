@@ -15,7 +15,7 @@
     "insertQuery": "INSERT INTO `seafreight` (``, ``, ``) VALUES (?, ?, ?)",
     "updateQuery": "UPDATE `seafreight` SET `` = ?, `` = ? WHERE `nocontainer` = ?",
     "deleteQuery": "DELETE FROM `seafreight` WHERE `nocontainer` = ?",
-    "markingTableQuery": "SELECT ``, ``, ``, `` FROM `seafreightmarking` WHERE `nocontainer` = ?",
+    "markingTableQuery": "SELECT `no`, `marking`, `qty`, `list[m3]`, `list[kg]`, `dlist[m3]`, `dlist[kg]`, `hb[m3]`, `hb[kg]`, `cust[m3]`, `cust[kg]`, `lunas` FROM `seafreightmarking` WHERE `nocontainer` = ?",
     "markingInsertQuery": "INSERT INTO `seafreightmarking` (``, ``, ``) VALUES (?, ?, ?)",
     "markingDeleteQuery": "DELETE FROM `seafreightmarking` WHERE `nocontainer` = ?"
   },

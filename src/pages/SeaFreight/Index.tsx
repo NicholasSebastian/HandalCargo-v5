@@ -61,7 +61,7 @@ class SeaFreight extends Component<never, ISeaFreightState> {
           const dateDifference = Math.ceil(timeDifference / (1000 * 60 * 60 * 24));
           return { ...entry, lamatiba: dateDifference };
         })}
-        columns={[ // TODO: sorters
+        columns={[
           {
             title: "Arrival Date",
             dataIndex: "tgltiba",
@@ -79,30 +79,35 @@ class SeaFreight extends Component<never, ISeaFreightState> {
             title: "Route Description",
             dataIndex: "rute",
             key: "rute",
-            render: (routeId) => routes.find(route => route.rutecode === routeId)?.rutedesc
+            render: (routeId) => routes.find(route => route.rutecode === routeId)?.rutedesc,
+            sorter: (a: any, b: any) => a.rute - b.rute
           },
           {
             title: "Handler",
             dataIndex: "pengurus",
             key: "pengurus",
-            render: (handlerId) => handlers.find(handler => handler.penguruscode === handlerId)?.pengurusname
+            render: (handlerId) => handlers.find(handler => handler.penguruscode === handlerId)?.pengurusname,
+            sorter: (a: any, b: any) => a.pengurus - b.pengurus
           },
           {
             title: "Carrier",
             dataIndex: "shipper",
             key: "shipper",
-            render: (shipperId) => carriers.find(carrier => carrier.shippercode === shipperId)?.name
+            render: (shipperId) => carriers.find(carrier => carrier.shippercode === shipperId)?.name,
+            sorter: (a: any, b: any) => a.shipper - b.shipper
           },
           {
             title: "Container Group",
             dataIndex: "kelcontainer",
             key: "kelcontainer",
-            render: (containerId) => containerGroups.find(group => group.containercode === containerId)?.containerdesc
+            render: (containerId) => containerGroups.find(group => group.containercode === containerId)?.containerdesc,
+            sorter: (a: any, b: any) => a.kelcontainer - b.kelcontainer
           },
           {
             title: "Days to Ship",
             dataIndex: "lamatiba",
-            key: "lamatiba"
+            key: "lamatiba",
+            sorter: (a: any, b: any) => a.lamatiba - b.lamatiba
           }
         ]} />
     );
