@@ -60,7 +60,19 @@ class Form extends Component<IFormProps, IFormState> {
   }
 
   handleSubmit(values: any) {
+    const { entryId, closeModal } = this.props;
+    
+    const formValues = Object.values(values);
+    const rawValues = objectMomentToDates(formValues);
+
+    const { markingData } = this.state;
+    const markingValues = markingData.map(entry => {
+      delete entry.key;
+      return { noaircargo: entryId, ...entry };
+    });
+
     // TODO: Submit values to database here.
+    console.log(rawValues, markingValues);
   }
 
   calculateValues() {

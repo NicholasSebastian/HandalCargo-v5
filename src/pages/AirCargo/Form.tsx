@@ -113,7 +113,12 @@ class Form extends Component<IFormProps, IFormState> {
     
     const formValues = Object.values(values);
     const rawValues = objectMomentToDates(formValues);
-    const markingValues = this.state.markingData;
+
+    const { markingData } = this.state;
+    const markingValues = markingData.map(entry => {
+      delete entry.key;
+      return { noaircargo: entryId, ...entry };
+    });
 
     const withMultipleValues = (insertQuery: string, queryValues: Array<object>) => {
       const from = insertQuery.lastIndexOf('(');
@@ -134,7 +139,7 @@ class Form extends Component<IFormProps, IFormState> {
         ipcRenderer.once('aircargoMarkingDeleteQuery', () => {
           if (markingValues.length > 0) {
             ipcRenderer.once('aircargoMarkingInsertQuery', () => {
-              message.success(`'${rawValues[0]}' successfully updated`);
+              message.success(`'${entryId}' successfully updated`);
               closeModal();
             });
             ipcRenderer.send('queryValues', ...withMultipleValues(markingInsertQuery, markingValues), 'aircargoMarkingInsertQuery');
@@ -205,7 +210,7 @@ class Form extends Component<IFormProps, IFormState> {
 
   render() {
     const { Item } = AntForm;
-    const { initialData: data, routes, planes, currencies } = this.state;
+    const { initialData: data, markingData, routes, planes, currencies } = this.state;
     const initialValues = objectDatesToMoment(data);
 
     return (
@@ -281,7 +286,7 @@ class Form extends Component<IFormProps, IFormState> {
           </div>
         </DoubleColumns>
         <MarkingTable 
-          data={this.state.markingData} 
+          data={markingData} 
           setData={data => this.setState({ markingData: data })}
           onUpdate={this.calculateMarkingValues} />
         <DoubleColumns>

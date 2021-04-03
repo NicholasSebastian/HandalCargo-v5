@@ -1,11 +1,19 @@
-import React, { FC } from 'react';
+import React, { FC, useState, useEffect } from 'react';
+import { ipcRenderer } from 'electron';
 
 import Template from '../../components/TableTemplate';
 import Form from './Form';
 
-import { expedition } from '../../Queries.json';
+import { expedition, routes } from '../../Queries.json';
+const { tableQuery: routeQuery } = routes;
 
 const Expedition: FC = () => {
+  const [routes, setRoutes] = useState<Array<any> | null>(null);
+  useEffect(() => {
+    ipcRenderer.once('routeQuery', (event, routes) => setRoutes(routes));
+    ipcRenderer.send('query', routeQuery, 'routeQuery');
+  }, []);
+
   return (
     <Template width={600}
       pageKey="expeditions"
@@ -25,8 +33,9 @@ const Expedition: FC = () => {
         },
         {
           title: "Route Name",
-          dataIndex: "rutename",
-          key: "rutename"
+          dataIndex: "ruteid",
+          key: "ruteid",
+          render: (routeid: number) => routes?.find(route => route.rutecode === routeid)?.rutedesc
         },
         {
           title: "Address",

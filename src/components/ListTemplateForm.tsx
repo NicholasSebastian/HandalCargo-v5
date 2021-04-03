@@ -55,7 +55,7 @@ class Form extends Component<IFormProps, IFormState> {
     if (entryId) {
       // Edit form on submit.
       ipcRenderer.once('listUpdateQuery', () => {
-        message.success(`'${rawValues[1]}' successfully updated`);
+        message.success(`'${entryId}' successfully updated`);
         closeModal();
       });
       ipcRenderer.send('queryValues', updateQuery, [...rawValues, entryId], 'listUpdateQuery');
