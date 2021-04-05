@@ -11,6 +11,7 @@ const Loading: FunctionComponent = () => {
 export default Loading;
 
 const Center = styled.div`
+  min-height: 100px;
   height: 100%;
   display: flex;
   justify-content: center;

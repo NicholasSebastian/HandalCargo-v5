@@ -57,7 +57,8 @@
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "sjcl": "^1.0.8",
-    "styled-components": "^5.2.1"
+    "styled-components": "^5.2.1",
+    "utility-types": "^3.10.0"
   },
   "build": {
     "appId": "com.handalcargo.erp",

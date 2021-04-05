@@ -5,6 +5,8 @@ import { FormInstance, Form as AntForm, Input, InputNumber, Button, message } fr
 import { Store } from 'antd/lib/form/interface';
 
 import { IQueries, IFormData } from './ListTemplate';
+import Loading from './Loading';
+import isEmpty from '../utils/isEmptyObject';
 
 interface IFormItem {
   label: string
@@ -72,9 +74,12 @@ class Form extends Component<IFormProps, IFormState> {
 
   render() {
     const { Item } = AntForm;
-    return (
+    const { entryId } = this.props;
+    const { initialValues } = this.state;
+    const isLoading = entryId ? isEmpty(initialValues) : false;
+    return isLoading ? <Loading /> : (
       <FormStyles ref={this.formRef} labelCol={{ span: 6 }}
-        onFinish={this.handleSubmit} initialValues={this.state.initialValues}>
+        onFinish={this.handleSubmit} initialValues={initialValues}>
         <Item label={this.props.formItems[0].label} name={this.props.formItems[0].key}
           rules={[{ required: true, message: `${this.props.formItems[0].label} is required` }]}>
           <InputNumber min={0} type='number' />

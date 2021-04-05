@@ -5,7 +5,10 @@ import { Form as AntForm, FormInstance, Input, Select, Button, message } from 'a
 import { Store } from 'antd/lib/form/interface';
 
 import { IFormProps } from '../../components/TableTemplate';
+import Loading from '../../components/Loading';
+
 import scrollToTop from '../../utils/scrollModal';
+import isEmpty from '../../utils/isEmptyObject';
 
 import { expedition, routes } from '../../Queries.json';
 const { formQuery, insertQuery, updateQuery } = expedition;
@@ -71,9 +74,11 @@ class Form extends Component<IFormProps, IFormState> {
     const { Item } = AntForm;
     const { TextArea } = Input;
     const { Option } = Select;
+    const { entryId } = this.props;
     const { initialData, routes } = this.state;
 
-    return (
+    const isLoading = entryId ? isEmpty(initialData) : false;
+    return isLoading ? <Loading /> : (
       <FormStyles ref={this.formRef} labelCol={{ span: 6 }}
         onFinish={this.handleSubmit} onFinishFailed={scrollToTop} 
         initialValues={initialData}>

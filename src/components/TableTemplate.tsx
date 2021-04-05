@@ -1,4 +1,5 @@
-import React, { Component, FunctionComponent } from 'react';
+import React, { Component, FunctionComponent, ComponentType, useState } from 'react';
+import { Subtract } from 'utility-types';
 import { ipcRenderer } from 'electron';
 import styled from 'styled-components';
 import { Table, Input, Modal, message, Space, Button, Popconfirm } from 'antd';
@@ -28,7 +29,7 @@ interface ITemplateProps {
   queries: IQueries
   columns: ColumnsType<object>
   View?: FunctionComponent<IViewProps>
-  Form: typeof Component
+  Form: ComponentType<IFormProps>
   extraData?: (data: Array<Object>) => Array<Object>
   width?: number
 }
@@ -186,7 +187,7 @@ class Template extends Component<ITemplateProps, ITemplateState> {
         <Modal centered maskClosable width={width || 1250} footer={null}
           visible={modal !== null} onCancel={this.closeModal}
           bodyStyle={{ 
-            paddingTop: 50, 
+            paddingTop: 30, 
             paddingBottom: 20, 
             paddingLeft: 50,
             paddingRight: 50,

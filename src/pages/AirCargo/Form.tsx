@@ -6,11 +6,13 @@ import { Store } from 'antd/lib/form/interface';
 import moment from 'moment';
 
 import { IFormProps } from '../../components/TableTemplate';
+import Loading from '../../components/Loading';
 import MarkingTable from './MarkingTable';
 
 import round from '../../utils/roundToTwo';
 import { objectDatesToMoment, objectMomentToDates } from '../../utils/momentConverter';
 import scrollToTop from '../../utils/scrollModal';
+import isEmpty from '../../utils/isEmptyObject';
 
 import { airCargo, routes, planes, currencies } from '../../Queries.json';
 const { formQuery, insertQuery, updateQuery, markingTableQuery, markingInsertQuery, markingDeleteQuery } = airCargo;
@@ -83,8 +85,8 @@ class Form extends Component<IFormProps, IFormState> {
               ipcRenderer.once('markingTableQuery', (event, markingData: Array<object>) => {
                 this.setState({ 
                   initialData: data[0],
-                  routes, planes, currencies,
-                  markingData: markingData.map((entry, i) => ({ key: i, ...entry }))
+                  markingData: markingData.map((entry, i) => ({ key: i, ...entry })),
+                  routes, planes, currencies
                 });
                 this.formRef.current?.resetFields();
                 this.calculateValues();
@@ -210,10 +212,12 @@ class Form extends Component<IFormProps, IFormState> {
 
   render() {
     const { Item } = AntForm;
+    const { entryId } = this.props;
     const { initialData: data, markingData, routes, planes, currencies } = this.state;
     const initialValues = objectDatesToMoment(data);
 
-    return (
+    const isLoading = entryId ? isEmpty(data) : false;
+    return isLoading ? <Loading /> : (
       <FormStyles ref={this.formRef} labelCol={{ span: 6 }}
         onFinish={this.handleSubmit} onFieldsChange={this.calculateValues}
         onFinishFailed={scrollToTop} initialValues={initialValues}>

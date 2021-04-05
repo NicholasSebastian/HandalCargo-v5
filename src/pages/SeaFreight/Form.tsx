@@ -1,15 +1,17 @@
 import React, { Component, createRef } from 'react';
 import { ipcRenderer } from 'electron';
 import styled from 'styled-components';
-import { Typography, Form as AntForm, Button, Input, DatePicker, Select, FormInstance } from 'antd';
+import { Typography, Form as AntForm, FormInstance, Button, Input, DatePicker, Select, message } from 'antd';
 import { Store } from 'antd/lib/form/interface';
 import moment from 'moment';
 
 import { IFormProps } from '../../components/TableTemplate';
+import Loading from '../../components/Loading';
 import MarkingTable from './MarkingTable';
 
 import { objectDatesToMoment, objectMomentToDates } from '../../utils/momentConverter';
 import scrollToTop from '../../utils/scrollModal';
+import isEmpty from '../../utils/isEmptyObject';
 
 import { seaFreight, containerGroup, carriers, routes, handlers, currencies } from '../../Queries.json';
 const { formQuery, insertQuery, updateQuery, markingTableQuery, markingInsertQuery, markingDeleteQuery } = seaFreight;
@@ -56,7 +58,45 @@ class Form extends Component<IFormProps, IFormState> {
   }
 
   initializeData() {
-    // TODO: Initialize state values.
+    ipcRenderer.once('conGroupQuery', (event, containerGroups) => {
+      ipcRenderer.once('carrierQuery', (event, carriers) => {
+        ipcRenderer.once('routeQuery', (event, routes) => {
+          ipcRenderer.once('handlerQuery', (event, handlers) => {
+            ipcRenderer.once('currencyQuery', (event, currencies) => {
+              const { entryId } = this.props;
+              if (entryId) {
+                // Initialize 'edit' form values.
+                ipcRenderer.once('formQuery', (event, data) => {
+                  ipcRenderer.once('markingTableQuery', (event, markingData: Array<object>) => {
+                    this.setState({ 
+                      initialData: data[0],
+                      markingData: markingData.map((entry, i) => ({ key: i, ...entry })),
+                      containerGroups, carriers, routes, handlers, currencies
+                    });
+                    this.formRef.current?.resetFields();
+                    this.calculateValues();
+                    this.calculateMarkingValues();
+                  });
+                  ipcRenderer.send('queryValues', markingTableQuery, [data[0].nocontainer], 'markingTableQuery');
+                });
+                ipcRenderer.send('queryValues', formQuery, [entryId], 'formQuery');
+              }
+              else {
+                // Initialize 'add' form values.
+                this.setState({ containerGroups, carriers, routes, handlers, currencies });
+                this.formRef.current?.resetFields();
+                this.calculateValues();
+              }
+            });
+            ipcRenderer.send('query', currencies.tableQuery, 'currencyQuery');
+          });
+          ipcRenderer.send('query', handlers.tableQuery, 'handlerQuery');
+        });
+        ipcRenderer.send('query', routes.tableQuery, 'routeQuery');
+      });
+      ipcRenderer.send('query', carriers.tableQuery, 'carrierQuery');
+    });
+    ipcRenderer.send('query', containerGroup.tableQuery, 'conGroupQuery');
   }
 
   handleSubmit(values: any) {
@@ -68,11 +108,17 @@ class Form extends Component<IFormProps, IFormState> {
     const { markingData } = this.state;
     const markingValues = markingData.map(entry => {
       delete entry.key;
-      return { noaircargo: entryId, ...entry };
+      return { nocontainer: entryId, ...entry };
     });
 
-    // TODO: Submit values to database here.
-    console.log(rawValues, markingValues);
+    if (entryId) {
+      // Edit form on submit.
+      console.log(rawValues, markingValues);
+    }
+    else {
+      // Add form on submit.
+      console.log(rawValues, markingValues);
+    }
   }
 
   calculateValues() {
@@ -83,17 +129,41 @@ class Form extends Component<IFormProps, IFormState> {
   calculateMarkingValues() {
     // TODO: Calculate Marking Values Totals
   }
-
+ 
   render() {
     const { Item } = AntForm;
-    const { initialData: data, containerGroups, carriers, routes, handlers, currencies } = this.state;
+    const { entryId } = this.props;
+    const { initialData: data, markingData, containerGroups, carriers, routes, handlers, currencies } = this.state;
     const initialValues = objectDatesToMoment(data);
 
-    return (
+    console.log(initialValues);
+
+    const isLoading = entryId ? isEmpty(data) : false;
+    return isLoading ? <Loading /> : (
       <FormStyles ref={this.formRef} labelCol={{ span: 6 }}
         onFinish={this.handleSubmit} onFieldsChange={this.calculateValues}
         onFinishFailed={scrollToTop} initialValues={initialValues}>
-        {/* here */}
+          <Title level={4}>Sea Freight</Title>
+        <DoubleColumns>
+          <div>
+            {/* here */}
+          </div>
+          <div>
+            {/* here */}
+          </div>
+        </DoubleColumns>
+        <MarkingTable
+          data={markingData}
+          setData={data => this.setState({ markingData: data })}
+          onUpdate={this.calculateMarkingValues} />
+        <DoubleColumns>
+          <div>
+            {/* here */}
+          </div>
+          <div>
+            {/* here */}
+          </div>
+        </DoubleColumns>
         <Item><Button type="primary" htmlType="submit">Submit</Button></Item>
       </FormStyles>
     );
@@ -103,9 +173,22 @@ class Form extends Component<IFormProps, IFormState> {
 export default Form;
 
 const FormStyles = styled(AntForm)`
-  // TODO: Here
+  .ant-form-item {
+    margin-bottom: 12px;
+  }
+
+  > .ant-table-wrapper {
+    margin-bottom: 20px;
+  }
 
   > div:last-child {
     text-align: right;
   }
+`;
+
+const DoubleColumns = styled.div`
+  display: flex;
+  justify-content: space-between;
+
+  > div { width: 550px; }
 `;
