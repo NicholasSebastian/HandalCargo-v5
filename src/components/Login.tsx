@@ -2,8 +2,9 @@ import React, { Component } from 'react';
 import { ipcRenderer } from 'electron';
 import styled from 'styled-components'
 import { Typography, Form, Input, Button, message } from 'antd'
-import { UserOutlined, LockOutlined } from '@ant-design/icons'
+import { UserOutlined, LockOutlined, CloudServerOutlined } from '@ant-design/icons'
 
+import DatabaseSetup from './DatabaseSetup';
 import Image from '../assets/login.jpg'
 
 const { Title, Text } = Typography
@@ -31,6 +32,7 @@ class Login extends Component<ILoginProps, ILoginState> {
       loading: false
     };
     this.handleLogin = this.handleLogin.bind(this);
+    this.handleResetDbSettings = this.handleResetDbSettings.bind(this);
   }
 
   componentDidMount() {
@@ -51,7 +53,14 @@ class Login extends Component<ILoginProps, ILoginState> {
     this.setState({ loading: true });
   }
 
+  handleResetDbSettings() {
+    window.localStorage.removeItem('dbsettings');
+    window.sessionStorage.removeItem('connected');
+    this.props.callUpdate();
+  }
+
   render() {
+    const { loading } = this.state;
     return (
       <LoginStyles>
         <LoginImage src={Image} />
@@ -65,9 +74,10 @@ class Login extends Component<ILoginProps, ILoginState> {
             <Item name="password" rules={[{ required: true, message: 'Password is required.' }]}>
               <Password prefix={<LockOutlined style={{ color: 'gray' }} />} placeholder="Password" />
             </Item>
-            <Button type="primary" loading={this.state.loading} htmlType="submit">Login</Button>
+            <Button type="primary" loading={loading} htmlType="submit">Login</Button>
           </Form>
           <Text>© Handal Cargo {currentYear}, All rights reserved.</Text>
+          <Button icon={<CloudServerOutlined />} onClick={this.handleResetDbSettings} />
         </div>
       </LoginStyles>
     );
@@ -101,13 +111,17 @@ const LoginStyles = styled.div`
       right: 20px;
     }
 
-    > span {
+    > span:last-of-type {
       position: absolute;
       bottom: 12px;
-      left: 0;
-      right: 0;
-      text-align: center;
+      left: 40px;
       font-size: 10px;
+    }
+
+    > button:last-of-type {
+      position: absolute;
+      bottom: 12px;
+      right: 20px;
     }
   }
 `;

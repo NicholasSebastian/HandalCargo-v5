@@ -5,21 +5,25 @@ import '@babel/polyfill'
 import { windowInstance } from './main'
 import { customDecrypt } from './encryption'
 
-import connectionSettings from './Connection.json'
 const DB_PING_INTERVAL = 60000
 
 class Connection {
   connection: mariadb.Connection | undefined
 
-  constructor (event: Electron.IpcMainEvent) {
+  constructor (event: Electron.IpcMainEvent, connectionSettings: object) {
+    console.log('Establishing connection...')
     mariadb.createConnection(connectionSettings)
       .then(connection => {
         this.connection = connection
         this.connection.on('error', Connection.handleConnectionError)
         this.createConnectionHeartbeat()
-        event.reply('connected')
+        console.log('Connection established.')
+        event.reply('connected', false)
       })
-      .catch(Connection.handleConnectionError)
+      .catch(() => {
+        console.log('Unable to establish connection.');
+        event.reply('connected', true)
+      })
   }
 
   public onLogin (event: Electron.IpcMainEvent, username: string, password: string): void {

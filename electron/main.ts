@@ -10,8 +10,8 @@ export let connectionInstance: Connection
 app.on('ready', () => {
   windowInstance = new Window()
 
-  ipcMain.on('connect', (event) => {
-    connectionInstance = new Connection(event)
+  ipcMain.on('connect', (event, connectionSettings) => {
+    connectionInstance = new Connection(event, connectionSettings)
 
     // login/logout functionality
     ipcMain.on('login', (event, username, password) => connectionInstance.onLogin(event, username, password))

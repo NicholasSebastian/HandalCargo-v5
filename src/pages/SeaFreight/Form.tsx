@@ -111,13 +111,47 @@ class Form extends Component<IFormProps, IFormState> {
       return { nocontainer: entryId, ...entry };
     });
 
+    const withMultipleValues = (insertQuery: string, queryValues: Array<object>) => {
+      const from = insertQuery.lastIndexOf('(');
+      const queryEnd = insertQuery.substring(from);
+
+      let newInsertQuery = insertQuery;
+      for (let i = 0; i < queryValues.length - 1; i++) {
+        newInsertQuery += `,${queryEnd}`;
+      }
+      
+      const flattenedValues = queryValues.map(entry => Object.values(entry)).flat();
+      return [newInsertQuery, flattenedValues];
+    }
+
     if (entryId) {
       // Edit form on submit.
-      console.log(rawValues, markingValues);
+      ipcRenderer.once('seafreightUpdateQuery', () => {
+        ipcRenderer.once('seafreightMarkingDeleteQuery', () => {
+          if (markingValues.length > 0) {
+            ipcRenderer.once('seafreightMarkingInsertQuery', () => {
+              message.success(`'${entryId}' successfully updated`);
+              closeModal();
+            });
+            ipcRenderer.send('queryValues', ...withMultipleValues(markingInsertQuery, markingValues), 'seafreightMarkingInsertQuery');
+          }
+        });
+        ipcRenderer.send('queryValues', markingDeleteQuery, [entryId], 'seafreightMarkingDeleteQuery');
+      });
+      ipcRenderer.send('queryValues', updateQuery, [...rawValues, entryId], 'seafreightUpdateQuery');
     }
     else {
       // Add form on submit.
-      console.log(rawValues, markingValues);
+      ipcRenderer.once('seafreightInsertQuery', () => {
+        if (markingValues.length > 0) {
+          ipcRenderer.once('seafreightMarkingInsertQuery', () => {
+            message.success('Entry successfully added');
+            closeModal();
+          });
+          ipcRenderer.send('queryValues', ...withMultipleValues(markingInsertQuery, markingValues), 'seafreightMarkingInsertQuery');
+        }
+      });
+      ipcRenderer.send('queryValues', insertQuery, rawValues, 'seafreightInsertQuery');
     }
   }
 

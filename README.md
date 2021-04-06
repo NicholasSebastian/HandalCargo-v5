@@ -8,9 +8,7 @@ Uses Ant Design for UI components.
 ### Content
 
 - All Shipping pages
-- Expedition page
 - Company Setup
-- Database Setup
 - Backup and Restore?
 
 ### Features

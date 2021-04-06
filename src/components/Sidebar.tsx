@@ -125,7 +125,6 @@ class Sidebar extends Component<ISidebarProps, ISidebarState> {
             <Item key="companySetup">Company Setup</Item>
           </SubMenu>
           <SubMenu icon={<SettingOutlined/>} title="Settings">
-            <Item key="databaseSetup">Database Setup</Item>
             <Item key="backupRestore">Backup and Restore</Item>
           </SubMenu>
         </Menu>

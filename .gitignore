@@ -1,5 +1,5 @@
 node_modules
 dist
 packages
-electron/Connection.json
+DBSETTINGS.txt
 electron/Encryption.json
