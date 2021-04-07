@@ -17,6 +17,7 @@ import Expedition from './pages/Expedition';
 import Staff from './pages/Staff/Index';
 import StaffGroups from './pages/StaffGroups';
 import AccessLevels from './pages/AccessLevels';
+import CompanySetup from './pages/CompanySetup';
 import Mail from './pages/Mail';
 
 const pages: Array<IPage> = [
@@ -36,6 +37,7 @@ const pages: Array<IPage> = [
   { key: 'staff', title: 'Staff', content: <Staff /> },
   { key: 'staffGroups', title: 'Staff Groups', content: <StaffGroups /> },
   { key: 'accessLevels', title: 'Access Levels', content: <AccessLevels /> },
+  { key: 'companySetup', title: 'Company Setup', content: <CompanySetup /> },
   { key: 'mail', title: 'Messages', content: <Mail /> }
 ];
 

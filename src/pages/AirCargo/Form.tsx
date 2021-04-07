@@ -113,8 +113,8 @@ class Form extends Component<IFormProps, IFormState> {
   handleSubmit(values: any) {
     const { entryId, closeModal } = this.props;
     
-    const formValues = Object.values(values);
-    const rawValues = objectMomentToDates(formValues);
+    const formValues = objectMomentToDates(values);
+    const rawValues = Object.values(formValues);
 
     const { markingData } = this.state;
     const markingValues = markingData.map(entry => {

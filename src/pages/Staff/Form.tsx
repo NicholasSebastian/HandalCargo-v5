@@ -6,7 +6,10 @@ import {
   Form as AntForm, Button, Typography, message } from 'antd';
 import { Store } from 'antd/lib/form/interface';
 
+import Loading from '../../components/Loading';
 import scrollToTop from '../../utils/scrollModal';
+import { objectMomentToDates, objectDatesToMoment } from '../../utils/momentConverter';
+import isEmpty from '../../utils/isEmptyObject';
 
 import { staff, staffGroup } from '../../Queries.json';
 const { formQuery, insertQuery, updateQuery } = staff;
@@ -79,36 +82,47 @@ class Form extends Component<IFormProps, IFormState> {
 
   handleSubmit(values: any) {
     const { staffId, closeModal } = this.props;
+
+    const formValues = objectMomentToDates(values);
     const encryptedPassword = ipcRenderer.sendSync('encrypt', values.pwd);
     const finalizedValues = { 
-      ...values, 
+      ...formValues, 
       pwd: encryptedPassword.cipherText,
       pwd_iv: encryptedPassword.initializeVector,
       pwd_salt: encryptedPassword.salt,
       profilepic: null,                   // TODO: Images
       profilepic_type: null
     };
-    const rawValues = Object.values(finalizedValues).map(value => value || null);
+    const rawValues = Object.values(finalizedValues);
 
     if (staffId) {
       // Edit form on submit.
-      ipcRenderer.once('staffUpdateQuery', () => message.success(`Staff '${staffId}' successfully updated`));
+      ipcRenderer.once('staffUpdateQuery', () => {
+        message.success(`Staff '${staffId}' successfully updated`);
+        closeModal();
+      });
       ipcRenderer.send('queryValues', updateQuery, [...rawValues, staffId], 'staffUpdateQuery');
     }
     else {
       // Add form on submit.
-      ipcRenderer.once('staffInsertQuery', () => message.success('Staff successfully added'));
+      ipcRenderer.once('staffInsertQuery', () => {
+        message.success('Staff successfully added');
+        closeModal();
+      });
       ipcRenderer.send('queryValues', insertQuery, rawValues, 'staffInsertQuery');
     }
-    closeModal();
   }
   
   render() {
-    const { initialValues } = this.state;
-    return (
+    const { staffId } = this.props;
+    const { initialValues: data } = this.state;
+    const initialData = objectDatesToMoment(data);
+
+    const isLoading = staffId ? isEmpty(data) : false;
+    return isLoading ? <Loading /> : (
       <FormStyles ref={this.formRef} labelCol={{ span: 5 }}
         onFinish={this.handleSubmit} onFinishFailed={scrollToTop}
-        initialValues={initialValues}>
+        initialValues={initialData}>
         <Title level={4}>Account Details</Title>
         <Item label="Username" name="staffid" 
           rules={[{ required: true, message: 'Username is required' }]}>

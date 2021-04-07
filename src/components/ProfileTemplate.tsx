@@ -62,11 +62,11 @@ class Template extends PureComponent<ITemplateProps, {}> {
             <Item label="District">{profile.district || 'Unknown'}</Item>
             <Item label="City">{profile.city || 'Unknown'}</Item>
             <Item label="Place of Birth">{profile.placeofbirth || 'Unknown'}</Item>
-            <Item label="Date of Birth">{profile.dateofbirth || 'Unknown'}</Item>
+            <Item label="Date of Birth">{profile.dateofbirth?.toDateString() || 'Unknown'}</Item>
           </Descriptions>
           <Descriptions title="Work Details" labelStyle={{ fontWeight: 500 }}>
             <Item label="Job Category">{profile.groupname}</Item>
-            <Item label="Employment Date">{profile.dateofemployment || 'Unknown'}</Item>
+            <Item label="Employment Date">{profile.dateofemployment?.toDateString() || 'Unknown'}</Item>
           </Descriptions>
         </Card>
         {this.props.showSalary &&
