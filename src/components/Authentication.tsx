@@ -11,12 +11,10 @@ class Authentication extends Component {
   constructor(props: never) {
     super(props);
     this.establishConnection = this.establishConnection.bind(this);
-    this.setupDatabase = this.setupDatabase.bind(this);
-
-    this.establishConnection(() => this.forceUpdate());
+    this.establishConnection();
   }
 
-  establishConnection(onSuccess: () => void) {
+  establishConnection() {
     const connectionSettings = window.localStorage.getItem('dbsettings');
     const canConnect = connectionSettings !== null;
     const notConnected = window.sessionStorage.getItem('connected') === null;
@@ -26,26 +24,18 @@ class Authentication extends Component {
         if (error) {
           window.localStorage.removeItem('dbsettings');
           message.error('Unable to establish connection with database');
+          this.setState({ loading: false });
         }
         else {
           window.sessionStorage.setItem('connected', 'true');
-          onSuccess();
+          this.forceUpdate();
         }
       });
-      ipcRenderer.send('connect', JSON.parse(connectionSettings!));
+      const encryptedSettings = JSON.parse(connectionSettings!);
+      const decryptedString = ipcRenderer.sendSync('decrypt', encryptedSettings);
+      const decryptedSettings = JSON.parse(decryptedString);
+      ipcRenderer.send('connect', decryptedSettings);
     }
-  }
-
-  setupDatabase() {
-    this.establishConnection(() => {
-      Modal.info({
-        title: "Connection to Database Established",
-        content: "The program will be restarted.",
-        onOk() {
-          ipcRenderer.send('logout');
-        }
-      });
-    });
   }
 
   render() {
@@ -63,7 +53,7 @@ class Authentication extends Component {
       else 
         return <Loading />
     }
-    return <DatabaseSetup connect={this.setupDatabase} />
+    return <DatabaseSetup />
   }
 }
 

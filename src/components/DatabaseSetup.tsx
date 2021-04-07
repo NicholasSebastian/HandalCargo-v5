@@ -1,26 +1,45 @@
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useState } from 'react';
+import { ipcRenderer } from 'electron';
 import styled from 'styled-components';
-import { Typography, Form, Input, Button, Space } from 'antd';
-import Image from '../assets/login.jpg';
-
-interface IDatabaseSetupProps {
-  connect: () => void
-}
+import { Typography, Form, Input, Button, Modal, message } from 'antd';
+import Image from '../assets/login.jpg';  // TODO: change this image
 
 interface IDatabaseSetupImage {
   src: any
 }
 
-const DatabaseSetup: FunctionComponent<IDatabaseSetupProps> = props => {
+const DatabaseSetup: FunctionComponent = () => {
   const { Title } = Typography;
   const { Item } = Form;
   const { Password } = Input;
-  const { connect } = props;
+  const [loading, setLoading] = useState<boolean>(false);
 
   function handleSubmit(values: any) {
-    const connectionSettings = JSON.stringify(values);
-    window.localStorage.setItem('dbsettings', connectionSettings);
-    connect();
+    setLoading(true);
+    ipcRenderer.once('connected', (event, error: boolean) => {
+      if (error) {
+        message.error('Unable to establish connection with database');
+        setLoading(false);
+      }
+      else {
+        const connectionSettings = JSON.stringify(values);
+        const encrypted = ipcRenderer.sendSync('encrypt', connectionSettings);
+        const encryptedString = JSON.stringify(encrypted);
+        window.localStorage.setItem('dbsettings', encryptedString);
+        promptClose();
+      }
+    });
+    ipcRenderer.send('connect', values);
+  }
+
+  function promptClose() {
+    const close = () => ipcRenderer.send('logout');
+    Modal.info({
+      title: "Connection to Database Established",
+      content: "The program will be restarted.",
+      onOk: close,
+      onCancel: close
+    });
   }
 
   return (
@@ -32,7 +51,7 @@ const DatabaseSetup: FunctionComponent<IDatabaseSetupProps> = props => {
         <Item name="database"><Input placeholder="Database Name" /></Item>
         <Item name="user"><Input placeholder="Database User" /></Item>
         <Item name="password"><Password placeholder="Database Password" /></Item>
-        <Button type='primary' htmlType='submit'>Save</Button>
+        <Button type='primary' htmlType='submit' loading={loading}>Save</Button>
       </Form>
     </ViewStyles>
   );

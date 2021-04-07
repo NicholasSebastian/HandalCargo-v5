@@ -10,6 +10,10 @@ export let connectionInstance: Connection
 app.on('ready', () => {
   windowInstance = new Window()
 
+  // encryption functionality
+  ipcMain.on('encrypt', (event, message) => { event.returnValue = customEncrypt(message) })
+  ipcMain.on('decrypt', (event, encryptedObject) => { event.returnValue = customDecrypt(encryptedObject) })
+
   ipcMain.on('connect', (event, connectionSettings) => {
     connectionInstance = new Connection(event, connectionSettings)
 
@@ -20,10 +24,6 @@ app.on('ready', () => {
     // database query functionality
     ipcMain.on('query', (event, query, replyKey) => connectionInstance.query(event, query, replyKey));
     ipcMain.on('queryValues', (event, query, values, replyKey) => connectionInstance.queryWithValues(event, query, values, replyKey))
-
-    // encryption functionality
-    ipcMain.on('encrypt', (event, message) => { event.returnValue = customEncrypt(message) })
-    ipcMain.on('decrypt', (event, encryptedObject) => { event.returnValue = customDecrypt(encryptedObject) })
   })
 })
 

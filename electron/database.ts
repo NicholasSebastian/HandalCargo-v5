@@ -38,21 +38,21 @@ class Connection {
           const truePassword = customDecrypt(encryptedTruePassword)
           if (truePassword === password) {
             ipcMain.removeAllListeners('login')
-            const profileInfo =
-              await this.connection?.query('\
-                SELECT * FROM `staff` \
-                LEFT JOIN `staffgroup` \
-                ON `staff`.`groupcode` = `staffgroup`.`stfgrcode` \
-                WHERE `staffid` = ?',
-                [username]
-              )
+            const profileInfo = await this.connection?.query('\
+              SELECT * FROM `staff` \
+              LEFT JOIN `staffgroup` \
+              ON `staff`.`groupcode` = `staffgroup`.`stfgrcode` \
+              WHERE `staffid` = ?',
+              [username]
+            )
             event.reply('login-success', profileInfo[0])
             windowInstance.onLogin()
           }
           else {
             event.reply('login-failed', 'Invalid Password')
           }
-        } else {
+        } 
+        else {
           event.reply('login-failed', 'Invalid Username')
         }
       })
@@ -67,7 +67,8 @@ class Connection {
           event.reply(replyKey, data)
         })
         .catch(error => event.reply('prompt', error.message, replyKey))
-    } else {
+    } 
+    else {
       Connection.handleConnectionError()
     }
   }
@@ -80,7 +81,8 @@ class Connection {
           event.reply(replyKey, data)
         })
         .catch(error => event.reply('prompt', error.message, replyKey))
-    } else {
+    } 
+    else {
       Connection.handleConnectionError()
     }
   }
@@ -97,10 +99,12 @@ class Connection {
     if (error) {
       if (error.code === 'ECONNREFUSED') {
         dialog.showErrorBox('Connection Refused', 'There was a problem connecting to the database server.')
-      } else {
+      } 
+      else {
         dialog.showErrorBox('Fatal Error occured', `${error.code}: ${error.message}`)
       }
-    } else {
+    } 
+    else {
       dialog.showErrorBox('Connection ended', 'Connection with database unexpectedly is no longer valid.')
     }
     windowInstance.window?.close()
