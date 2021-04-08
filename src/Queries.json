@@ -2,8 +2,8 @@
   "airCargo": {
     "tableQuery": "SELECT * FROM `aircargo`",
     "formQuery": "SELECT * FROM `aircargo` WHERE `no` = ?",
-    "insertQuery": "INSERT INTO `aircargo` (``, ``, ``) VALUES (?, ?, ?)",
-    "updateQuery": "UPDATE `aircargo` SET `` = ?, `` = ?, `` = ? WHERE `no` = ?",
+    "insertQuery": "INSERT INTO `aircargo` (`no`, `kode`, `tglmuat`, `tgltiba`, `rute`, `pesawat`, `matauang`, `kurs`, `keterangan`, `freightcharge/kg`, `brtfreight`, `komisi/kg`, `brtkomisi`, `customclrn`, `brtclrn`, `biayatambahan`, `biayalain-lain`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    "updateQuery": "UPDATE `aircargo` SET `no` = ?, `kode` = ?, `tglmuat` = ?, `tgltiba` = ?, `rute` = ?, `pesawat` = ?, `matauang` = ?, `kurs` = ?, `keterangan` = ?, `freightcharge/kg` = ?, `brtfreight` = ?, `komisi/kg` = ?, `brtkomisi` = ?, `customclrn` = ?, `brtclrn` = ?, `biayatambahan` = ?, `biayalain-lain` = ? WHERE `no` = ?",
     "deleteQuery": "DELETE FROM `aircargo` WHERE `no` = ?",
     "markingTableQuery": "SELECT `no`, `marking`, `qty`, `list[kg]`, `hb[kg]`, `standart[kg]`, `vol.charge`, `lunas`, `sisa`, `suratjalan`, `faktur` FROM `aircargomarking` WHERE `noaircargo` = ?",
     "markingInsertQuery": "INSERT INTO `aircargomarking` (`noaircargo`, `marking`, `qty`, `list[kg]`, `hb[kg]`, `standart[kg]`, `vol.charge`, `lunas`, `sisa`, `suratjalan`, `faktur`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -12,8 +12,8 @@
   "seaFreight": {
     "tableQuery": "SELECT * FROM `seafreight`",
     "formQuery": "SELECT * FROM `seafreight` WHERE `nocontainer` = ?",
-    "insertQuery": "INSERT INTO `seafreight` (``, ``, ``) VALUES (?, ?, ?)",
-    "updateQuery": "UPDATE `seafreight` SET `` = ?, `` = ?, `` = ? WHERE `nocontainer` = ?",
+    "insertQuery": "INSERT INTO `seafreight` (`nocontainer`, `kodebarang`, `tglmuat`, `tgltiba`, `tglbl`, `kelcontainer`, `shipper`, `rute`, `pengurus`, `matauang`, `kurs`, `biayamuat`, `b.customclrc`, `b.tambahan`, `b.lain-lain`, `keterangan`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    "updateQuery": "UPDATE `seafreight` SET `nocontainer` = ?, `kodebarang` = ?, `tglmuat` = ?, `tgltiba` = ?, `tglbl` = ?, `kelcontainer` = ?, `shipper` = ?, `rute` = ?, `pengurus` = ?, `matauang` = ?, `kurs` = ?, `biayamuat` = ?, `b.customclrc` = ?, `b.tambahan` = ?, `b.lain-lain` = ?, `keterangan` = ? WHERE `nocontainer` = ?",
     "deleteQuery": "DELETE FROM `seafreight` WHERE `nocontainer` = ?",
     "markingTableQuery": "SELECT `no`, `marking`, `qty`, `list[m3]`, `list[kg]`, `dlist[m3]`, `dlist[kg]`, `hb[m3]`, `hb[kg]`, `cust[m3]`, `cust[kg]`, `lunas` FROM `seafreightmarking` WHERE `nocontainer` = ?",
     "markingInsertQuery": "INSERT INTO `seafreightmarking` (`nocontainer`, `no`, `marking`, `qty`, `list[m3]`, `list[kg]`, `dlist[m3]`, `dlist[kg]`, `hb[m3]`, `hb[kg]`, `cust[m3]`, `cust[kg]`, `lunas`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",

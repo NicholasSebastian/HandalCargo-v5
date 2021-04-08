@@ -50,18 +50,18 @@ const View: FC<IViewProps> = (props) => {
     ipcRenderer.send('query', containerGroupQuery, 'containerGroupQuery');
   }, []);
 
-  const shipmentDate = (data.tglmuat as Date).toDateString();
-  const arrivalDate = (data.tgltiba as Date).toDateString();
-  const blDate = (data.tglbl as Date).toDateString();
+  const shipmentDate = (data.tglmuat as Date)?.toDateString();
+  const arrivalDate = (data.tgltiba as Date)?.toDateString();
+  const blDate = (data.tglbl as Date)?.toDateString();
 
   const timeDifference = Math.abs(data.tgltiba - data.tglmuat);
   const dateDifference = Math.ceil(timeDifference / (1000 * 60 * 60 * 24));
 
-  const containerGroup = extraData?.containerGroups.find(c => c.containercode === data.kelcontainer).containerdesc as string;
-  const carrier = extraData?.carriers.find(c => c.shippercode === data.shipper).name as string;
-  const route = extraData?.routes.find(r => r.rutecode === data.rute).rutedesc as string;
-  const handler = extraData?.handlers.find(h => h.penguruscode === data.pengurus).pengurusname as string;
-  const currency = extraData?.currencies.find(c => c.currencycode === data.matauang).currencydesc as string;
+  const containerGroup = extraData?.containerGroups.find(c => c.containercode === data.kelcontainer)?.containerdesc as string;
+  const carrier = extraData?.carriers.find(c => c.shippercode === data.shipper)?.name as string;
+  const route = extraData?.routes.find(r => r.rutecode === data.rute)?.rutedesc as string;
+  const handler = extraData?.handlers.find(h => h.penguruscode === data.pengurus)?.pengurusname as string;
+  const currency = extraData?.currencies.find(c => c.currencycode === data.matauang)?.currencydesc as string;
 
   const clearanceFees = data['b.customclrc'];
   const additionalFees = data['b.tambahan'];

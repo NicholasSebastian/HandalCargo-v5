@@ -1,7 +1,7 @@
 import React, { Component, createRef } from 'react';
 import { ipcRenderer } from 'electron';
 import styled from 'styled-components';
-import { Typography, Form as AntForm, FormInstance, Button, Input, DatePicker, Select, message } from 'antd';
+import { Typography, Form as AntForm, FormInstance, Button, Input, InputNumber, DatePicker, Select, message } from 'antd';
 import { Store } from 'antd/lib/form/interface';
 import moment from 'moment';
 
@@ -10,6 +10,7 @@ import Loading from '../../components/Loading';
 import MarkingTable from './MarkingTable';
 
 import { objectDatesToMoment, objectMomentToDates } from '../../utils/momentConverter';
+import fillEmptyValues from '../../utils/objectNulling';
 import scrollToTop from '../../utils/scrollModal';
 import isEmpty from '../../utils/isEmptyObject';
 
@@ -31,8 +32,21 @@ interface IFormState {
 }
 
 class Form extends Component<IFormProps, IFormState> {
-  // TODO: Declare Refs here
   formRef: React.RefObject<FormInstance>;
+
+  daysToShipRef: React.RefObject<Input>;
+  totalFeesRef: React.RefObject<Input>;
+
+  totalQuantityRef: React.RefObject<Input>;
+  totalVolumeListRef: React.RefObject<Input>;
+  totalVolumeDListRef: React.RefObject<Input>;
+  totalVolumeHbRef: React.RefObject<Input>;
+  totalVolumeCustRef: React.RefObject<Input>;
+
+  totalWeightListRef: React.RefObject<Input>;
+  totalWeightDListRef: React.RefObject<Input>;
+  totalWeightHbRef: React.RefObject<Input>;
+  totalWeightCustRef: React.RefObject<Input>;
 
   constructor(props: IFormProps) {
     super(props);
@@ -46,8 +60,18 @@ class Form extends Component<IFormProps, IFormState> {
       currencies: []
     };
 
-    // TODO: Define Refs here
     this.formRef = createRef();
+    this.daysToShipRef = createRef();
+    this.totalFeesRef = createRef();
+    this.totalQuantityRef = createRef();
+    this.totalVolumeListRef = createRef();
+    this.totalVolumeDListRef = createRef();
+    this.totalVolumeHbRef = createRef();
+    this.totalVolumeCustRef = createRef();
+    this.totalWeightListRef = createRef();
+    this.totalWeightDListRef = createRef();
+    this.totalWeightHbRef = createRef();
+    this.totalWeightCustRef = createRef();
 
     this.initializeData = this.initializeData.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -102,13 +126,14 @@ class Form extends Component<IFormProps, IFormState> {
   handleSubmit(values: any) {
     const { entryId, closeModal } = this.props;
     
-    const formValues = objectMomentToDates(values);
-    const rawValues = Object.values(formValues);
+    const formValues = fillEmptyValues(values);
+    const formattedValues = objectMomentToDates(formValues);
+    const rawValues = Object.values(formattedValues);
 
     const { markingData } = this.state;
     const markingValues = markingData.map(entry => {
       delete entry.key;
-      return { nocontainer: entryId, ...entry };
+      return { nocontainer: entryId || values.nocontainer, ...entry };
     });
 
     const withMultipleValues = (insertQuery: string, queryValues: Array<object>) => {
@@ -156,12 +181,51 @@ class Form extends Component<IFormProps, IFormState> {
   }
 
   calculateValues() {
-    // TODO: Calculate Days to Ship
-    // TODO: Calculate Total Fees
+    const data = this.formRef.current?.getFieldsValue(true);
+    if (data) {
+      const tglmuat = moment(data.tglmuat);
+      const tgltiba = moment(data.tgltiba);
+      const daysToShip = tgltiba.diff(tglmuat, 'days');
+      this.daysToShipRef.current?.setState({ value: daysToShip || "" });
+
+      const loadingFees = data.biayamuat;
+      const customClrnFees = data['b.customclrc'];
+      const additionalFees = data['b.tambahan'];
+      const otherFees = data['b.lain-lain'];
+      const totalFees = loadingFees + customClrnFees + additionalFees + otherFees;
+      this.totalFeesRef.current?.setState({ value: totalFees || 0 });
+    }
   }
 
   calculateMarkingValues() {
-    // TODO: Calculate Marking Values Totals
+    const { markingData } = this.state;
+
+    const totalQuantity = markingData.map(d => d.qty).reduce((a, b) => a + b, 0) as number;
+    this.totalQuantityRef.current?.setState({ value: totalQuantity || 0 });
+
+    const totalVolumeList = markingData.map(d => d['list[m3]']).reduce((a, b) => a + b, 0) as number;
+    this.totalVolumeListRef.current?.setState({ value: totalVolumeList || 0 });
+
+    const totalVolumeDList = markingData.map(d => d['dlist[m3]']).reduce((a, b) => a + b, 0) as number;
+    this.totalVolumeDListRef.current?.setState({ value: totalVolumeDList || 0 });
+
+    const totalVolumeHb = markingData.map(d => d['hb[m3]']).reduce((a, b) => a + b, 0) as number;
+    this.totalVolumeHbRef.current?.setState({ value: totalVolumeHb || 0 });
+
+    const totalVolumeCust = markingData.map(d => d['cust[m3]']).reduce((a, b) => a + b, 0) as number;
+    this.totalVolumeCustRef.current?.setState({ value: totalVolumeCust || 0 });
+
+    const totalWeightList = markingData.map(d => d['list[kg]']).reduce((a, b) => a + b, 0) as number;
+    this.totalWeightListRef.current?.setState({ value: totalWeightList || 0 });
+
+    const totalWeightDList = markingData.map(d => d['dlist[kg]']).reduce((a, b) => a + b, 0) as number;
+    this.totalWeightDListRef.current?.setState({ value: totalWeightDList || 0 });
+
+    const totalWeightHb = markingData.map(d => d['hb[kg]']).reduce((a, b) => a + b, 0) as number;
+    this.totalWeightHbRef.current?.setState({ value: totalWeightHb || 0 });
+
+    const totalWeightCust = markingData.map(d => d['cust[kg]']).reduce((a, b) => a + b, 0) as number;
+    this.totalWeightCustRef.current?.setState({ value: totalWeightCust || 0 });
   }
  
   render() {
@@ -169,8 +233,6 @@ class Form extends Component<IFormProps, IFormState> {
     const { entryId } = this.props;
     const { initialData: data, markingData, containerGroups, carriers, routes, handlers, currencies } = this.state;
     const initialValues = objectDatesToMoment(data);
-
-    console.log(initialValues);
 
     const isLoading = entryId ? isEmpty(data) : false;
     return isLoading ? <Loading /> : (
@@ -180,10 +242,69 @@ class Form extends Component<IFormProps, IFormState> {
           <Title level={4}>Sea Freight</Title>
         <DoubleColumns>
           <div>
-            {/* here */}
+            <Item label="Container No" name='nocontainer'
+              rules={[{ required: true, message: `Container Number is required` }]}>
+              <Input />
+            </Item>
+            <Item label="Item Code" name='kodebarang'><Input /></Item>
+            <Item label="Date of Shipment" name='tglmuat'><DatePicker /></Item>
+            <Item label="Date of Arrival" name='tgltiba'><DatePicker /></Item>
+            <Item label="Bill of Lading Date" name='tglbl'><DatePicker /></Item>
+            <Item label="Days to Ship"><Input ref={this.daysToShipRef} disabled addonAfter="Days" /></Item>
+            <Item label="Container Group" name="kelcontainer">
+              <Select>
+                {containerGroups.map(cg => (
+                  <Option key={cg.containercode} value={cg.containercode}>{cg.containerdesc}</Option>
+                ))}
+              </Select>
+            </Item>
+            <Item label="Carrier" name="shipper">
+              <Select>
+                {carriers.map(carrier => (
+                  <Option key={carrier.shippercode} value={carrier.shippercode}>{carrier.name}</Option>
+                ))}
+              </Select>
+            </Item>
+            <Item label="Route" name="rute">
+              <Select>
+                {routes.map(route => (
+                  <Option key={route.rutecode} value={route.rutecode}>{route.rutedesc}</Option>
+                ))}
+              </Select>
+            </Item>
+            <Item label="Handler" name="pengurus">
+              <Select>
+                {handlers.map(handler => (
+                  <Option key={handler.penguruscode} value={handler.penguruscode}>{handler.pengurusname}</Option>
+                ))}
+              </Select>
+            </Item>
           </div>
           <div>
-            {/* here */}
+            <Item label="Currencies" name="matauang">
+              <Select>
+                {currencies.map(currency => (
+                  <Option key={currency.currencycode} value={currency.currencycode}>{currency.currencydesc}</Option>
+                ))}
+              </Select>
+            </Item>
+            <Item label="Exchange Rate" name="kurs">
+              <InputNumber type='number' style={{ width: '100%' }} />
+            </Item>
+            <Item label="Loading Fees" name="biayamuat">
+              <InputNumber type='number' style={{ width: '100%' }} />
+            </Item>
+            <Item label="Custom Clrn Fees" name="b.customclrc">
+              <InputNumber type='number' style={{ width: '100%' }} />
+            </Item>
+            <Item label="Additional Fees" name="b.tambahan">
+              <InputNumber type='number' style={{ width: '100%' }} />
+            </Item>
+            <Item label="Other Fees" name="b.lain-lain">
+              <InputNumber type='number' style={{ width: '100%' }} />
+            </Item>
+            <Item label="Total Fees"><Input ref={this.totalFeesRef} disabled /></Item>
+            <Item label="Description" name="keterangan"><TextArea /></Item>
           </div>
         </DoubleColumns>
         <MarkingTable
@@ -192,10 +313,17 @@ class Form extends Component<IFormProps, IFormState> {
           onUpdate={this.calculateMarkingValues} />
         <DoubleColumns>
           <div>
-            {/* here */}
+            <Item label="Total Volume [List]"><Input ref={this.totalVolumeListRef} disabled /></Item>
+            <Item label="Total Volume [DList]"><Input ref={this.totalVolumeDListRef} disabled /></Item>
+            <Item label="Total Volume [HB]"><Input ref={this.totalVolumeHbRef} disabled /></Item>
+            <Item label="Total Volume [Cust]"><Input ref={this.totalVolumeCustRef} disabled /></Item>
+            <Item label="Total Quantity"><Input ref={this.totalQuantityRef} disabled /></Item>
           </div>
           <div>
-            {/* here */}
+            <Item label="Total Weight [List]"><Input ref={this.totalWeightListRef} disabled /></Item>
+            <Item label="Total Weight [DList]"><Input ref={this.totalWeightDListRef} disabled /></Item>
+            <Item label="Total Weight [HB]"><Input ref={this.totalWeightHbRef} disabled /></Item>
+            <Item label="Total Weight [Cust]"><Input ref={this.totalWeightCustRef} disabled /></Item>
           </div>
         </DoubleColumns>
         <Item><Button type="primary" htmlType="submit">Submit</Button></Item>

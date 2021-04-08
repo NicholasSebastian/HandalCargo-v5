@@ -66,7 +66,7 @@ class SeaFreight extends Component<never, ISeaFreightState> {
             title: "Arrival Date",
             dataIndex: "tgltiba",
             key: "tgltiba",
-            render: (date: Date) => date.toDateString(),
+            render: (date: Date) => date?.toDateString(),
             sorter: (a: any, b: any) => a.tgltiba - b.tgltiba
           },
           {

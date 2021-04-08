@@ -64,9 +64,13 @@ class Connection {
     if (this.connection?.isValid()) {
       this.connection.query(query)
         .then((data: Array<any>) => {
+          console.log('Query success')
           event.reply(replyKey, data)
         })
-        .catch(error => event.reply('prompt', error.message, replyKey))
+        .catch(error => {
+          console.log('Query failed')
+          event.reply('prompt', error.message, replyKey)
+        })
     } 
     else {
       Connection.handleConnectionError()
@@ -74,13 +78,17 @@ class Connection {
   }
 
   public queryWithValues (event: Electron.IpcMainEvent, query: string, values: Array<string>, replyKey: string): void {
-    console.log(`Querying: ${query}`);
+    console.log(`Querying: ${query}\nWith Values: ${values}`);
     if (this.connection?.isValid()) {
       this.connection.query(query, values)
         .then((data: Array<any>) => {
+          console.log('Query success')
           event.reply(replyKey, data)
         })
-        .catch(error => event.reply('prompt', error.message, replyKey))
+        .catch(error => {
+          console.log('Query failed')
+          event.reply('prompt', error.message, replyKey)
+        })
     } 
     else {
       Connection.handleConnectionError()

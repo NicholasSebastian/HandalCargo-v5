@@ -41,15 +41,15 @@ const View: FC<IViewProps> = (props) => {
     ipcRenderer.send('query', routeQuery, 'routesQuery');
   }, []);
 
-  const shipmentDate = (data.tglmuat as Date).toDateString();
-  const arrivalDate = (data.tgltiba as Date).toDateString();
+  const shipmentDate = (data.tglmuat as Date)?.toDateString();
+  const arrivalDate = (data.tgltiba as Date)?.toDateString();
 
   const timeDifference = Math.abs(data.tgltiba - data.tglmuat);
   const dateDifference = Math.ceil(timeDifference / (1000 * 60 * 60 * 24));
 
-  const route = extraData?.routes.find((r: any) => r.rutecode == data.rute).rutedesc as string;
-  const plane = extraData?.planes.find((p: any) => p.pesawatcode == data.pesawat).pesawatdesc as string;
-  const currency = extraData?.currencies.find((c: any) => c.currencycode == data.matauang).currencydesc as string;
+  const route = extraData?.routes.find((r: any) => r.rutecode == data.rute)?.rutedesc as string;
+  const plane = extraData?.planes.find((p: any) => p.pesawatcode == data.pesawat)?.pesawatdesc as string;
+  const currency = extraData?.currencies.find((c: any) => c.currencycode == data.matauang)?.currencydesc as string;
 
   const freightCharge = data['freightcharge/kg'];
   const commissionCharge = data['komisi/kg'];
@@ -67,6 +67,7 @@ const View: FC<IViewProps> = (props) => {
   const totalWeightHb = extraData?.markingData.map((d: any) => d['hb[kg]']).reduce((a: number, b: number) => a + b, 0);
   const realDifference = round(totalWeightHb - totalWeightList);
   const masterDifference = round(totalWeightHb - data.brtclrn);
+  
   return (
     <ViewStyles>
       <Card title="Shipping Information">

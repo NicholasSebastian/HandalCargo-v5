@@ -47,6 +47,14 @@ class Form extends Component<IFormProps, IFormState> {
       });
       ipcRenderer.send('queryValues', formQuery, [entryId], 'formQuery');
     }
+    else {
+      // Initialize 'add' form values.
+      ipcRenderer.once('routeQuery', (event, routes) => {
+        this.setState({ routes });
+        this.formRef.current?.resetFields();
+      });
+      ipcRenderer.send('query', routeQuery, 'routeQuery');
+    }
   }
 
   handleSubmit(values: any) {

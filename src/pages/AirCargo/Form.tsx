@@ -11,6 +11,7 @@ import MarkingTable from './MarkingTable';
 
 import round from '../../utils/roundToTwo';
 import { objectDatesToMoment, objectMomentToDates } from '../../utils/momentConverter';
+import fillEmptyValues from '../../utils/objectNulling';
 import scrollToTop from '../../utils/scrollModal';
 import isEmpty from '../../utils/isEmptyObject';
 
@@ -31,7 +32,7 @@ interface IFormState {
 
 class Form extends Component<IFormProps, IFormState> {
   formRef: React.RefObject<FormInstance>
-  
+
   daysToShipRef: React.RefObject<Input>;
   freightTotalRef: React.RefObject<Input>;
   commissionTotalRef: React.RefObject<Input>;
@@ -113,13 +114,14 @@ class Form extends Component<IFormProps, IFormState> {
   handleSubmit(values: any) {
     const { entryId, closeModal } = this.props;
     
-    const formValues = objectMomentToDates(values);
-    const rawValues = Object.values(formValues);
+    const formValues = fillEmptyValues(values);
+    const formattedValues = objectMomentToDates(formValues);
+    const rawValues = Object.values(formattedValues);
 
     const { markingData } = this.state;
     const markingValues = markingData.map(entry => {
       delete entry.key;
-      return { noaircargo: entryId, ...entry };
+      return { noaircargo: entryId || values.no, ...entry };
     });
 
     const withMultipleValues = (insertQuery: string, queryValues: Array<object>) => {

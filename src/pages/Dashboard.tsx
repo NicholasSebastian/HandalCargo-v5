@@ -1,11 +1,35 @@
 import React, { PureComponent } from 'react';
+import { ipcRenderer } from 'electron';
 import styled from 'styled-components';
+import { Space, Statistic } from 'antd';
+import { TeamOutlined, AppstoreOutlined } from '@ant-design/icons';
 
-class Dashboard extends PureComponent {
+interface IDashboardState {
+  // here
+}
+
+class Dashboard extends PureComponent<never, IDashboardState> {
+  constructor(props: never) {
+    super(props);
+    this.state = {
+      // here
+    };
+    this.initializeData = this.initializeData.bind(this);
+    this.initializeData();
+  }
+
+  initializeData() {
+    // here
+  }
+
   render() {
     return (
-      <DashboardStyles>
-        <Panel>Dashboard</Panel>
+      <DashboardStyles direction='vertical' size='large'>
+        <StatisticsStyles>
+          <Statistic title="Air Cargo Entries" value={100} prefix={<AppstoreOutlined />} />
+          <Statistic title="Sea Freight Entries" value={100} prefix={<AppstoreOutlined />} />
+          <Statistic title="Total Customers" value={100} prefix={<TeamOutlined />} />
+        </StatisticsStyles>
         <Panel>Dashboard</Panel>
         <Panel>Dashboard</Panel>
       </DashboardStyles>
@@ -15,8 +39,15 @@ class Dashboard extends PureComponent {
 
 export default Dashboard;
 
-const DashboardStyles = styled.div`
-  // here
+const DashboardStyles = styled(Space)`
+  width: 100%;
+`;
+
+const StatisticsStyles = styled.div`
+  background-color: #fff;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
 `;
 
 const Panel = styled.div`
