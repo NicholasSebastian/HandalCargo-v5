@@ -154,7 +154,7 @@ class Staff extends Component<{}, IStaffState> {
         </StaffStyles> :
         <Loading />
         }
-        <Modal centered maskClosable width={900} footer={null}
+        <Modal centered maskClosable width={modal?.mode === 'view' ? 1200 : 900} footer={null}
           bodyStyle={{ paddingTop: 45, maxHeight: '90vh', overflowY: 'auto' }}
           visible={modal !== null} 
           onCancel={this.closeModal}>

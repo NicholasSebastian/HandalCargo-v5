@@ -1,7 +1,7 @@
 import React, { Component, createRef } from 'react';
 import { ipcRenderer } from 'electron';
 import styled from 'styled-components';
-import { Typography, Form as AntForm, FormInstance, Button, Input, InputNumber, DatePicker, Select, message } from 'antd';
+import { Typography, Form as AntForm, FormInstance, Button, Input, DatePicker, Select, message } from 'antd';
 import { Store } from 'antd/lib/form/interface';
 import moment from 'moment';
 
@@ -151,15 +151,17 @@ class Form extends Component<IFormProps, IFormState> {
 
     if (entryId) {
       // Edit form on submit.
+      const onSuccess = () => {
+        message.success(`'${entryId}' successfully updated`);
+        closeModal();
+      }
       ipcRenderer.once('seafreightUpdateQuery', () => {
         ipcRenderer.once('seafreightMarkingDeleteQuery', () => {
           if (markingValues.length > 0) {
-            ipcRenderer.once('seafreightMarkingInsertQuery', () => {
-              message.success(`'${entryId}' successfully updated`);
-              closeModal();
-            });
+            ipcRenderer.once('seafreightMarkingInsertQuery', onSuccess);
             ipcRenderer.send('queryValues', ...withMultipleValues(markingInsertQuery, markingValues), 'seafreightMarkingInsertQuery');
           }
+          else onSuccess();
         });
         ipcRenderer.send('queryValues', markingDeleteQuery, [entryId], 'seafreightMarkingDeleteQuery');
       });
@@ -167,14 +169,16 @@ class Form extends Component<IFormProps, IFormState> {
     }
     else {
       // Add form on submit.
+      const onSuccess = () => {
+        message.success('Entry successfully added');
+        closeModal();
+      }
       ipcRenderer.once('seafreightInsertQuery', () => {
         if (markingValues.length > 0) {
-          ipcRenderer.once('seafreightMarkingInsertQuery', () => {
-            message.success('Entry successfully added');
-            closeModal();
-          });
+          ipcRenderer.once('seafreightMarkingInsertQuery', onSuccess);
           ipcRenderer.send('queryValues', ...withMultipleValues(markingInsertQuery, markingValues), 'seafreightMarkingInsertQuery');
         }
+        else onSuccess();
       });
       ipcRenderer.send('queryValues', insertQuery, rawValues, 'seafreightInsertQuery');
     }
@@ -188,10 +192,10 @@ class Form extends Component<IFormProps, IFormState> {
       const daysToShip = tgltiba.diff(tglmuat, 'days');
       this.daysToShipRef.current?.setState({ value: daysToShip || "" });
 
-      const loadingFees = data.biayamuat;
-      const customClrnFees = data['b.customclrc'];
-      const additionalFees = data['b.tambahan'];
-      const otherFees = data['b.lain-lain'];
+      const loadingFees = parseInt(data.biayamuat) || 0;
+      const customClrnFees = parseInt(data['b.customclrc']) || 0;
+      const additionalFees = parseInt(data['b.tambahan']) || 0;
+      const otherFees = parseInt(data['b.lain-lain']) || 0;
       const totalFees = loadingFees + customClrnFees + additionalFees + otherFees;
       this.totalFeesRef.current?.setState({ value: totalFees || 0 });
     }
@@ -200,31 +204,31 @@ class Form extends Component<IFormProps, IFormState> {
   calculateMarkingValues() {
     const { markingData } = this.state;
 
-    const totalQuantity = markingData.map(d => d.qty).reduce((a, b) => a + b, 0) as number;
+    const totalQuantity = markingData.map(d => +d.qty).reduce((a, b) => a + b, 0) as number;
     this.totalQuantityRef.current?.setState({ value: totalQuantity || 0 });
 
-    const totalVolumeList = markingData.map(d => d['list[m3]']).reduce((a, b) => a + b, 0) as number;
+    const totalVolumeList = markingData.map(d => +d['list[m3]']).reduce((a, b) => a + b, 0) as number;
     this.totalVolumeListRef.current?.setState({ value: totalVolumeList || 0 });
 
-    const totalVolumeDList = markingData.map(d => d['dlist[m3]']).reduce((a, b) => a + b, 0) as number;
+    const totalVolumeDList = markingData.map(d => +d['dlist[m3]']).reduce((a, b) => a + b, 0) as number;
     this.totalVolumeDListRef.current?.setState({ value: totalVolumeDList || 0 });
 
-    const totalVolumeHb = markingData.map(d => d['hb[m3]']).reduce((a, b) => a + b, 0) as number;
+    const totalVolumeHb = markingData.map(d => +d['hb[m3]']).reduce((a, b) => a + b, 0) as number;
     this.totalVolumeHbRef.current?.setState({ value: totalVolumeHb || 0 });
 
-    const totalVolumeCust = markingData.map(d => d['cust[m3]']).reduce((a, b) => a + b, 0) as number;
+    const totalVolumeCust = markingData.map(d => +d['cust[m3]']).reduce((a, b) => a + b, 0) as number;
     this.totalVolumeCustRef.current?.setState({ value: totalVolumeCust || 0 });
 
-    const totalWeightList = markingData.map(d => d['list[kg]']).reduce((a, b) => a + b, 0) as number;
+    const totalWeightList = markingData.map(d => +d['list[kg]']).reduce((a, b) => a + b, 0) as number;
     this.totalWeightListRef.current?.setState({ value: totalWeightList || 0 });
 
-    const totalWeightDList = markingData.map(d => d['dlist[kg]']).reduce((a, b) => a + b, 0) as number;
+    const totalWeightDList = markingData.map(d => +d['dlist[kg]']).reduce((a, b) => a + b, 0) as number;
     this.totalWeightDListRef.current?.setState({ value: totalWeightDList || 0 });
 
-    const totalWeightHb = markingData.map(d => d['hb[kg]']).reduce((a, b) => a + b, 0) as number;
+    const totalWeightHb = markingData.map(d => +d['hb[kg]']).reduce((a, b) => a + b, 0) as number;
     this.totalWeightHbRef.current?.setState({ value: totalWeightHb || 0 });
 
-    const totalWeightCust = markingData.map(d => d['cust[kg]']).reduce((a, b) => a + b, 0) as number;
+    const totalWeightCust = markingData.map(d => +d['cust[kg]']).reduce((a, b) => a + b, 0) as number;
     this.totalWeightCustRef.current?.setState({ value: totalWeightCust || 0 });
   }
  
@@ -246,7 +250,10 @@ class Form extends Component<IFormProps, IFormState> {
               rules={[{ required: true, message: `Container Number is required` }]}>
               <Input />
             </Item>
-            <Item label="Item Code" name='kodebarang'><Input /></Item>
+            <Item label="Item Code" name='kodebarang'
+              rules={[{ required: true, message: `Item Code is required` }]}>
+              <Input />
+            </Item>
             <Item label="Date of Shipment" name='tglmuat'><DatePicker /></Item>
             <Item label="Date of Arrival" name='tgltiba'><DatePicker /></Item>
             <Item label="Bill of Lading Date" name='tglbl'><DatePicker /></Item>
@@ -289,19 +296,19 @@ class Form extends Component<IFormProps, IFormState> {
               </Select>
             </Item>
             <Item label="Exchange Rate" name="kurs">
-              <InputNumber type='number' style={{ width: '100%' }} />
+              <Input type='number' style={{ width: '100%' }} />
             </Item>
             <Item label="Loading Fees" name="biayamuat">
-              <InputNumber type='number' style={{ width: '100%' }} />
+              <Input type='number' style={{ width: '100%' }} />
             </Item>
             <Item label="Custom Clrn Fees" name="b.customclrc">
-              <InputNumber type='number' style={{ width: '100%' }} />
+              <Input type='number' style={{ width: '100%' }} />
             </Item>
             <Item label="Additional Fees" name="b.tambahan">
-              <InputNumber type='number' style={{ width: '100%' }} />
+              <Input type='number' style={{ width: '100%' }} />
             </Item>
             <Item label="Other Fees" name="b.lain-lain">
-              <InputNumber type='number' style={{ width: '100%' }} />
+              <Input type='number' style={{ width: '100%' }} />
             </Item>
             <Item label="Total Fees"><Input ref={this.totalFeesRef} disabled /></Item>
             <Item label="Description" name="keterangan"><TextArea /></Item>
@@ -310,20 +317,20 @@ class Form extends Component<IFormProps, IFormState> {
         <MarkingTable
           data={markingData}
           setData={data => this.setState({ markingData: data })}
-          onUpdate={this.calculateMarkingValues} />
+          onUpdate={() => this.calculateMarkingValues()} />
         <DoubleColumns>
           <div>
-            <Item label="Total Volume [List]"><Input ref={this.totalVolumeListRef} disabled /></Item>
-            <Item label="Total Volume [DList]"><Input ref={this.totalVolumeDListRef} disabled /></Item>
-            <Item label="Total Volume [HB]"><Input ref={this.totalVolumeHbRef} disabled /></Item>
-            <Item label="Total Volume [Cust]"><Input ref={this.totalVolumeCustRef} disabled /></Item>
-            <Item label="Total Quantity"><Input ref={this.totalQuantityRef} disabled /></Item>
+            <Item label="Total Volume [List]"><Input ref={this.totalVolumeListRef} disabled addonAfter="m³" /></Item>
+            <Item label="Total Volume [DList]"><Input ref={this.totalVolumeDListRef} disabled addonAfter="m³" /></Item>
+            <Item label="Total Volume [HB]"><Input ref={this.totalVolumeHbRef} disabled addonAfter="m³" /></Item>
+            <Item label="Total Volume [Cust]"><Input ref={this.totalVolumeCustRef} disabled addonAfter="m³" /></Item>
+            <Item label="Total Quantity"><Input ref={this.totalQuantityRef} disabled addonAfter="m³" /></Item>
           </div>
           <div>
-            <Item label="Total Weight [List]"><Input ref={this.totalWeightListRef} disabled /></Item>
-            <Item label="Total Weight [DList]"><Input ref={this.totalWeightDListRef} disabled /></Item>
-            <Item label="Total Weight [HB]"><Input ref={this.totalWeightHbRef} disabled /></Item>
-            <Item label="Total Weight [Cust]"><Input ref={this.totalWeightCustRef} disabled /></Item>
+            <Item label="Total Weight [List]"><Input ref={this.totalWeightListRef} disabled addonAfter="kg" /></Item>
+            <Item label="Total Weight [DList]"><Input ref={this.totalWeightDListRef} disabled addonAfter="kg" /></Item>
+            <Item label="Total Weight [HB]"><Input ref={this.totalWeightHbRef} disabled addonAfter="kg" /></Item>
+            <Item label="Total Weight [Cust]"><Input ref={this.totalWeightCustRef} disabled addonAfter="kg" /></Item>
           </div>
         </DoubleColumns>
         <Item><Button type="primary" htmlType="submit">Submit</Button></Item>

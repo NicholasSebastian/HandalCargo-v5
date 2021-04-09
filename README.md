@@ -7,9 +7,10 @@ Uses Ant Design for UI components.
 
 ### Content
 
-- All Shipping pages
+- Invoice Entry
+- Payment
+- Customers
 - Company Setup
-- Backup and Restore?
 
 ### Features
 
@@ -17,10 +18,13 @@ Uses Ant Design for UI components.
 - Language (English / Indonesian)
 - Images for Profiles
 - Mail?
+- Backup and Restore?
+- Shortcuts?
 
 ### Known Bugs and Issues
 
-- Air Cargo and Sea Freight forms not calculating values properly.
-- Deleting an entry from Air Cargo opens its 'view' right after, causing an error.
+- Air Cargo and Sea Freight 'add' forms not calculating marking values properly.
+- Inserting marking values fail due to a foreign key constraint.
+
 - Calculator should automatically focus on Input when opened.
-- Inputting long text in the To-Do-List Input gets covered by the plus icon. 
+- Inputting long text in the To-Do-List Input gets covered by the plus icon.

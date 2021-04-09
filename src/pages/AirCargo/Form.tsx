@@ -1,7 +1,7 @@
 import React, { Component, createRef } from 'react';
 import { ipcRenderer } from 'electron';
 import styled from 'styled-components';
-import { Typography, Form as AntForm, Button, Input, InputNumber, DatePicker, Select, FormInstance, message } from 'antd';
+import { Typography, Form as AntForm, Button, Input, DatePicker, Select, FormInstance, message } from 'antd';
 import { Store } from 'antd/lib/form/interface';
 import moment from 'moment';
 
@@ -139,15 +139,17 @@ class Form extends Component<IFormProps, IFormState> {
 
     if (entryId) {
       // Edit form on submit.
+      const onSuccess = () => {
+        message.success(`'${entryId}' successfully updated`);
+        closeModal();
+      }
       ipcRenderer.once('aircargoUpdateQuery', () => {
         ipcRenderer.once('aircargoMarkingDeleteQuery', () => {
           if (markingValues.length > 0) {
-            ipcRenderer.once('aircargoMarkingInsertQuery', () => {
-              message.success(`'${entryId}' successfully updated`);
-              closeModal();
-            });
+            ipcRenderer.once('aircargoMarkingInsertQuery', onSuccess);
             ipcRenderer.send('queryValues', ...withMultipleValues(markingInsertQuery, markingValues), 'aircargoMarkingInsertQuery');
           }
+          else onSuccess();
         });
         ipcRenderer.send('queryValues', markingDeleteQuery, [entryId], 'aircargoMarkingDeleteQuery');
       });
@@ -155,14 +157,16 @@ class Form extends Component<IFormProps, IFormState> {
     }
     else {
       // Add form on submit.
+      const onSuccess = () => {
+        message.success('Entry successfully added');
+        closeModal();
+      }
       ipcRenderer.once('aircargoInsertQuery', () => {
         if (markingValues.length > 0) {
-          ipcRenderer.once('aircargoMarkingInsertQuery', () => {
-            message.success('Entry successfully added');
-            closeModal();
-          });
+          ipcRenderer.once('aircargoMarkingInsertQuery', onSuccess);
           ipcRenderer.send('queryValues', ...withMultipleValues(markingInsertQuery, markingValues), 'aircargoMarkingInsertQuery');
         }
+        else onSuccess();
       });
       ipcRenderer.send('queryValues', insertQuery, rawValues, 'aircargoInsertQuery');
     }
@@ -195,13 +199,13 @@ class Form extends Component<IFormProps, IFormState> {
   calculateMarkingValues() {
     const { markingData } = this.state;
 
-    const totalQuantity = markingData.map(d => d.qty).reduce((a, b) => a + b, 0) as number;
+    const totalQuantity = markingData.map(d => +d.qty).reduce((a, b) => a + b, 0) as number;
     this.totalQuantityRef.current?.setState({ value: totalQuantity || 0 });
 
-    const totalWeightList = markingData.map(d => d['list[kg]']).reduce((a, b) => a + b, 0) as number;
+    const totalWeightList = markingData.map(d => +d['list[kg]']).reduce((a, b) => a + b, 0) as number;
     this.totalWeightListRef.current?.setState({ value: totalWeightList || 0 });
 
-    const totalWeightHb = markingData.map(d => d['hb[kg]']).reduce((a, b) => a + b, 0) as number;
+    const totalWeightHb = markingData.map(d => +d['hb[kg]']).reduce((a, b) => a + b, 0) as number;
     this.totalWeightHbRef.current?.setState({ value: totalWeightHb || 0 });
 
     const realDifference = round(totalWeightHb - totalWeightList);
@@ -230,7 +234,10 @@ class Form extends Component<IFormProps, IFormState> {
               rules={[{ required: true, message: `Airway Bill Number is required` }]}>
               <Input />
             </Item>
-            <Item label="Item Code" name='kode'><Input /></Item>
+            <Item label="Item Code" name='kode'
+              rules={[{ required: true, message: `Item Code is required` }]}>
+              <Input />
+            </Item>
             <Item label="Date of Shipment" name="tglmuat"><DatePicker /></Item>
             <Item label="Date of Arrival" name="tgltiba"><DatePicker /></Item>
             <Item label="Days to Ship"><Input ref={this.daysToShipRef} disabled addonAfter="Days" /></Item>
@@ -256,37 +263,37 @@ class Form extends Component<IFormProps, IFormState> {
               </Select>
             </Item>
             <Item label="Exchange Rate" name="kurs">
-              <InputNumber type='number' style={{ width: '100%' }} />
+              <Input type='number' style={{ width: '100%' }} />
             </Item>
             <Item label="Description" name="keterangan"><TextArea /></Item>
           </div>
           <div>
             <Item label="Charge/Kg" name="freightcharge/kg">
-              <InputNumber type='number' style={{ width: '100%' }} />
+              <Input type='number' style={{ width: '100%' }} />
             </Item>
             <Item label="Freight Weight" name="brtfreight">
-              <InputNumber type='number' style={{ width: '100%' }} />
+              <Input type='number' style={{ width: '100%' }} addonAfter="kg" />
             </Item>
             <Item label="Freight Total"><Input ref={this.freightTotalRef} disabled /></Item>
             <Item label="Commission/Kg" name="komisi/kg">
-              <InputNumber type='number' style={{ width: '100%' }} />
+              <Input type='number' style={{ width: '100%' }} />
             </Item>
             <Item label="Commission Weight" name="brtkomisi">
-              <InputNumber type='number' style={{ width: '100%' }} />
+              <Input type='number' style={{ width: '100%' }} addonAfter="kg" />
             </Item>
             <Item label="Commission Total"><Input ref={this.commissionTotalRef} disabled /></Item>
             <Item label="Custom Clrn" name="customclrn">
-              <InputNumber type='number' style={{ width: '100%' }} />
+              <Input type='number' style={{ width: '100%' }} />
             </Item>
             <Item label="Clrn Weight" name="brtclrn">
-              <InputNumber type='number' style={{ width: '100%' }} />
+              <Input type='number' style={{ width: '100%' }} addonAfter="kg" />
             </Item>
             <Item label="Clrn Total"><Input ref={this.clrnTotalRef} disabled /></Item>
             <Item label="Additional Fees" name="biayatambahan">
-              <InputNumber type='number' style={{ width: '100%' }} />
+              <Input type='number' style={{ width: '100%' }} />
             </Item>
             <Item label="Other Fees" name="biayalain-lain">
-              <InputNumber type='number' style={{ width: '100%' }} />
+              <Input type='number' style={{ width: '100%' }} />
             </Item>
             <Item label="Total Fees"><Input ref={this.totalFeesRef} disabled /></Item>
           </div>
@@ -294,16 +301,16 @@ class Form extends Component<IFormProps, IFormState> {
         <MarkingTable 
           data={markingData} 
           setData={data => this.setState({ markingData: data })}
-          onUpdate={this.calculateMarkingValues} />
+          onUpdate={() => this.calculateMarkingValues()} />
         <DoubleColumns>
           <div>
             <Item label="Total Quantity"><Input ref={this.totalQuantityRef} disabled /></Item>
-            <Item label="Total Weight (List)"><Input ref={this.totalWeightListRef} disabled /></Item>
-            <Item label="Total Weight (HB)"><Input ref={this.totalWeightHbRef} disabled /></Item>
+            <Item label="Total Weight (List)"><Input ref={this.totalWeightListRef} disabled addonAfter="kg" /></Item>
+            <Item label="Total Weight (HB)"><Input ref={this.totalWeightHbRef} disabled addonAfter="kg" /></Item>
           </div>
           <div>
-            <Item label="Real Difference"><Input ref={this.realDifferenceRef} disabled /></Item>
-            <Item label="Master Difference"><Input ref={this.masterDifferenceRef} disabled /></Item>
+            <Item label="Real Difference"><Input ref={this.realDifferenceRef} disabled addonAfter="kg" /></Item>
+            <Item label="Master Difference"><Input ref={this.masterDifferenceRef} disabled addonAfter="kg" /></Item>
           </div>
         </DoubleColumns>
         <Item><Button type="primary" htmlType="submit">Submit</Button></Item>

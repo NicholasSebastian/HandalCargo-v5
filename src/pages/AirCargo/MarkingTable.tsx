@@ -20,13 +20,14 @@ const MarkingTable: FunctionComponent<MarkingTableProps> = props => {
   const listRef = useRef<Input>(null);
 
   function handleSubmit() {
+    const no = Math.max(0, ...data.map(entry => entry.no) as Array<number>) + 1;
     const marking = markingRef.current?.state.value;
     const quantity = quantityRef.current?.state.value;
     const list = listRef.current?.state.value;
 
     const newData = { 
       key: data.length,
-      no: null,
+      no,
       marking,
       qty: quantity,
       'list[kg]': list,
@@ -52,10 +53,10 @@ const MarkingTable: FunctionComponent<MarkingTableProps> = props => {
   return (
     <Fragment>
       <ItemStyles>
-        <Item label="Marking"><Input ref={markingRef} /></Item>
+        <Item label="Marking" colon={false}><Input ref={markingRef} /></Item>
+        <Item label="Quantity" colon={false}><Input ref={quantityRef} type='number' /></Item>
+        <Item label="List [Kg]" colon={false}><Input ref={listRef} type='number' /></Item>
         <Button type="default" htmlType="button" icon={<DownOutlined />} onClick={handleSubmit} />
-        <Item label="Quantity"><Input ref={quantityRef} /></Item>
-        <Item label="List [Kg]"><Input ref={listRef} /></Item>
       </ItemStyles>
       <Table pagination={false}
         dataSource={data} size='small' 
@@ -83,7 +84,7 @@ const ItemStyles = styled.div`
   margin-top: 10px;
 
   > * {
-    margin-right: 10px;
+    margin-right: 12px;
   }
 `;
 

@@ -11,7 +11,7 @@ class CompanySetup extends Component {
   render() {
     return (
       <CompanySetupStyles>
-        test
+        {/* here */}
       </CompanySetupStyles>
     );
   }

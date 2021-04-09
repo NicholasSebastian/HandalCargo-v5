@@ -83,7 +83,7 @@ const View: FC<IViewProps> = (props) => {
   return (
     <ViewStyles>
       <Card title="Shipping Information">
-        <Descriptions title="Basic Details" labelStyle={{ fontWeight: 500 }}>
+        <Descriptions title="Basic Details" labelStyle={{ fontWeight: 500 }} bordered size='small'>
           <Item label="Container No">{data.nocontainer}</Item>
           <Item label="Item Code">{data.kodebarang}</Item>
           <Item label="Date of Shipment">{shipmentDate}</Item>
@@ -98,7 +98,7 @@ const View: FC<IViewProps> = (props) => {
           <Item label="Exchange Rate">{data.kurs}</Item>
           <Item label="Description">{data.keterangan}</Item>
         </Descriptions>
-        <Descriptions title="Monetary Details" labelStyle={{ fontWeight: 500 }}>
+        <Descriptions title="Monetary Details" labelStyle={{ fontWeight: 500 }} bordered size='small'>
           <Item label="Loading Fees">{data.biayamuat}</Item>
           <Item label="Custom Clearance Fees">{clearanceFees}</Item>
           <Item label="Additional Fees">{additionalFees}</Item>
@@ -113,7 +113,7 @@ const View: FC<IViewProps> = (props) => {
           loading={extraData === null} />
       </Card>
       <Card>
-        <Descriptions title="Summary" labelStyle={{ fontWeight: 500 }}>
+        <Descriptions title="Summary" labelStyle={{ fontWeight: 500 }} bordered size='small'>
           <Item label="Total Quantity">{totalQuantity}</Item>
           <Item label="Total Volume [List]">{totalVolumeList}</Item>
           <Item label="Total Volume [DList]">{totalVolumeDList}</Item>

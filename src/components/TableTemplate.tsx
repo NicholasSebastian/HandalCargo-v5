@@ -141,7 +141,7 @@ class Template extends Component<ITemplateProps, ITemplateState> {
             <Button onClick={e => { e.stopPropagation(); this.handleEdit(primaryKey); }}>Edit</Button>
             <Popconfirm placement="left"
               title="Are you sure you would like to delete this entry?"
-              onConfirm={() => this.handleDelete(primaryKey)}>
+              onConfirm={e => { e?.stopPropagation(); this.handleDelete(primaryKey); }}>
               <Button onClick={e => e.stopPropagation()}>Delete</Button>
             </Popconfirm>
           </Space>
