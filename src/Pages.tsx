@@ -6,6 +6,7 @@ import Welcome from './pages/Welcome';
 import Profile from './pages/Profile';
 import AirCargo from './pages/AirCargo/Index';
 import SeaFreight from './pages/SeaFreight/Index';
+import Customers from './pages/Customers/Index';
 import ContainerGroups from './pages/ContainerGroups';
 import Carriers from './pages/Carriers';
 import Routes from './pages/Route';
@@ -26,6 +27,7 @@ const pages: Array<IPage> = [
   { key: 'profile', title: 'Profile', content: <Profile /> },
   { key: 'airCargo', title: 'Air Cargo', content: <AirCargo /> },
   { key: 'seaFreight', title: 'Sea Freight', content: <SeaFreight /> },
+  { key: 'customers', title: 'Customer Markings', content: <Customers /> },
   { key: 'containerGroups', title: 'Container Groups', content: <ContainerGroups /> },
   { key: 'carriers', title: 'Carriers', content: <Carriers /> },
   { key: 'routes', title: 'Routes', content: <Routes /> },

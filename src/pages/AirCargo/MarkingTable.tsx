@@ -1,4 +1,4 @@
-import React, { FunctionComponent, Fragment, useRef } from 'react';
+import React, { FC, Fragment, useRef } from 'react';
 import styled from "styled-components";
 import { Table, Input, Form, Button, Popconfirm } from 'antd';
 import { ColumnsType } from 'antd/lib/table';
@@ -6,13 +6,13 @@ import { DownOutlined, DeleteOutlined } from "@ant-design/icons";
 
 const { Item } = Form;
 
-interface MarkingTableProps {
+interface IMarkingTableProps {
   data: Array<any>
   setData: (data: Array<any>) => void
   onUpdate?: () => void
 }
 
-const MarkingTable: FunctionComponent<MarkingTableProps> = props => {
+const MarkingTable: FC<IMarkingTableProps> = props => {
   const { data, setData, onUpdate } = props;
 
   const markingRef = useRef<Input>(null);

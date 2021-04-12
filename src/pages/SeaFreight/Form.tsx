@@ -1,7 +1,7 @@
 import React, { Component, createRef } from 'react';
 import { ipcRenderer } from 'electron';
 import styled from 'styled-components';
-import { Typography, Form as AntForm, FormInstance, Button, Input, DatePicker, Select, message } from 'antd';
+import { Typography, Form as AntForm, FormInstance, Button, Input, DatePicker, Select, Divider, message } from 'antd';
 import { Store } from 'antd/lib/form/interface';
 import moment from 'moment';
 
@@ -314,10 +314,12 @@ class Form extends Component<IFormProps, IFormState> {
             <Item label="Description" name="keterangan"><TextArea /></Item>
           </div>
         </DoubleColumns>
+        <Divider />
         <MarkingTable
           data={markingData}
           setData={data => this.setState({ markingData: data })}
           onUpdate={() => this.calculateMarkingValues()} />
+        <Divider />
         <DoubleColumns>
           <div>
             <Item label="Total Volume [List]"><Input ref={this.totalVolumeListRef} disabled addonAfter="m³" /></Item>

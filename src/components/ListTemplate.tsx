@@ -108,6 +108,7 @@ class Template extends Component<ITemplateProps, ITemplateState> {
 
   render() {
     const { queries, formItems } = this.props;
+    
     let modalComponent: JSX.Element | null = null;
     if (this.state.modal) {
       modalComponent = 

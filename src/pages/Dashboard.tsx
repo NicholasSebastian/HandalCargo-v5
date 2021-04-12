@@ -4,6 +4,8 @@ import styled from 'styled-components';
 import { Space, Statistic } from 'antd';
 import { TeamOutlined, AppstoreOutlined } from '@ant-design/icons';
 
+// https://charts.ant.design/
+
 interface IDashboardState {
   // here
 }

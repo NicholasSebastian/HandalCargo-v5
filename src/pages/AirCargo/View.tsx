@@ -4,8 +4,8 @@ import styled from 'styled-components';
 import { Card, Descriptions, Table } from 'antd';
 
 import { IViewProps } from '../../components/TableTemplate';
-import { markingColumns } from './MarkingTable';
 import round from '../../utils/roundToTwo';
+import { markingColumns } from './MarkingTable';
 
 import { airCargo, routes, planes, currencies } from '../../Queries.json';
 const { markingTableQuery: markingQuery } = airCargo;

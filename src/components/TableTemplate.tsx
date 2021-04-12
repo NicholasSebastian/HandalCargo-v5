@@ -18,14 +18,16 @@ type Object = { [key: string]: any }
 interface IQueries {
   tableQuery: string
   formQuery: string
-  insertQuery: string
-  updateQuery: string
+  formQueryAlt?: string
   deleteQuery: string
+  deleteQueryAlt?: string
 }
 
 interface ITemplateProps {
   pageKey: string
-  dataKey: string
+  primaryKey: string
+  secondaryKey?: string
+  searchKey?: string
   queries: IQueries
   columns: ColumnsType<object>
   View?: FunctionComponent<IViewProps>
@@ -46,6 +48,7 @@ interface IViewProps {
 
 interface IFormData {
   entryId?: string | number
+  secondary?: boolean
 }
 
 interface IFormProps extends IFormData {
@@ -55,6 +58,9 @@ interface IFormProps extends IFormData {
 type TViewMode = { mode: "view" } & IViewProps;
 type TFormMode = { mode: "form" } & IFormData;
 type TModal = (TViewMode | TFormMode) & { key?: string | number };
+
+type EditEvent = React.MouseEventHandler<HTMLElement>;
+type DeleteEvent = (e?: React.MouseEvent<HTMLElement, MouseEvent> | undefined) => void;
 
 class Template extends Component<ITemplateProps, ITemplateState> {
   constructor(props: ITemplateProps) {
@@ -73,10 +79,10 @@ class Template extends Component<ITemplateProps, ITemplateState> {
   }
 
   refreshTable() {
-    const { dataKey, queries } = this.props;
+    const { queries } = this.props;
     ipcRenderer.once('tableQuery', (event, data: Array<Object>) => {
       this.setState({ 
-        tableData: data.map(entry => ({ key: entry[dataKey], ...entry }))
+        tableData: data.map((entry, i) => ({ key: i, ...entry }))
       });
     });
     ipcRenderer.send('query', queries.tableQuery, 'tableQuery');
@@ -87,8 +93,9 @@ class Template extends Component<ITemplateProps, ITemplateState> {
     this.refreshTable();
   }
 
-  handleView(entryId: string | number) {
+  handleView(entryId: string | number, secondary: boolean) {
     const { queries } = this.props;
+    const query = secondary ? queries.formQueryAlt : queries.formQuery;
     ipcRenderer.once('tableViewQuery', (event, data) => {
       this.setState({ 
         modal: {
@@ -98,7 +105,7 @@ class Template extends Component<ITemplateProps, ITemplateState> {
         }
       });
     });
-    ipcRenderer.send('queryValues', queries.formQuery, [entryId], 'tableViewQuery');
+    ipcRenderer.send('queryValues', query, [entryId], 'tableViewQuery');
   }
 
   handleAdd() {
@@ -109,52 +116,38 @@ class Template extends Component<ITemplateProps, ITemplateState> {
     });
   }
 
-  handleEdit(entryId: string | number) {
+  handleEdit(entryId: string | number, secondary: boolean) {
     this.setState({
       modal: {
         mode: 'form',
         key: instanceOfKey(entryId),
-        entryId
+        entryId,
+        secondary
       }
     });
   }
 
-  handleDelete(entryId: string | number) {
+  handleDelete(entryId: string | number, secondary: boolean) {
     const { queries } = this.props;
+    const query = secondary ? queries.deleteQueryAlt : queries.deleteQuery;
     ipcRenderer.once('tableDeleteQuery', () => {
       message.success(`Entry successfully deleted`);
       this.refreshTable();
     });
-    ipcRenderer.send('queryValues', queries.deleteQuery, [entryId], 'tableDeleteQuery');
+    ipcRenderer.send('queryValues', query, [entryId], 'tableDeleteQuery');
   }
 
   render() {
-    const { View, Form, pageKey, dataKey, extraData, width } = this.props;
+    const { View, Form, pageKey, primaryKey, secondaryKey, searchKey, extraData, width } = this.props;
     const { tableData, modal, search } = this.state;
-
-    const columns = [ 
-      ...this.props.columns, 
-      {
-        dataIndex: dataKey,
-        render: (primaryKey: string | number) => (
-          <Space>
-            <Button onClick={e => { e.stopPropagation(); this.handleEdit(primaryKey); }}>Edit</Button>
-            <Popconfirm placement="left"
-              title="Are you sure you would like to delete this entry?"
-              onConfirm={e => { e?.stopPropagation(); this.handleDelete(primaryKey); }}>
-              <Button onClick={e => e.stopPropagation()}>Delete</Button>
-            </Popconfirm>
-          </Space>
-        )
-      } 
-    ];
+    const processedData = extraData ? extraData(tableData) : tableData;
 
     let modalComponent: JSX.Element | null = null;
     if (modal) {
       const { key, mode } = modal;
       if (View === undefined || mode === 'form') {
-        const { entryId } = modal as never;
-        modalComponent = <Form key={key} entryId={entryId} closeModal={this.closeModal} />
+        const { entryId, secondary } = modal as never;
+        modalComponent = <Form key={key} entryId={entryId} secondary={secondary} closeModal={this.closeModal} />
       }
       else if (mode === 'view') {
         const { data } = modal as never;
@@ -162,7 +155,37 @@ class Template extends Component<ITemplateProps, ITemplateState> {
       }
     }
 
-    const processedData = extraData ? extraData(tableData) : tableData;
+    const columns = [ 
+      ...this.props.columns, 
+      {
+        dataIndex: 'key',
+        render: (rowIndex: number) => {
+          const onEdit: EditEvent = e => { 
+            e.stopPropagation(); 
+            const entry = processedData[rowIndex];
+            const key = entry[primaryKey] || entry[secondaryKey!];
+            this.handleEdit(key, !entry[primaryKey]); 
+          }
+          const onDelete: DeleteEvent = e => {
+            e?.stopPropagation(); 
+            const entry = processedData[rowIndex];
+            const key = entry[primaryKey] || entry[secondaryKey!];
+            this.handleDelete(key, !entry[primaryKey]);
+          }
+          return (
+            <Space>
+              <Button onClick={onEdit}>Edit</Button>
+              <Popconfirm placement="left"
+                title="Are you sure you would like to delete this entry?"
+                onConfirm={onDelete}>
+                <Button onClick={e => e.stopPropagation()}>Delete</Button>
+              </Popconfirm>
+            </Space>
+          );
+        }
+      } 
+    ];
+
     return (
       <>
         <PageEffect function={this.refreshTable} pageKey={pageKey} />
@@ -172,14 +195,14 @@ class Template extends Component<ITemplateProps, ITemplateState> {
             onSearch={value => this.setState({ search: value })} />
           <br />
           <Button icon={<PlusOutlined />} onClick={this.handleAdd}>Add Record</Button> 
-          <Table columns={columns} 
+          <Table columns={columns} size='small' pagination={false}
             dataSource={processedData.filter((entry: Object) => (
-              new RegExp(search, 'i').test(entry[dataKey])
+              new RegExp(search, 'i').test(entry[searchKey || primaryKey])
             ))}
-            onRow={(record: Object, rowIndex) => ({
+            onRow={(record, rowIndex) => ({
               onClick: View && (e => {
-                const primaryKey = record[dataKey];
-                this.handleView(primaryKey);
+                const key = record[primaryKey] || record[secondaryKey!];
+                this.handleView(key, !record[primaryKey]);
               })
             })} />
         </TemplateStyles> : <Loading />

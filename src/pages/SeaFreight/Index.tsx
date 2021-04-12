@@ -52,7 +52,7 @@ class SeaFreight extends Component<never, ISeaFreightState> {
     return (
       <Template
         pageKey="seaFreight"
-        dataKey="nocontainer"
+        primaryKey="nocontainer"
         queries={seaFreight}
         View={View}
         Form={Form}
@@ -65,48 +65,41 @@ class SeaFreight extends Component<never, ISeaFreightState> {
           {
             title: "Arrival Date",
             dataIndex: "tgltiba",
-            key: "tgltiba",
             render: (date: Date) => date?.toDateString(),
             sorter: (a: any, b: any) => a.tgltiba - b.tgltiba
           },
           {
             title: "Container Number",
             dataIndex: "nocontainer",
-            key: "nocontainer",
             sorter: (a: any, b: any) => (a.nocontainer as string).localeCompare(b.nocontainer)
           },
           {
             title: "Route Description",
             dataIndex: "rute",
-            key: "rute",
             render: (routeId) => routes.find(route => route.rutecode === routeId)?.rutedesc,
             sorter: (a: any, b: any) => a.rute - b.rute
           },
           {
             title: "Handler",
             dataIndex: "pengurus",
-            key: "pengurus",
             render: (handlerId) => handlers.find(handler => handler.penguruscode === handlerId)?.pengurusname,
             sorter: (a: any, b: any) => a.pengurus - b.pengurus
           },
           {
             title: "Carrier",
             dataIndex: "shipper",
-            key: "shipper",
             render: (shipperId) => carriers.find(carrier => carrier.shippercode === shipperId)?.name,
             sorter: (a: any, b: any) => a.shipper - b.shipper
           },
           {
             title: "Container Group",
             dataIndex: "kelcontainer",
-            key: "kelcontainer",
             render: (containerId) => containerGroups.find(group => group.containercode === containerId)?.containerdesc,
             sorter: (a: any, b: any) => a.kelcontainer - b.kelcontainer
           },
           {
             title: "Days to Ship",
             dataIndex: "lamatiba",
-            key: "lamatiba",
             sorter: (a: any, b: any) => a.lamatiba - b.lamatiba
           }
         ]} />

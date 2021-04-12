@@ -19,6 +19,21 @@
     "markingInsertQuery": "INSERT INTO `seafreightmarking` (`nocontainer`, `no`, `marking`, `qty`, `list[m3]`, `list[kg]`, `dlist[m3]`, `dlist[kg]`, `hb[m3]`, `hb[kg]`, `cust[m3]`, `cust[kg]`, `lunas`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
     "markingDeleteQuery": "DELETE FROM `seafreightmarking` WHERE `nocontainer` = ?"
   },
+  "customers": {
+    "tableQuery": "SELECT `customers`.`customerid`, `customername`, `marking`, `company`, `officephone1`, `officephone2`, `status` FROM `customers` LEFT JOIN `customermarking` ON `customers`.`customerid` = `customermarking`.`customerid`",
+    "formQuery": "SELECT * FROM `customers` WHERE `customerid` = (SELECT `customerid` FROM `customermarking` WHERE `marking` = ?)",
+    "formQueryAlt": "SELECT * FROM `customers` WHERE `customerid` = ?",
+    "insertQuery": "INSERT INTO `customers` (``, ``, ``) VALUES (?, ?, ?)",
+    "updateQuery": "UPDATE `customers` SET `` = ?, `` = ?, `` = ? WHERE `customerid` = ?",
+    "deleteQuery": "DELETE FROM `customermarking` WHERE `marking` = ?",
+    "deleteQueryAlt": "DELETE FROM `customers` WHERE `customerid` = ?",
+    "markingTableQuery": "SELECT `marking` FROM `customermarking` WHERE `customerid` = ?",
+    "markingInsertQuery": "INSERT INTO `customermarking` (`customerid`, `marking`) VALUES (?, ?)",
+    "markingDeleteQuery": "DELETE FROM `customermarking` WHERE `customerid` = ?",
+    "itemTableQuery": "SELECT `date`, `keteranganbarang`, `by`, `rute`, `harga`, `hargaterakhir`, `user` FROM `customerketeranganbrg` WHERE `customerid` = ?",
+    "itemInsertQuery": "INSERT INTO `customerketeranganbrg` (`customerid`, `date`, `keteranganbarang`, `by`, `rute`, `harga`, `hargaterakhir`, `user`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+    "itemDeleteQuery": "DELETE FROM `customerketeranganbrg` WHERE `customerid` = ?"
+  },
   "containerGroup": {
     "tableQuery": "SELECT `containercode`, `containerdesc`, `size` FROM `kelcontainer`",
     "formQuery": "SELECT `containercode`, `containerdesc`, `size` FROM `kelcontainer` WHERE `containercode` = ?",

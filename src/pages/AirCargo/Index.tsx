@@ -40,7 +40,7 @@ class AirCargo extends Component<never, IAirCargoState> {
 		return (
 			<Template 
         pageKey="airCargo" 
-        dataKey="no"
+        primaryKey="no"
         queries={airCargo} 
         View={View}
         Form={Form}
@@ -48,33 +48,28 @@ class AirCargo extends Component<never, IAirCargoState> {
           {
             title: 'Arrival Date',
             dataIndex: 'tgltiba',
-            key: 'tgltiba',
             render: (date: Date) => date?.toDateString(),
             sorter: (a: any, b: any) => a.tgltiba - b.tgltiba
           },
           {
             title: 'Airway Bill Number',
             dataIndex: 'no',
-            key: 'no',
             sorter: (a: any, b: any) => (a.no as string).localeCompare(b.no)
           },
           {
             title: 'Item Code',
             dataIndex: 'kode',
-            key: 'kode',
             sorter: (a: any, b: any) => (a.kode as string).localeCompare(b.kode)
           },
           {
             title: 'Route Description',
             dataIndex: 'rute',
-            key: 'rute',
             render: (routeId) => routes.find(route => route.rutecode === routeId)?.rutedesc,
             sorter: (a: any, b: any) => a.rute - b.rute
           },
           {
             title: 'Airplane',
             dataIndex: 'pesawat',
-            key: 'pesawat',
             render: (planeId) => planes.find(plane => plane.pesawatcode === planeId)?.pesawatdesc,
             sorter: (a: any, b: any) => a.pesawat - b.pesawat
           }

@@ -89,14 +89,16 @@ class Sidebar extends Component<ISidebarProps, ISidebarState> {
   }
 
   render() {
+    const { collapse, activePage, changeToPage } = this.props;
+    const { currentlyOpen } = this.state;
     return (
-      <SidebarStyles width={250} collapsed={this.props.collapse}>
-        <Title level={3}>{this.props.collapse ? 'HC' : 'Handal Cargo'}</Title>
+      <SidebarStyles width={250} collapsed={collapse}>
+        <Title level={3}>{collapse ? 'HC' : 'Handal Cargo'}</Title>
         <Menu mode="inline" theme="dark"
-          selectedKeys={[this.props.activePage]}
-          openKeys={this.state.currentlyOpen} 
+          selectedKeys={[activePage]}
+          openKeys={currentlyOpen} 
           onOpenChange={this.handleSubMenuOpen}
-          onClick={({ key }) => this.props.changeToPage(key.toString())}>
+          onClick={({ key }) => changeToPage(key.toString())}>
           <SubMenu icon={<DropboxOutlined/>} title="Shipping">
             <Item key="airCargo">Air Cargo</Item>
             <Item key="seaFreight">Sea Freight</Item>
