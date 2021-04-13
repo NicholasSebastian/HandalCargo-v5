@@ -11,12 +11,12 @@ Uses Ant Design for UI components.
 - Payment
 - Company Setup
 
-### Features
+### Extra Features
 
 - Dashboard
 - Language (English / Indonesian)
 - Images for Profiles
-- Mail?
+- Local Messages
 - Backup and Restore?
 - Shortcuts?
 
@@ -37,3 +37,4 @@ Uses Ant Design for UI components.
 
 - Calculator should automatically focus on Input when opened.
 - Inputting long text in the To-Do-List Input gets covered by the plus icon.
+- Replace Encryption.json with a local environment variable.
