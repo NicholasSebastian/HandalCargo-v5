@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { ipcRenderer } from 'electron';
+
+import { simpleQuery } from '../../utils/query';
 
 import Template from '../../components/TableTemplate';
 import View from './View';
@@ -25,14 +26,10 @@ class AirCargo extends Component<never, IAirCargoState> {
     this.initializeData();
   }
 
-  initializeData() {
-    ipcRenderer.once('routeQuery', (event, routes) => {
-      ipcRenderer.once('planeQuery', (event, planes) => {
-        this.setState({ routes, planes });
-      });
-      ipcRenderer.send('query', planeQuery, 'planeQuery');
-    });
-    ipcRenderer.send('query', routeQuery, 'routeQuery');
+  async initializeData() {
+    const routes = await simpleQuery(routeQuery) as Array<any>;
+    const planes = await simpleQuery(planeQuery) as Array<any>;
+    this.setState({ routes, planes });
   }
 
 	render() {

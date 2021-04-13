@@ -6,7 +6,7 @@ import * as url from 'url'
 import { connectionInstance } from './main'
 
 const loginWindowSize = { width: 550, height: 400 }
-const windowSize = { width: 1470, height: 780, minWidth: 1340, minHeight: 640 }
+const windowSize = { width: 1360, height: 720, minWidth: 1340, minHeight: 640 }
 
 class Window {
   window: Electron.BrowserWindow | null

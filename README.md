@@ -7,7 +7,6 @@ Uses Ant Design for UI components.
 
 ### Content
 
-- Customers
 - Invoice Entry
 - Payment
 - Company Setup
@@ -25,6 +24,9 @@ Uses Ant Design for UI components.
 
 - Air Cargo and Sea Freight 'add' forms not calculating marking values properly.
 - Inserting marking values fail due to a foreign key constraint; marking values 'marking' field should select from 'customermarkings'.
+- Inserting item values in customers fail due to foreign key constraint.
+- Prevent new Marking Table and Item Table entries from being added with empty values.
 
 - Calculator should automatically focus on Input when opened.
 - Inputting long text in the To-Do-List Input gets covered by the plus icon.
+- In-Form tables such as marking tables and item tables should have a max height and scroll.

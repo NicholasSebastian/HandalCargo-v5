@@ -1,15 +1,14 @@
-import React, { Component, FunctionComponent, ComponentType, useState } from 'react';
-import { Subtract } from 'utility-types';
-import { ipcRenderer } from 'electron';
+import React, { Component, FunctionComponent, ComponentType } from 'react';
 import styled from 'styled-components';
 import { Table, Input, Modal, message, Space, Button, Popconfirm } from 'antd';
 import { ColumnsType } from 'antd/lib/table';
 import { PlusOutlined } from '@ant-design/icons';
+import { v4 as generateKey } from 'uuid';
+
+import { simpleQuery, query } from '../utils/query';
 
 import PageEffect from './PageEffect';
 import Loading from './Loading';
-
-import instanceOfKey from '../utils/uniqueKey';
 
 const { Search } = Input;
 
@@ -78,14 +77,11 @@ class Template extends Component<ITemplateProps, ITemplateState> {
     this.handleDelete = this.handleDelete.bind(this);
   }
 
-  refreshTable() {
-    const { queries } = this.props;
-    ipcRenderer.once('tableQuery', (event, data: Array<Object>) => {
-      this.setState({ 
-        tableData: data.map((entry, i) => ({ key: i, ...entry }))
-      });
-    });
-    ipcRenderer.send('query', queries.tableQuery, 'tableQuery');
+  async refreshTable() {
+    const { tableQuery } = this.props.queries;
+    const data = await simpleQuery(tableQuery) as Array<any>;
+    const dataWithKeys = data.map((entry, i) => ({ key: i, ...entry }));
+    this.setState({ tableData: dataWithKeys });
   }
 
   closeModal() {
@@ -95,17 +91,18 @@ class Template extends Component<ITemplateProps, ITemplateState> {
 
   handleView(entryId: string | number, secondary: boolean) {
     const { queries } = this.props;
-    const query = secondary ? queries.formQueryAlt : queries.formQuery;
-    ipcRenderer.once('tableViewQuery', (event, data) => {
+    const entryQuery = secondary ? queries.formQueryAlt : queries.formQuery;
+    query(entryQuery, [entryId])
+    .then((data: any) => {
+      const entry = data[0];
       this.setState({ 
         modal: {
           mode: "view",
-          key: instanceOfKey(entryId),
-          data: data[0]
+          key: generateKey(),
+          data: entry
         }
       });
     });
-    ipcRenderer.send('queryValues', query, [entryId], 'tableViewQuery');
   }
 
   handleAdd() {
@@ -120,7 +117,7 @@ class Template extends Component<ITemplateProps, ITemplateState> {
     this.setState({
       modal: {
         mode: 'form',
-        key: instanceOfKey(entryId),
+        key: generateKey(),
         entryId,
         secondary
       }
@@ -129,12 +126,13 @@ class Template extends Component<ITemplateProps, ITemplateState> {
 
   handleDelete(entryId: string | number, secondary: boolean) {
     const { queries } = this.props;
-    const query = secondary ? queries.deleteQueryAlt : queries.deleteQuery;
-    ipcRenderer.once('tableDeleteQuery', () => {
+    const deleteQuery = secondary ? queries.deleteQueryAlt : queries.deleteQuery;
+    query(deleteQuery, [entryId])
+    .then(() => {
       message.success(`Entry successfully deleted`);
       this.refreshTable();
-    });
-    ipcRenderer.send('queryValues', query, [entryId], 'tableDeleteQuery');
+    })
+    .catch(e => message.success(e.message));
   }
 
   render() {

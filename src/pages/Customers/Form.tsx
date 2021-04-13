@@ -1,23 +1,26 @@
 import React, { Component, createRef } from 'react';
-import { ipcRenderer } from 'electron';
 import styled from 'styled-components';
 import { Typography, FormInstance, Form as AntForm, Button, Input, Select, Switch, Divider, message } from 'antd';
 import { Store } from 'antd/lib/form/interface';
 
-import { IFormProps } from '../../components/TableTemplate';
-import Loading from '../../components/Loading';
-import MarkingTable from './MarkingTable';
-import ItemTable from './ItemTable';
-
-import { objectDatesToMoment, objectMomentToDates } from '../../utils/momentConverter';
+import { query, simpleQuery } from '../../utils/query';
+import { objectDatesToMoment } from '../../utils/momentConverter';
 import fillEmptyValues from '../../utils/objectNulling';
 import scrollToTop from '../../utils/scrollModal';
 import isEmpty from '../../utils/isEmptyObject';
+import withMultipleValues from '../../utils/manyQueryValues';
+
+import { IFormProps } from '../../components/TableTemplate';
+import Loading from '../../components/Loading';
+
+import MarkingTable from './MarkingTable';
+import ItemTable from './ItemTable';
 
 import { customers, expedition } from '../../Queries.json';
 const { 
   formQuery, formQueryAlt, insertQuery, updateQuery, 
-  markingTableQuery: markingQuery, itemTableQuery: itemQuery 
+  markingTableQuery: markingQuery, markingInsertQuery, markingDeleteQuery,
+  itemTableQuery: itemQuery, itemInsertQuery, itemDeleteQuery
 } = customers;
 const { tableQuery: expeditionQuery } = expedition;
 
@@ -51,42 +54,88 @@ class Form extends Component<IFormProps, IFormState> {
     this.initializeData();
   }
 
-  initializeData() {
+  async initializeData() {
     const { entryId, secondary } = this.props;
-    const query = secondary ? formQueryAlt : formQuery;
-    ipcRenderer.once('expeditionsQuery', (event, expeditions) => {
-      if (entryId) {
-        // Initialize 'edit' form values.
-        ipcRenderer.once('customersFormQuery', (event, data) => {
-          const entry = data[0];
-          const customerId = secondary ? entryId : entry.customerid;
-          ipcRenderer.once('customersMarkingQuery', (event, markingData) => {
-            ipcRenderer.once('customersItemQuery', (event, itemData) => {
-              this.setState({
-                initialData: entry,
-                markingData: markingData.map((marking: object, i: number) => ({ key: i, ...marking })),
-                itemData: itemData.map((item: object, i: number) => ({ key: i, ...item })),
-                expeditions
-              });
-              this.formRef.current?.resetFields();
-            });
-            ipcRenderer.send('queryValues', itemQuery, [customerId], 'customersItemQuery');
-          });
-          ipcRenderer.send('queryValues', markingQuery, [customerId], 'customersMarkingQuery');
-        });
-        ipcRenderer.send('queryValues', query, [entryId], 'customersFormQuery');
-      }
-      else {
-        // Initialize 'add' form values.
-        this.setState({ expeditions });
-        this.formRef.current?.resetFields();
-      }
-    });
-    ipcRenderer.send('query', expeditionQuery, 'expeditionsQuery');
+    const entryQuery = secondary ? formQueryAlt : formQuery;
+    const expeditions = await simpleQuery(expeditionQuery) as Array<any>;
+    if (entryId) {
+      // Initialize 'edit' form values.
+      const entry = await query(entryQuery, [entryId]) as Array<any>;
+      const data = entry[0];
+      const customerId = secondary ? entryId : data.customerid;
+      const markingData = await query(markingQuery, [customerId]) as Array<any>;
+      const markingDataWithKeys = markingData.map((marking: object, i: number) => ({ key: i, ...marking }));
+      const itemData =  await query(itemQuery, [customerId]) as Array<any>;
+      const itemDataWithKeys = itemData.map((item: object, i: number) => ({ key: i, ...item }));
+      this.setState({
+        initialData: data,
+        markingData: markingDataWithKeys,
+        itemData: itemDataWithKeys,
+        expeditions
+      });
+      this.formRef.current?.resetFields();
+    }
+    else {
+      // Inititalize 'add' form values.
+      this.setState({ expeditions });
+      this.formRef.current?.resetFields();
+    }
   }
 
   handleSubmit(values: any) {
-    // here
+    const { entryId, secondary, closeModal } = this.props;
+    const id = secondary ? entryId : this.state.initialData.customerid;
+
+    const formValues = fillEmptyValues(values);
+    const rawValues = Object.values(formValues);
+
+    const replaceKeyWithId = (data: Array<any>) => {
+      return data.map((entry: any) => {
+        delete entry.key;
+        return { 
+          customerid: id || values.customerid, 
+          ...entry 
+        };
+      });
+    }
+
+    const { markingData, itemData } = this.state;
+    const markingValues = replaceKeyWithId(markingData);
+    const itemValues = replaceKeyWithId(itemData);
+    
+    const [mInsertQuery, allMarkings] = withMultipleValues(markingInsertQuery, markingValues);
+    const [iInsertQuery, allItems] = withMultipleValues(itemInsertQuery, itemValues);
+
+    if (entryId) {
+      // Edit form on submit.
+      Promise.all([
+        query(updateQuery, [...rawValues, id]),
+        query(markingDeleteQuery, [id]),
+        markingValues.length > 0 && query(mInsertQuery, allMarkings),
+        query(itemDeleteQuery, [id]),
+        itemValues.length > 0 && query(iInsertQuery, allItems)
+      ])
+      .then(() => {
+        message.success(`'${entryId}' successfully updated`);
+        closeModal();
+      })
+      .catch(e => message.error(e.message));
+    }
+    else {
+      // Add form on submit.
+      const dateAdded = new Date();
+      const rawValuesWithDate = [...rawValues, dateAdded];
+      Promise.all([
+        query(insertQuery, rawValuesWithDate),
+        markingValues.length  > 0 && query(mInsertQuery, allMarkings),
+        itemValues.length > 0 && query(iInsertQuery, allItems)
+      ])
+      .then(() => {
+        message.success('Entry successfully added');
+        closeModal();
+      })
+      .catch(e => message.error(e.message));
+    }
   }
 
   render() {

@@ -98,80 +98,65 @@ const ItemStyles = styled.div`
 const markingColumns: ColumnsType<object> = [
   {
     title: 'No',
-    dataIndex: 'no',
-    key: 'no'
+    dataIndex: 'no'
   },
   {
     title: 'Marking',
-    dataIndex: 'marking',
-    key: 'marking'
+    dataIndex: 'marking'
   },
   {
     title: 'Qty',
-    dataIndex: 'qty',
-    key: 'qty'
+    dataIndex: 'qty'
   },
   {
     title: 'List [m3]',
-    dataIndex: 'list[m3]',
-    key: 'list[m3]'
+    dataIndex: 'list[m3]'
   },
   {
     title: 'List [Kg]',
-    dataIndex: 'list[kg]',
-    key: 'list[kg]'
+    dataIndex: 'list[kg]'
   },
   {
     title: 'DList [m3]',
-    dataIndex: 'dlist[m3]',
-    key: 'dlist[m3]'
+    dataIndex: 'dlist[m3]'
   },
   {
     title: 'DList [Kg]',
-    dataIndex: 'dlist[kg]',
-    key: 'dlist[kg]'
+    dataIndex: 'dlist[kg]'
   },
   {
     title: 'HB [m3]',
-    dataIndex: 'hb[m3]',
-    key: 'hb[m3]'
+    dataIndex: 'hb[m3]'
   },
   {
     title: 'HB [Kg]',
-    dataIndex: 'hb[kg]',
-    key: 'hb[kg]'
+    dataIndex: 'hb[kg]'
   },
   {
     title: 'Cust [m3]',
-    dataIndex: 'cust[m3]',
-    key: 'cust[m3]'
+    dataIndex: 'cust[m3]'
   },
   {
     title: 'Cust [Kg]',
-    dataIndex: 'cust[kg]',
-    key: 'cust[kg]'
+    dataIndex: 'cust[kg]'
   },
   {
     title: 'Settled',
     dataIndex: 'lunas',
-    key: 'lunas',
     render: (value) => value ? 
       <span style={{ color: 'green' }}>Paid Off</span> : 
       <span style={{ color: 'red' }}>Not Settled</span>
   },
   {
     title: 'Remainder',
-    dataIndex: 'sisa',
-    key: 'sisa'
+    dataIndex: 'sisa'
   },
   {
     title: 'Delivery Orders',
-    dataIndex: 'suratjalan',
-    key: 'suratjalan'
+    dataIndex: 'suratjalan'
   },
   {
     title: 'Invoice',
-    dataIndex: 'faktur',
-    key: 'faktur'
+    dataIndex: 'faktur'
   }
 ];

@@ -1,5 +1,4 @@
 import React, { Component, createRef } from 'react';
-import { ipcRenderer } from 'electron';
 import styled from 'styled-components';
 import { Typography, Form as AntForm, FormInstance, Button, Input, DatePicker, Select, Divider, message } from 'antd';
 import { Store } from 'antd/lib/form/interface';
@@ -9,13 +8,20 @@ import { IFormProps } from '../../components/TableTemplate';
 import Loading from '../../components/Loading';
 import MarkingTable from './MarkingTable';
 
+import { query, simpleQuery } from '../../utils/query';
 import { objectDatesToMoment, objectMomentToDates } from '../../utils/momentConverter';
 import fillEmptyValues from '../../utils/objectNulling';
 import scrollToTop from '../../utils/scrollModal';
 import isEmpty from '../../utils/isEmptyObject';
+import withMultipleValues from '../../utils/manyQueryValues';
 
 import { seaFreight, containerGroup, carriers, routes, handlers, currencies } from '../../Queries.json';
 const { formQuery, insertQuery, updateQuery, markingTableQuery, markingInsertQuery, markingDeleteQuery } = seaFreight;
+const { tableQuery: containerGroupQuery } = containerGroup;
+const { tableQuery: carrierQuery } = carriers;
+const { tableQuery: routeQuery } = routes;
+const { tableQuery: handlerQuery } = handlers;
+const { tableQuery: currencyQuery } = currencies;
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -81,46 +87,34 @@ class Form extends Component<IFormProps, IFormState> {
     this.initializeData();
   }
 
-  initializeData() {
-    ipcRenderer.once('conGroupQuery', (event, containerGroups) => {
-      ipcRenderer.once('carrierQuery', (event, carriers) => {
-        ipcRenderer.once('routeQuery', (event, routes) => {
-          ipcRenderer.once('handlerQuery', (event, handlers) => {
-            ipcRenderer.once('currencyQuery', (event, currencies) => {
-              const { entryId } = this.props;
-              if (entryId) {
-                // Initialize 'edit' form values.
-                ipcRenderer.once('formQuery', (event, data) => {
-                  ipcRenderer.once('markingTableQuery', (event, markingData: Array<object>) => {
-                    this.setState({ 
-                      initialData: data[0],
-                      markingData: markingData.map((entry, i) => ({ key: i, ...entry })),
-                      containerGroups, carriers, routes, handlers, currencies
-                    });
-                    this.formRef.current?.resetFields();
-                    this.calculateValues();
-                    this.calculateMarkingValues();
-                  });
-                  ipcRenderer.send('queryValues', markingTableQuery, [data[0].nocontainer], 'markingTableQuery');
-                });
-                ipcRenderer.send('queryValues', formQuery, [entryId], 'formQuery');
-              }
-              else {
-                // Initialize 'add' form values.
-                this.setState({ containerGroups, carriers, routes, handlers, currencies });
-                this.formRef.current?.resetFields();
-                this.calculateValues();
-              }
-            });
-            ipcRenderer.send('query', currencies.tableQuery, 'currencyQuery');
-          });
-          ipcRenderer.send('query', handlers.tableQuery, 'handlerQuery');
-        });
-        ipcRenderer.send('query', routes.tableQuery, 'routeQuery');
+  async initializeData() {
+    const { entryId } = this.props;
+    const containerGroups = await simpleQuery(containerGroupQuery) as Array<any>;
+    const carriers = await simpleQuery(carrierQuery) as Array<any>;
+    const routes = await simpleQuery(routeQuery) as Array<any>;
+    const handlers = await simpleQuery(handlerQuery) as Array<any>;
+    const currencies = await simpleQuery(currencyQuery) as Array<any>;
+    if (entryId) {
+      // Initialize 'edit' form values.
+      const data = await query(formQuery, [entryId]) as Array<any>;
+      const entry = data[0];
+      const markingData = await query(markingTableQuery, [entry.container]) as Array<any>;
+      const markingDataWithKeys = markingData.map((entry, i) => ({ key: i, ...entry }));
+      this.setState({ 
+        initialData: entry,
+        markingData: markingDataWithKeys,
+        containerGroups, carriers, routes, handlers, currencies
       });
-      ipcRenderer.send('query', carriers.tableQuery, 'carrierQuery');
-    });
-    ipcRenderer.send('query', containerGroup.tableQuery, 'conGroupQuery');
+      this.formRef.current?.resetFields();
+      this.calculateValues();
+      this.calculateMarkingValues();
+    }
+    else {
+      // Initialize 'add' form values.
+      this.setState({ containerGroups, carriers, routes, handlers, currencies });
+      this.formRef.current?.resetFields();
+      this.calculateValues();
+    }
   }
 
   handleSubmit(values: any) {
@@ -133,54 +127,38 @@ class Form extends Component<IFormProps, IFormState> {
     const { markingData } = this.state;
     const markingValues = markingData.map(entry => {
       delete entry.key;
-      return { nocontainer: entryId || values.nocontainer, ...entry };
+      return { 
+        nocontainer: entryId || values.nocontainer, 
+        ...entry 
+      };
     });
 
-    const withMultipleValues = (insertQuery: string, queryValues: Array<object>) => {
-      const from = insertQuery.lastIndexOf('(');
-      const queryEnd = insertQuery.substring(from);
-
-      let newInsertQuery = insertQuery;
-      for (let i = 0; i < queryValues.length - 1; i++) {
-        newInsertQuery += `,${queryEnd}`;
-      }
-      
-      const flattenedValues = queryValues.map(entry => Object.values(entry)).flat();
-      return [newInsertQuery, flattenedValues];
-    }
+    const [mInsertQuery, allMarkings] = withMultipleValues(markingInsertQuery, markingValues);
 
     if (entryId) {
       // Edit form on submit.
-      const onSuccess = () => {
+      Promise.all([
+        query(updateQuery, [...rawValues, entryId]),
+        query(markingDeleteQuery, [entryId]),
+        markingValues.length > 0 && query(mInsertQuery, allMarkings)
+      ])
+      .then(() => {
         message.success(`'${entryId}' successfully updated`);
         closeModal();
-      }
-      ipcRenderer.once('seafreightUpdateQuery', () => {
-        ipcRenderer.once('seafreightMarkingDeleteQuery', () => {
-          if (markingValues.length > 0) {
-            ipcRenderer.once('seafreightMarkingInsertQuery', onSuccess);
-            ipcRenderer.send('queryValues', ...withMultipleValues(markingInsertQuery, markingValues), 'seafreightMarkingInsertQuery');
-          }
-          else onSuccess();
-        });
-        ipcRenderer.send('queryValues', markingDeleteQuery, [entryId], 'seafreightMarkingDeleteQuery');
-      });
-      ipcRenderer.send('queryValues', updateQuery, [...rawValues, entryId], 'seafreightUpdateQuery');
+      })
+      .catch(e => message.error(e.message));
     }
     else {
       // Add form on submit.
-      const onSuccess = () => {
+      Promise.all([
+        query(insertQuery, rawValues),
+        markingValues.length > 0 && query(mInsertQuery, allMarkings)
+      ])
+      .then(() => {
         message.success('Entry successfully added');
         closeModal();
-      }
-      ipcRenderer.once('seafreightInsertQuery', () => {
-        if (markingValues.length > 0) {
-          ipcRenderer.once('seafreightMarkingInsertQuery', onSuccess);
-          ipcRenderer.send('queryValues', ...withMultipleValues(markingInsertQuery, markingValues), 'seafreightMarkingInsertQuery');
-        }
-        else onSuccess();
-      });
-      ipcRenderer.send('queryValues', insertQuery, rawValues, 'seafreightInsertQuery');
+      })
+      .catch(e => message.error(e.message));
     }
   }
 

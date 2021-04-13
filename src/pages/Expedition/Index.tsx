@@ -1,5 +1,6 @@
 import React, { FC, useState, useEffect } from 'react';
-import { ipcRenderer } from 'electron';
+
+import { simpleQuery } from '../../utils/query';
 
 import Template from '../../components/TableTemplate';
 import Form from './Form';
@@ -10,14 +11,13 @@ const { tableQuery: routeQuery } = routes;
 const Expedition: FC = () => {
   const [routes, setRoutes] = useState<Array<any> | null>(null);
   useEffect(() => {
-    ipcRenderer.once('routeQuery', (event, routes) => setRoutes(routes));
-    ipcRenderer.send('query', routeQuery, 'routeQuery');
+    simpleQuery(routeQuery).then((routes: any) => setRoutes(routes));
   }, []);
 
   return (
     <Template width={600}
       pageKey="expeditions"
-      dataKey="expedisicode"
+      primaryKey="expedisicode"
       queries={expedition}
       Form={Form}
       columns={[

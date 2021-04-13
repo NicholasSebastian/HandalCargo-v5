@@ -1,8 +1,8 @@
 import React, { FC, useState, useEffect } from 'react';
-import { ipcRenderer } from 'electron';
 import styled from 'styled-components';
 import { Card, Descriptions, Table } from 'antd';
 
+import { query } from '../../utils/query';
 import { IViewProps } from '../../components/TableTemplate';
 import { markingColumns } from './MarkingTable';
 import { itemColumns } from './ItemTable';
@@ -22,13 +22,11 @@ const View: FC<IViewProps> = props => {
   const [extraData, setExtraData] = useState<IViewState>();
   useEffect(() => {
     const primaryKey = data.customerid;
-    ipcRenderer.once('customerMarkingQuery', (event, markingData) => {
-      ipcRenderer.once('customerItemQuery', (event, itemData) => {
-        setExtraData({ markingData, itemData });
-      });
-      ipcRenderer.send('queryValues', itemQuery, [primaryKey], 'customerItemQuery');
-    });
-    ipcRenderer.send('queryValues', markingQuery, [primaryKey], 'customerMarkingQuery');
+    (async () => {
+      const markingData = await query(markingQuery, [primaryKey]) as Array<any>;
+      const itemData = await query(itemQuery, [primaryKey]) as Array<any>;
+      setExtraData({ markingData, itemData });
+    })();
   }, []);
 
   const markingDataWithKeys = extraData?.markingData.map((entry, i) => ({ key: i, ...entry }));

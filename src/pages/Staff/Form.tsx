@@ -7,12 +7,15 @@ import {
 import { Store } from 'antd/lib/form/interface';
 
 import Loading from '../../components/Loading';
+
+import { query, simpleQuery } from '../../utils/query';
 import scrollToTop from '../../utils/scrollModal';
 import { objectMomentToDates, objectDatesToMoment } from '../../utils/momentConverter';
 import isEmpty from '../../utils/isEmptyObject';
 
 import { staff, staffGroup } from '../../Queries.json';
 const { formQuery, insertQuery, updateQuery } = staff;
+const { tableQuery: staffGroupQuery } = staffGroup;
 
 const { Title } = Typography;
 const { Item } = AntForm;
@@ -54,35 +57,31 @@ class Form extends Component<IFormProps, IFormState> {
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  initializeData() {
-    ipcRenderer.once('staffForm_staffGroupQuery', (event, staffGroups) => {
-      const { staffId } = this.props;
-      if (staffId) {
-        // Initialize 'edit' form values.
-        ipcRenderer.once('staffFormQuery', (event, data) => {
-          this.setState({ 
-            initialValues: data[0],
-            staffGroups
-          });
-          this.formRef.current?.resetFields();
-        });
-        ipcRenderer.send('queryValues', formQuery, [staffId], 'staffFormQuery');
-      }
-      else {
-        // Initialize 'add' form values. Normally this would be blank.
-        this.setState({ 
-          initialValues: { status: true },
-          staffGroups
-        });
-        this.formRef.current?.resetFields();
-      }
-    });
-    ipcRenderer.send('query', staffGroup.tableQuery, 'staffForm_staffGroupQuery');
+  async initializeData() {
+    const { staffId } = this.props;
+    const staffGroups = await simpleQuery(staffGroupQuery) as Array<any>;
+    if (staffId) {
+      // Initialize 'edit' form values.
+      const data = await query(formQuery, [staffId]) as Array<any>;
+      const entry = data[0];
+      this.setState({ 
+        initialValues: entry,
+        staffGroups
+      });
+      this.formRef.current?.resetFields();
+    }
+    else {
+      // Initialize 'add' form values. Normally this would be blank.
+      this.setState({ 
+        initialValues: { status: true },
+        staffGroups
+      });
+      this.formRef.current?.resetFields();
+    }
   }
 
   handleSubmit(values: any) {
     const { staffId, closeModal } = this.props;
-
     const formValues = objectMomentToDates(values);
     const encryptedPassword = ipcRenderer.sendSync('encrypt', values.pwd);
     const finalizedValues = { 
@@ -94,22 +93,21 @@ class Form extends Component<IFormProps, IFormState> {
       profilepic_type: null
     };
     const rawValues = Object.values(finalizedValues);
-
     if (staffId) {
       // Edit form on submit.
-      ipcRenderer.once('staffUpdateQuery', () => {
+      query(updateQuery, [...rawValues, staffId])
+      .then(() => {
         message.success(`Staff '${staffId}' successfully updated`);
         closeModal();
       });
-      ipcRenderer.send('queryValues', updateQuery, [...rawValues, staffId], 'staffUpdateQuery');
     }
     else {
       // Add form on submit.
-      ipcRenderer.once('staffInsertQuery', () => {
+      query(insertQuery, rawValues)
+      .then(() => {
         message.success('Staff successfully added');
         closeModal();
       });
-      ipcRenderer.send('queryValues', insertQuery, rawValues, 'staffInsertQuery');
     }
   }
   

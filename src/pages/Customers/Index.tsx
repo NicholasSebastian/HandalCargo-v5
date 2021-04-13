@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { ipcRenderer } from 'electron';
 
 import Template from '../../components/TableTemplate';
 import View from './View';

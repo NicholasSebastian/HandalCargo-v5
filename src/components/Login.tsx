@@ -4,7 +4,6 @@ import styled from 'styled-components'
 import { Typography, Form, Input, Button, message } from 'antd'
 import { UserOutlined, LockOutlined, CloudServerOutlined } from '@ant-design/icons'
 
-import DatabaseSetup from './DatabaseSetup';
 import Image from '../assets/login.jpg'
 
 const { Title, Text } = Typography

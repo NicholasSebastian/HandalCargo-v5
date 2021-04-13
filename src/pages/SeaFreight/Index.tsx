@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { ipcRenderer } from 'electron';
+
+import { simpleQuery } from '../../utils/query';
 
 import Template from '../../components/TableTemplate';
 import View from './View';
@@ -31,20 +32,12 @@ class SeaFreight extends Component<never, ISeaFreightState> {
     this.initializeData();
   }
 
-  initializeData() {
-    ipcRenderer.once('routeQuery', (event, routes) => {
-      ipcRenderer.once('handlerQuery', (event, handlers) => {
-        ipcRenderer.once('carrierQuery', (event, carriers) => {
-          ipcRenderer.once('containerGroupQuery', (event, containerGroups) => {
-            this.setState({ routes, handlers, carriers, containerGroups });
-          });
-          ipcRenderer.send('query', containerGroupQuery, 'containerGroupQuery');
-        });
-        ipcRenderer.send('query', carrierQuery, 'carrierQuery');
-      });
-      ipcRenderer.send('query', handlerQuery, 'handlerQuery');
-    });
-    ipcRenderer.send('query', routeQuery, 'routeQuery');
+  async initializeData() {
+    const routes = await simpleQuery(routeQuery) as Array<any>;
+    const handlers = await simpleQuery(handlerQuery) as Array<any>;
+    const carriers = await simpleQuery(carrierQuery) as Array<any>;
+    const containerGroups = await simpleQuery(containerGroupQuery) as Array<any>;
+    this.setState({ routes, handlers, carriers, containerGroups });
   }
 
   render() {

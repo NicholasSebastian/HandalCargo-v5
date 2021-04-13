@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import { ipcRenderer } from 'electron';
 import styled from 'styled-components';
 import { Typography } from 'antd';
 
+import { simpleQuery, query } from '../utils/query';
 import {} from '../Queries.json';
 
 const { Title, Text } = Typography;

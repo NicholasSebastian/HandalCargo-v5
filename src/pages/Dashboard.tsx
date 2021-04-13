@@ -1,8 +1,8 @@
 import React, { PureComponent } from 'react';
-import { ipcRenderer } from 'electron';
 import styled from 'styled-components';
 import { Space, Statistic } from 'antd';
 import { TeamOutlined, AppstoreOutlined } from '@ant-design/icons';
+import { simpleQuery } from '../utils/query';
 
 // https://charts.ant.design/
 

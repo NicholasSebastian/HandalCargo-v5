@@ -1,22 +1,26 @@
 import React, { Component, createRef } from 'react';
-import { ipcRenderer } from 'electron';
 import styled from 'styled-components';
 import { Typography, FormInstance, Form as AntForm, Button, Input, DatePicker, Select, Divider, message } from 'antd';
 import { Store } from 'antd/lib/form/interface';
 import moment from 'moment';
 
-import { IFormProps } from '../../components/TableTemplate';
-import Loading from '../../components/Loading';
-import MarkingTable from './MarkingTable';
-
+import { query, simpleQuery } from '../../utils/query';
 import round from '../../utils/roundToTwo';
 import { objectDatesToMoment, objectMomentToDates } from '../../utils/momentConverter';
 import fillEmptyValues from '../../utils/objectNulling';
 import scrollToTop from '../../utils/scrollModal';
 import isEmpty from '../../utils/isEmptyObject';
+import withMultipleValues from '../../utils/manyQueryValues';
+
+import { IFormProps } from '../../components/TableTemplate';
+import Loading from '../../components/Loading';
+import MarkingTable from './MarkingTable';
 
 import { airCargo, routes, planes, currencies } from '../../Queries.json';
 const { formQuery, insertQuery, updateQuery, markingTableQuery, markingInsertQuery, markingDeleteQuery } = airCargo;
+const { tableQuery: routeQuery } = routes;
+const { tableQuery: planeQuery } = planes;
+const { tableQuery: currencyQuery } = currencies;
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -75,40 +79,32 @@ class Form extends Component<IFormProps, IFormState> {
     this.initializeData();
   }
 
-  initializeData() {
-    ipcRenderer.once('routesQuery', (event, routes) => {
-      ipcRenderer.once('planesQuery', (event, planes) => {
-        ipcRenderer.once('currenciesQuery', (event, currencies) => {
-          const { entryId } = this.props;
-          if (entryId) {
-            // Initialize 'edit' form values.
-            ipcRenderer.once('formQuery', (event, data) => {
-              ipcRenderer.once('markingTableQuery', (event, markingData: Array<object>) => {
-                this.setState({ 
-                  initialData: data[0],
-                  markingData: markingData.map((entry, i) => ({ key: i, ...entry })),
-                  routes, planes, currencies
-                });
-                this.formRef.current?.resetFields();
-                this.calculateValues();
-                this.calculateMarkingValues();
-              });
-              ipcRenderer.send('queryValues', markingTableQuery, [data[0].no], 'markingTableQuery');
-            });
-            ipcRenderer.send('queryValues', formQuery, [entryId], 'formQuery');
-          }
-          else {
-            // Initialize 'add' form values.
-            this.setState({ routes, planes, currencies });
-            this.formRef.current?.resetFields();
-            this.calculateValues();
-          }
-        });
-        ipcRenderer.send('query', currencies.tableQuery, 'currenciesQuery');
+  async initializeData() {
+    const { entryId } = this.props;
+    const routes = await simpleQuery(routeQuery) as Array<any>;
+    const planes = await simpleQuery(planeQuery) as Array<any>;
+    const currencies = await simpleQuery(currencyQuery) as Array<any>;
+    if (entryId) {
+      // Initialize 'edit' form values.
+      const entry = await query(formQuery, [entryId]) as Array<any>;
+      const data = entry[0];
+      const markingData = await query(markingTableQuery, [data.no]) as Array<any>;
+      const markingDataWithKeys = markingData.map((entry, i) => ({ key: i, ...entry }));
+      this.setState({ 
+        initialData: data,
+        markingData: markingDataWithKeys,
+        routes, planes, currencies
       });
-      ipcRenderer.send('query', planes.tableQuery, 'planesQuery');
-    });
-    ipcRenderer.send('query', routes.tableQuery, 'routesQuery');
+      this.formRef.current?.resetFields();
+      this.calculateValues();
+      this.calculateMarkingValues();
+    }
+    else {
+      // Initialize 'add' form values.
+      this.setState({ routes, planes, currencies });
+      this.formRef.current?.resetFields();
+      this.calculateValues();
+    }
   }
 
   handleSubmit(values: any) {
@@ -121,54 +117,38 @@ class Form extends Component<IFormProps, IFormState> {
     const { markingData } = this.state;
     const markingValues = markingData.map(entry => {
       delete entry.key;
-      return { noaircargo: entryId || values.no, ...entry };
+      return { 
+        noaircargo: entryId || values.no, 
+        ...entry 
+      };
     });
 
-    const withMultipleValues = (insertQuery: string, queryValues: Array<object>) => {
-      const from = insertQuery.lastIndexOf('(');
-      const queryEnd = insertQuery.substring(from);
-
-      let newInsertQuery = insertQuery;
-      for (let i = 0; i < queryValues.length - 1; i++) {
-        newInsertQuery += `,${queryEnd}`;
-      }
-      
-      const flattenedValues = queryValues.map(entry => Object.values(entry)).flat();
-      return [newInsertQuery, flattenedValues];
-    }
-
+    const [mInsertQuery, allMarkings] = withMultipleValues(markingInsertQuery, markingValues);
+    
     if (entryId) {
       // Edit form on submit.
-      const onSuccess = () => {
+      Promise.all([
+        query(updateQuery, [...rawValues, entryId]),
+        query(markingDeleteQuery, [entryId]),
+        markingValues.length > 0 && query(mInsertQuery, allMarkings)
+      ])
+      .then(() => {
         message.success(`'${entryId}' successfully updated`);
         closeModal();
-      }
-      ipcRenderer.once('aircargoUpdateQuery', () => {
-        ipcRenderer.once('aircargoMarkingDeleteQuery', () => {
-          if (markingValues.length > 0) {
-            ipcRenderer.once('aircargoMarkingInsertQuery', onSuccess);
-            ipcRenderer.send('queryValues', ...withMultipleValues(markingInsertQuery, markingValues), 'aircargoMarkingInsertQuery');
-          }
-          else onSuccess();
-        });
-        ipcRenderer.send('queryValues', markingDeleteQuery, [entryId], 'aircargoMarkingDeleteQuery');
-      });
-      ipcRenderer.send('queryValues', updateQuery, [...rawValues, entryId], 'aircargoUpdateQuery');
+      })
+      .catch(e => message.error(e.message));
     }
     else {
       // Add form on submit.
-      const onSuccess = () => {
+      Promise.all([
+        query(updateQuery, [...rawValues, entryId]),
+        markingValues.length > 0 && query(mInsertQuery, allMarkings)
+      ])
+      .then(() => {
         message.success('Entry successfully added');
         closeModal();
-      }
-      ipcRenderer.once('aircargoInsertQuery', () => {
-        if (markingValues.length > 0) {
-          ipcRenderer.once('aircargoMarkingInsertQuery', onSuccess);
-          ipcRenderer.send('queryValues', ...withMultipleValues(markingInsertQuery, markingValues), 'aircargoMarkingInsertQuery');
-        }
-        else onSuccess();
-      });
-      ipcRenderer.send('queryValues', insertQuery, rawValues, 'aircargoInsertQuery');
+      })
+      .catch(e => message.error(e.message));
     }
   }
 

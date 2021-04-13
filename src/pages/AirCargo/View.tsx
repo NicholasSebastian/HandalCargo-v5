@@ -1,7 +1,8 @@
 import React, { FC, useState, useEffect } from 'react';
-import { ipcRenderer } from 'electron';
 import styled from 'styled-components';
 import { Card, Descriptions, Table } from 'antd';
+
+import { query, simpleQuery } from '../../utils/query';
 
 import { IViewProps } from '../../components/TableTemplate';
 import round from '../../utils/roundToTwo';
@@ -26,19 +27,13 @@ const View: FC<IViewProps> = (props) => {
 
   const [extraData, setExtraData] = useState<IViewState>(null);
   useEffect(() => {
-    ipcRenderer.once('routesQuery', (event, routes) => {
-      ipcRenderer.once('planesQuery', (event, planes) => {
-        ipcRenderer.once('currenciesQuery', (event, currencies) => {
-          ipcRenderer.once('markingQuery', (event, markingData) => {
-            setExtraData({ routes, planes, currencies, markingData });
-          });
-          ipcRenderer.send('queryValues', markingQuery, [data.no], 'markingQuery');
-        });
-        ipcRenderer.send('query', currencyQuery, 'currenciesQuery');
-      });
-      ipcRenderer.send('query', planeQuery, 'planesQuery');
-    });
-    ipcRenderer.send('query', routeQuery, 'routesQuery');
+    (async () => {
+      const routes = await simpleQuery(routeQuery) as Array<any>;
+      const planes = await simpleQuery(planeQuery) as Array<any>;
+      const currencies = await simpleQuery(currencyQuery) as Array<any>;
+      const markingData = await query(markingQuery, [data.no]) as Array<any>;
+      setExtraData({ routes, planes, currencies, markingData });
+    })();
   }, []);
 
   const shipmentDate = (data.tglmuat as Date)?.toDateString();

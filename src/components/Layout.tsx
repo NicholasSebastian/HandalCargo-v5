@@ -1,5 +1,4 @@
 import React, { Component, createContext } from 'react';
-import { ipcRenderer } from 'electron';
 import styled from 'styled-components';
 import { Layout as AntLayout, Tabs, message, PageHeader } from 'antd';
 
@@ -43,13 +42,6 @@ class Layout extends Component<{}, ILayoutState> {
     this.setActiveTab = this.setActiveTab.bind(this);
     this.addTab = this.addTab.bind(this);
     this.removeTab = this.removeTab.bind(this);
-  }
-
-  componentDidMount() {
-    ipcRenderer.on('prompt', (event, text, replyKey) => {
-      message.error(text);
-      ipcRenderer.removeAllListeners(replyKey);
-    });
   }
 
   toggleCollapse() {

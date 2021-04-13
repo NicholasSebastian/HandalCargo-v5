@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
-import { ipcRenderer } from 'electron';
 import styled from 'styled-components';
 import { List, Button, Modal, Input, message, Popconfirm } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
+import { v4 as generateKey } from 'uuid';
+
+import { query, simpleQuery } from '../utils/query';
 
 import PageEffect from './PageEffect';
 import Form, { IFormItem } from './ListTemplateForm';
-
-import instanceOfKey from '../utils/uniqueKey';
 
 const { Item } = List;
 const { Search } = Input;
@@ -59,23 +59,17 @@ class Template extends Component<ITemplateProps, ITemplateState> {
     this.handleDelete = this.handleDelete.bind(this);
   }
 
-  refreshList() {
-    ipcRenderer.once('listQuery', (event, data) => {
-      this.setState({ listData: data
-        .map((obj: Object): IListEntry => {
-          const arrayForm = Object.values(obj);
-          return {
-            id: arrayForm[0],
-            name: arrayForm[1],
-            extra: arrayForm[2]
-          }
-        })
-        .sort((first: IListEntry, second: IListEntry) => {
-          return (first.id as number) - (second.id as number);
-        })
-      });
-    });
-    ipcRenderer.send('query', this.props.queries.tableQuery, 'listQuery');
+  async refreshList() {
+    const { tableQuery } = this.props.queries;
+    const data = await simpleQuery(tableQuery) as Array<any>;
+    const formattedData = data.map((obj: Object): IListEntry => {
+      const [id, name, extra] = Object.values(obj);
+      return { id, name, extra };
+    })
+    const sortedData = formattedData.sort((first: IListEntry, second: IListEntry) => {
+      return (first.id as number) - (second.id as number);
+    })
+    this.setState({ listData: sortedData });
   }
 
   closeModal() {
@@ -92,18 +86,20 @@ class Template extends Component<ITemplateProps, ITemplateState> {
   handleEdit(entryId: string | number) {
     this.setState({ 
       modal: {
-        key: instanceOfKey(entryId),
+        key: generateKey(),
         entryId
       }
     });
   }
 
   handleDelete(entryId: string | number) {
-    ipcRenderer.once('listDeleteQuery', () => {
+    const { deleteQuery } = this.props.queries;
+    query(deleteQuery, [entryId])
+    .then(() => {
       message.success(`Entry successfully deleted`);
       this.refreshList();
-    });
-    ipcRenderer.send('queryValues', this.props.queries.deleteQuery, [entryId], 'listDeleteQuery');
+    })
+    .catch(e => message.error(e.message));
   }
 
   render() {

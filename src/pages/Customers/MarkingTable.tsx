@@ -65,7 +65,6 @@ const ItemStyles = styled.div`
 const markingColumns: ColumnsType<object> = [
   {
     title: 'Marking',
-    dataIndex: 'marking',
-    key: 'marking'
+    dataIndex: 'marking'
   }
 ];

@@ -91,60 +91,49 @@ const ItemStyles = styled.div`
 const markingColumns: ColumnsType<object> = [
   {
     title: 'No',
-    dataIndex: 'no',
-    key: 'no'
+    dataIndex: 'no'
   },
   {
     title: 'Marking',
-    dataIndex: 'marking',
-    key: 'marking'
+    dataIndex: 'marking'
   },
   {
     title: 'Qty',
-    dataIndex: 'qty',
-    key: 'qty'
+    dataIndex: 'qty'
   },
   {
     title: 'List [Kg]',
-    dataIndex: 'list[kg]',
-    key: 'list[kg]'
+    dataIndex: 'list[kg]'
   },
   {
     title: 'HB [Kg]',
-    dataIndex: 'hb[kg]',
-    key: 'hb[kg]'
+    dataIndex: 'hb[kg]'
   },
   {
     title: 'Standard [Kg]',
-    dataIndex: 'standart[kg]',
-    key: 'standart[kg]'
+    dataIndex: 'standart[kg]'
   },
   {
     title: 'Vol. Charge',
-    dataIndex: 'vol.charge',
-    key: 'vol.charge'
+    dataIndex: 'vol.charge'
   },
   {
     title: 'Settled',
     dataIndex: 'lunas',
-    key: 'lunas',
     render: (value) => value ? 
       <span style={{ color: 'green' }}>Paid Off</span> : 
       <span style={{ color: 'red' }}>Not Settled</span>
   },
   {
     title: 'Remainder',
-    dataIndex: 'sisa',
-    key: 'sisa'
+    dataIndex: 'sisa'
   },
   {
     title: 'Delivery Orders',
-    dataIndex: 'suratjalan',
-    key: 'suratjalan'
+    dataIndex: 'suratjalan'
   },
   {
     title: 'Invoice',
-    dataIndex: 'faktur',
-    key: 'faktur'
+    dataIndex: 'faktur'
   }
 ];

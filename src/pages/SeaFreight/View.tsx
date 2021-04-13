@@ -1,7 +1,8 @@
 import React, { FC, useState, useEffect } from 'react';
-import { ipcRenderer } from 'electron';
 import styled from 'styled-components';
 import { Card, Descriptions, Table } from 'antd';
+
+import { query, simpleQuery } from '../../utils/query';
 
 import { IViewProps } from '../../components/TableTemplate';
 import { markingColumns } from './MarkingTable';
@@ -29,25 +30,15 @@ const View: FC<IViewProps> = (props) => {
 
   const [extraData, setExtraData] = useState<IViewState>(null);
   useEffect(() => {
-    ipcRenderer.once('containerGroupQuery', (event, containerGroups) => {
-      ipcRenderer.once('carrierQuery', (event, carriers) => {
-        ipcRenderer.once('routeQuery', (event, routes) => {
-          ipcRenderer.once('handlerQuery', (event, handlers) => {
-            ipcRenderer.once('currencyQuery', (event, currencies) => {
-              ipcRenderer.once('markingQuery', (event, markingData) => {
-                setExtraData({ containerGroups, carriers, routes, handlers, currencies, markingData });
-              });
-              ipcRenderer.send('queryValues', markingQuery, [data.nocontainer], 'markingQuery');
-            });
-            ipcRenderer.send('query', currencyQuery, 'currencyQuery');
-          });
-          ipcRenderer.send('query', handlerQuery, 'handlerQuery');
-        });
-        ipcRenderer.send('query', routeQuery, 'routeQuery');
-      });
-      ipcRenderer.send('query', carrierQuery, 'carrierQuery');
-    });
-    ipcRenderer.send('query', containerGroupQuery, 'containerGroupQuery');
+    (async () => {
+      const containerGroups = await simpleQuery(containerGroupQuery) as Array<any>;
+      const carriers = await simpleQuery(carrierQuery) as Array<any>;
+      const routes = await simpleQuery(routeQuery) as Array<any>;
+      const handlers = await simpleQuery(handlerQuery) as Array<any>;
+      const currencies = await simpleQuery(currencyQuery) as Array<any>;
+      const markingData = await query(markingQuery, [data.nocontainer]) as Array<any>;
+      setExtraData({ containerGroups, carriers, routes, handlers, currencies, markingData });
+    })();
   }, []);
 
   const shipmentDate = (data.tglmuat as Date)?.toDateString();

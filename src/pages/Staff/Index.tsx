@@ -1,17 +1,17 @@
 import React, { Component } from 'react';
-import { ipcRenderer } from 'electron';
 import styled from 'styled-components';
 import { 
   Card, Avatar, Typography, Space, Modal, Button, message, Popconfirm 
 } from 'antd';
 import { EditOutlined, DeleteOutlined, UserOutlined } from '@ant-design/icons';
+import { v4 as generateKey } from 'uuid';
+
+import { query, simpleQuery } from '../../utils/query';
 
 import PageEffect from '../../components/PageEffect';
 import Loading from '../../components/Loading';
 import ProfileView, { ITemplateData as IViewData } from '../../components/ProfileTemplate';
 import Form, { IFormData } from './Form';
-
-import instanceOfKey from '../../utils/uniqueKey';
 
 import { staff } from '../../Queries.json';
 const { tableQuery, viewQuery, deleteQuery } = staff;
@@ -51,9 +51,9 @@ class Staff extends Component<{}, IStaffState> {
     this.handleDelete = this.handleDelete.bind(this);
   }
 
-  refreshTable() {
-    ipcRenderer.once('staffTableQuery', (event, data) => this.setState({ tableData: data }));
-    ipcRenderer.send('query', tableQuery, 'staffTableQuery');
+  async refreshTable() {
+    const data = await simpleQuery(tableQuery) as Array<any>;
+    this.setState({ tableData: data });
   }
 
   closeModal() {
@@ -62,16 +62,16 @@ class Staff extends Component<{}, IStaffState> {
   }
 
   handleView(staffId: string) {
-    ipcRenderer.once('staffViewQuery', (event, data) => {
+    query(viewQuery, [staffId])
+    .then((data: any) => {
       this.setState({ 
         modal: {
           mode: 'view',
-          key: instanceOfKey(staffId),
+          key: generateKey(),
           profile: data[0]
         }
       });
     });
-    ipcRenderer.send('queryValues', viewQuery, [staffId], 'staffViewQuery');
   }
 
   handleAdd() {
@@ -86,18 +86,18 @@ class Staff extends Component<{}, IStaffState> {
     this.setState({ 
       modal: {
         mode: 'form',
-        key: instanceOfKey(staffId),
+        key: generateKey(),
         staffId
       } 
     });
   }
 
   handleDelete(staffId: string) {
-    ipcRenderer.once('staffDeleteQuery', () => {
+    query(deleteQuery, [staffId])
+    .then(() => {
       message.success(`Staff '${staffId}' successfully deleted`);
       this.refreshTable();
     });
-    ipcRenderer.send('queryValues', deleteQuery, [staffId], 'staffDeleteQuery');
   }
 
   render() {

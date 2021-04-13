@@ -1,11 +1,12 @@
 import React, { Component, createRef } from 'react';
-import { ipcRenderer } from 'electron';
 import styled from 'styled-components';
 import { FormInstance, Form as AntForm, Input, InputNumber, Button, message } from 'antd';
 import { Store } from 'antd/lib/form/interface';
 
 import { IQueries, IFormData } from './ListTemplate';
 import Loading from './Loading';
+
+import { query, simpleQuery } from '../utils/query';
 import isEmpty from '../utils/isEmptyObject';
 
 interface IFormItem {
@@ -37,16 +38,15 @@ class Form extends Component<IFormProps, IFormState> {
     this.initializeData();
   }
 
-  initializeData() {
+  async initializeData() {
     const { entryId, queries } = this.props;
     const { formQuery } = queries;
     if (entryId) {
       // Initialize 'edit' form values.
-      ipcRenderer.once('listFormQuery', (event, data) => {
-        this.setState({ initialValues: data[0] });
-        this.formRef.current?.resetFields();
-      });
-      ipcRenderer.send('queryValues', formQuery, [entryId], 'listFormQuery');
+      const data = await query(formQuery, [entryId]) as Array<any>;
+      const entry = data[0];
+      this.setState({ initialValues: entry });
+      this.formRef.current?.resetFields();
     }
   }
 
@@ -56,19 +56,21 @@ class Form extends Component<IFormProps, IFormState> {
     const rawValues = Object.values(values);
     if (entryId) {
       // Edit form on submit.
-      ipcRenderer.once('listUpdateQuery', () => {
+      query(updateQuery, [...rawValues, entryId])
+      .then(() => {
         message.success(`'${entryId}' successfully updated`);
         closeModal();
-      });
-      ipcRenderer.send('queryValues', updateQuery, [...rawValues, entryId], 'listUpdateQuery');
+      })
+      .catch(e => message.error(e.message));
     }
     else {
       // Add form on submit.
-      ipcRenderer.once('listInsertQuery', () => {
+      query(insertQuery, rawValues)
+      .then(() => {
         message.success('Entry successfully added');
         closeModal();
-      });
-      ipcRenderer.send('queryValues', insertQuery, rawValues, 'listInsertQuery');
+      })
+      .catch(e => message.error(e.message));
     }
   }
 

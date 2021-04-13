@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { query, simpleQuery } from '../utils/query';
 
 class Mail extends Component {
   render() {

@@ -1,11 +1,11 @@
 import React, { FC, Fragment, useState, useEffect, useRef } from 'react';
-import { ipcRenderer } from 'electron';
 import styled from "styled-components";
 import { Table, Input, Form, Select, Button, Popconfirm } from 'antd';
 import { ColumnsType } from 'antd/lib/table';
-import { RefSelectProps } from 'antd/lib/select';
+import { SelectValue } from 'antd/lib/select';
 import { DownOutlined, DeleteOutlined } from "@ant-design/icons";
 
+import { simpleQuery } from '../../utils/query';
 import { routes } from '../../Queries.json';
 const { tableQuery: routeQuery } = routes;
 
@@ -22,22 +22,32 @@ const ItemTable: FC<IItemTableProps> = props => {
 
   const itemDescRef = useRef<Input>(null);
   const byRef = useRef<Input>(null);
-  const routeRef = useRef<RefSelectProps>(null);
+  const [route, setRoute]  = useState<SelectValue| null>(null);
   const priceRef = useRef<Input>(null);
 
   const [routes, setRoutes] = useState<Array<any>>([]);
   useEffect(() => {
-    ipcRenderer.once('routesQuery', (event, routes) => setRoutes(routes));
-    ipcRenderer.send('query', routeQuery, 'routesQuery');
+    simpleQuery(routeQuery).then((routes: any) => setRoutes(routes));
   }, []);
 
   function handleSubmit() {
     const itemDesc = itemDescRef.current?.state.value;
     const by = byRef.current?.state.value;
-    // const route = routeRef.current?.;
     const price = priceRef.current?.state.value;
+    const profile = JSON.parse(window.sessionStorage.getItem('profile')!);
 
-    // here
+    const newData = {
+      key: data.length,
+      date: null,
+      keteranganbarang: itemDesc,
+      by,
+      rute: route,
+      harga: price,
+      hargaterakhir: null,
+      user: profile.staffid
+    };
+
+    setData([...data, newData]);
   }
 
   function handleDelete(index: number) {
@@ -51,13 +61,13 @@ const ItemTable: FC<IItemTableProps> = props => {
         <Item label="Item Description" labelCol={{ span: 10 }} colon={false}><Input ref={itemDescRef} /></Item>
         <Item label="By" colon={false}><Input ref={byRef} /></Item>
         <Item label="Route" labelCol={{ span: 100 }} colon={false}>
-          <Select ref={routeRef}>
+          <Select onChange={value => setRoute(value)}>
             {routes.map(route => (
               <Option key={route.rutecode} value={route.rutecode}>{route.rutedesc}</Option>
             ))}
           </Select>
         </Item>
-        <Item label="Price" colon={false}><Input ref={priceRef} /></Item>
+        <Item label="Price" colon={false}><Input ref={priceRef} type='number' /></Item>
         <Button type="default" htmlType="button" icon={<DownOutlined />} onClick={handleSubmit} />
       </ItemStyles>
       <Table pagination={false}
@@ -93,37 +103,30 @@ const ItemStyles = styled.div`
 const itemColumns: ColumnsType<object> = [
   {
     title: 'Date',
-    dataIndex: 'date',
-    key: 'date'
+    dataIndex: 'date'
   },
   {
     title: 'Item Description',
-    dataIndex: 'keteranganbrg',
-    key: 'keteranganbrg'
+    dataIndex: 'keteranganbarang'
   },
   {
     title: 'By',
-    dataIndex: 'by',
-    key: 'by'
+    dataIndex: 'by'
   },
   {
     title: 'Route',
-    dataIndex: 'rute',
-    key: 'rute'
+    dataIndex: 'rute'
   },
   {
     title: 'Price',
-    dataIndex: 'harga',
-    key: 'harga'
+    dataIndex: 'harga'
   },
   {
     title: 'Final Price',
-    dataIndex: 'hargaterakhir',
-    key: 'hargaterakhir'
+    dataIndex: 'hargaterakhir'
   },
   {
     title: 'User',
-    dataIndex: 'user',
-    key: 'user'
+    dataIndex: 'user'
   }
 ];

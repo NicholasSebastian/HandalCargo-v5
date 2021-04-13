@@ -1,5 +1,4 @@
 import React, { Component, createRef } from 'react';
-import { ipcRenderer } from 'electron';
 import styled from 'styled-components';
 import { Form as AntForm, FormInstance, Input, Select, Button, message } from 'antd';
 import { Store } from 'antd/lib/form/interface';
@@ -7,6 +6,7 @@ import { Store } from 'antd/lib/form/interface';
 import { IFormProps } from '../../components/TableTemplate';
 import Loading from '../../components/Loading';
 
+import { query, simpleQuery } from '../../utils/query';
 import scrollToTop from '../../utils/scrollModal';
 import isEmpty from '../../utils/isEmptyObject';
 
@@ -34,26 +34,19 @@ class Form extends Component<IFormProps, IFormState> {
     this.initializeData();
   }
 
-  initializeData() {
+  async initializeData() {
     const { entryId } = this.props;
+    const routes = await simpleQuery(routeQuery) as Array<any>;
     if (entryId) {
       // Initialize 'edit' form values.
-      ipcRenderer.once('formQuery', (event, data) => {
-        ipcRenderer.once('routeQuery', (event, routes) => {
-          this.setState({ initialData: data[0], routes });
-          this.formRef.current?.resetFields();
-        });
-        ipcRenderer.send('query', routeQuery, 'routeQuery');
-      });
-      ipcRenderer.send('queryValues', formQuery, [entryId], 'formQuery');
+      const data = await query(formQuery, [entryId]) as Array<any>;
+      this.setState({ initialData: data[0], routes });
+      this.formRef.current?.resetFields();
     }
     else {
       // Initialize 'add' form values.
-      ipcRenderer.once('routeQuery', (event, routes) => {
-        this.setState({ routes });
-        this.formRef.current?.resetFields();
-      });
-      ipcRenderer.send('query', routeQuery, 'routeQuery');
+      this.setState({ routes });
+      this.formRef.current?.resetFields();
     }
   }
 
@@ -62,19 +55,20 @@ class Form extends Component<IFormProps, IFormState> {
     const formValues = Object.values(values);
     if (entryId) {
       // Edit form on submit.
-      ipcRenderer.once('expeditionUpdateQuery', () => {
+      query(updateQuery, [...formValues, entryId])
+      .then(() => {
         message.success(`'${entryId}' successfully updated`);
         closeModal();
-      });
-      ipcRenderer.send('queryValues', updateQuery, [...formValues, entryId], 'expeditionUpdateQuery');
+      })
+      .catch(e => message.error(e.message));
     }
     else {
       // Add form on submit.
-      ipcRenderer.once('expeditionInsertQuery', () => {
+      query(insertQuery, formValues)
+      .then(() => {
         message.success('Entry successfully added');
         closeModal();
       });
-      ipcRenderer.send('queryValues', insertQuery, formValues, 'expeditionInsertQuery');
     }
   }
 

@@ -68,8 +68,8 @@ class Connection {
           event.reply(replyKey, data)
         })
         .catch(error => {
-          console.log('Query failed')
-          event.reply('prompt', error.message, replyKey)
+          console.log('Query failed', error.message)
+          event.reply(replyKey, new Error(error.message))
         })
     } 
     else {
@@ -86,8 +86,8 @@ class Connection {
           event.reply(replyKey, data)
         })
         .catch(error => {
-          console.log('Query failed')
-          event.reply('prompt', error.message, replyKey)
+          console.log('Query failed', error.message)
+          event.reply(replyKey, new Error(error.message))
         })
     } 
     else {
