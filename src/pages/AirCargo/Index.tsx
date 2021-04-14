@@ -41,6 +41,7 @@ class AirCargo extends Component<never, IAirCargoState> {
         queries={airCargo} 
         View={View}
         Form={Form}
+        extraDelete={['markingDeleteQuery']}
         columns={[
           {
             title: 'Arrival Date',

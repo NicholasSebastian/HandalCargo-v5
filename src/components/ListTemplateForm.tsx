@@ -76,22 +76,22 @@ class Form extends Component<IFormProps, IFormState> {
 
   render() {
     const { Item } = AntForm;
-    const { entryId } = this.props;
+    const { entryId, formItems } = this.props;
     const { initialValues } = this.state;
     const isLoading = entryId ? isEmpty(initialValues) : false;
     return isLoading ? <Loading /> : (
       <FormStyles ref={this.formRef} labelCol={{ span: 6 }}
         onFinish={this.handleSubmit} initialValues={initialValues}>
-        <Item label={this.props.formItems[0].label} name={this.props.formItems[0].key}
-          rules={[{ required: true, message: `${this.props.formItems[0].label} is required` }]}>
+        <Item label={formItems[0].label} name={formItems[0].key}
+          rules={[{ required: true, message: `${formItems[0].label} is required` }]}>
           <InputNumber min={0} type='number' />
         </Item>
-        <Item label={this.props.formItems[1].label} name={this.props.formItems[1].key}
-          rules={[{ required: true, message: `${this.props.formItems[1].label} is required` }]}>
+        <Item label={formItems[1].label} name={formItems[1].key}
+          rules={[{ required: true, message: `${formItems[1].label} is required` }]}>
           <Input />
         </Item>
-        {this.props.formItems[2] &&
-          <Item label={this.props.formItems[2].label} name={this.props.formItems[2].key}>
+        {formItems[2] &&
+          <Item label={formItems[2].label} name={formItems[2].key}>
             <Input />
           </Item>
         }

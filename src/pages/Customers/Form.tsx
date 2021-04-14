@@ -153,10 +153,13 @@ class Form extends Component<IFormProps, IFormState> {
         <DoubleColumns>
           <div>
             <Item label="Customer ID" name="customerid"
-              rules={[{ required: true, message: `Airway Bill Number is required` }]}>
+              rules={[{ required: true, message: `Customer ID is required` }]}>
               <Input />
             </Item>
-            <Item label="Name" name="customername"><Input /></Item>
+            <Item label="Name" name="customername"
+              rules={[{ required: true, message: `Customer Name is required` }]}>
+              <Input />
+            </Item>
             <Item label="Active" name="status" valuePropName="checked">
               <Switch defaultChecked />
             </Item>

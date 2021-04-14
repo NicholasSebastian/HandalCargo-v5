@@ -84,8 +84,14 @@ class Form extends Component<IFormProps, IFormState> {
       <FormStyles ref={this.formRef} labelCol={{ span: 6 }}
         onFinish={this.handleSubmit} onFinishFailed={scrollToTop} 
         initialValues={initialData}>
-        <Item label="Expedition Code" name="expedisicode"><Input /></Item>
-        <Item label="Name" name="expedisiname"><Input /></Item>
+        <Item label="Expedition Code" name="expedisicode"
+          rules={[{ required: true, message: `Expedition Code is required` }]}>
+          <Input />
+        </Item>
+        <Item label="Name" name="expedisiname"
+          rules={[{ required: true, message: `Expedition Name is required` }]}>
+          <Input />
+        </Item>
         <Item label="Route" name="ruteid">
           <Select>
             {routes.map(route => (

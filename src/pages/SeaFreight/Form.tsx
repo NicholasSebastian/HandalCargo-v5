@@ -127,6 +127,7 @@ class Form extends Component<IFormProps, IFormState> {
     const { markingData } = this.state;
     const markingValues = markingData.map(entry => {
       delete entry.key;
+      delete entry.no;
       return { 
         nocontainer: entryId || values.nocontainer, 
         ...entry 
@@ -179,8 +180,8 @@ class Form extends Component<IFormProps, IFormState> {
     }
   }
 
-  calculateMarkingValues() {
-    const { markingData } = this.state;
+  calculateMarkingValues(data?: Array<any>) {
+    const markingData = data || this.state.markingData;
 
     const totalQuantity = markingData.map(d => +d.qty).reduce((a, b) => a + b, 0) as number;
     this.totalQuantityRef.current?.setState({ value: totalQuantity || 0 });
@@ -295,8 +296,10 @@ class Form extends Component<IFormProps, IFormState> {
         <Divider />
         <MarkingTable
           data={markingData}
-          setData={data => this.setState({ markingData: data })}
-          onUpdate={() => this.calculateMarkingValues()} />
+          setData={data => {
+            this.setState({ markingData: data });
+            this.calculateMarkingValues(data);
+          }} />
         <Divider />
         <DoubleColumns>
           <div>

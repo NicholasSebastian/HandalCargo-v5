@@ -54,6 +54,7 @@ class SeaFreight extends Component<never, ISeaFreightState> {
           const dateDifference = Math.ceil(timeDifference / (1000 * 60 * 60 * 24));
           return { ...entry, lamatiba: dateDifference };
         })}
+        extraDelete={['markingDeleteQuery']}
         columns={[
           {
             title: "Arrival Date",

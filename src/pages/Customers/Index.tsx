@@ -17,6 +17,7 @@ class Customers extends Component {
         queries={customers}
         View={View}
         Form={Form}
+        extraDelete={['markingDeleteQuery, itemDeleteQuery']}
         columns={[
           {
             title: 'ID',

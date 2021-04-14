@@ -1,35 +1,47 @@
-import React, { FC, Fragment, useRef } from 'react';
+import React, { FC, Fragment, useRef, useEffect, useState } from 'react';
 import styled from "styled-components";
-import { Table, Input, Form, Button, Popconfirm } from 'antd';
+import { Table, Input, Select, Form, Button, Popconfirm } from 'antd';
 import { ColumnsType } from 'antd/lib/table';
+import { SelectValue } from 'antd/lib/select';
 import { DownOutlined, DeleteOutlined } from "@ant-design/icons";
 
+import { simpleQuery } from '../../utils/query';
+
+import { customers } from '../../Queries.json';
+const { markingQuery } = customers;
+
 const { Item } = Form;
+const { Option } = Select;
 
 interface MarkingTableProps {
   data: Array<any>
   setData: (data: Array<any>) => void
-  onUpdate?: () => void
 }
 
 const MarkingTable: FC<MarkingTableProps> = props => {
-  const { data, setData, onUpdate } = props;
+  const { data, setData } = props;
 
-  const markingRef = useRef<Input>(null);
+  const [marking, setMarking] = useState<SelectValue | null>(null);
   const quantityRef = useRef<Input>(null);
   const listM3Ref = useRef<Input>(null);
   const listKgRef = useRef<Input>(null);
 
+  const [customerMarkings, setCustomerMarkings] = useState([]);
+  useEffect(() => {
+    simpleQuery(markingQuery).then((customerMarkings: any) => {
+      const markings = customerMarkings.map((customerMarking: any) => customerMarking.marking);
+      setCustomerMarkings(markings);
+    });
+  }, [data]);
+
   function handleSubmit() {
-    const no = Math.max(0, ...data.map(entry => entry.no) as Array<number>) + 1;
-    const marking = markingRef.current?.state.value;
     const quantity = quantityRef.current?.state.value;
     const listM3 = listM3Ref.current?.state.value;
     const listKg = listKgRef.current?.state.value;
 
     const newData = {
       key: data.length,
-      no,
+      no: null,
       marking,
       qty: quantity,
       'list[m3]': listM3,
@@ -47,19 +59,23 @@ const MarkingTable: FC<MarkingTableProps> = props => {
     };
     
     setData([...data, newData]);
-    if (onUpdate) onUpdate();
   }
 
   function handleDelete(index: number) {
     const newData = [...data.slice(0, index), ...data.slice(index + 1)];
     setData(newData);
-    if (onUpdate) onUpdate();
   }
 
   return (
     <Fragment>
       <ItemStyles>
-        <Item label="Marking" colon={false}><Input ref={markingRef} /></Item>
+        <Item label="Marking" colon={false}>
+          <Select onChange={value => setMarking(value)}>
+            {customerMarkings.map(marking => (
+              <Option key={marking} value={marking}>{marking}</Option>
+            ))}
+          </Select>
+        </Item>
         <Item label="Quantity" colon={false}><Input ref={quantityRef} type='number' /></Item>
         <Item label="List [m3]" colon={false}><Input ref={listM3Ref} type='number' /></Item>
         <Item label="List [Kg]" colon={false}><Input ref={listKgRef} type='number' /></Item>

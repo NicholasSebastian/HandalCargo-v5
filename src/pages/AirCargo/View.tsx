@@ -3,9 +3,9 @@ import styled from 'styled-components';
 import { Card, Descriptions, Table } from 'antd';
 
 import { query, simpleQuery } from '../../utils/query';
+import round from '../../utils/roundToTwo';
 
 import { IViewProps } from '../../components/TableTemplate';
-import round from '../../utils/roundToTwo';
 import { markingColumns } from './MarkingTable';
 
 import { airCargo, routes, planes, currencies } from '../../Queries.json';
@@ -46,9 +46,9 @@ const View: FC<IViewProps> = (props) => {
   const plane = extraData?.planes.find((p: any) => p.pesawatcode == data.pesawat)?.pesawatdesc as string;
   const currency = extraData?.currencies.find((c: any) => c.currencycode == data.matauang)?.currencydesc as string;
 
-  const freightCharge = data['freightcharge/kg'];
-  const commissionCharge = data['komisi/kg'];
-  const otherFees = data['biayalain-lain'];
+  const freightCharge = data['freightcharge/kg'] || 0;
+  const commissionCharge = data['komisi/kg'] || 0;
+  const otherFees = data['biayalain-lain'] || 0;
 
   const freightTotal = freightCharge * data.brtfreight;
   const commissionTotal = commissionCharge * data.brtkomisi;
@@ -60,8 +60,8 @@ const View: FC<IViewProps> = (props) => {
   const totalQuantity = extraData?.markingData.map((d: any) => d.qty).reduce((a: number, b: number) => a + b, 0);
   const totalWeightList = extraData?.markingData.map((d: any) => d['list[kg]']).reduce((a: number, b: number) => a + b, 0);
   const totalWeightHb = extraData?.markingData.map((d: any) => d['hb[kg]']).reduce((a: number, b: number) => a + b, 0);
-  const realDifference = round(totalWeightHb - totalWeightList);
-  const masterDifference = round(totalWeightHb - data.brtclrn);
+  const realDifference = round(totalWeightHb - totalWeightList) || 0;
+  const masterDifference = round(totalWeightHb - data.brtclrn) || 0;
   
   return (
     <ViewStyles>

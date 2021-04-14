@@ -6,7 +6,9 @@ import { SelectValue } from 'antd/lib/select';
 import { DownOutlined, DeleteOutlined } from "@ant-design/icons";
 
 import { simpleQuery } from '../../utils/query';
-import { routes } from '../../Queries.json';
+
+import { productDetails, routes } from '../../Queries.json';
+const { tableQuery: productDetailQuery } = productDetails;
 const { tableQuery: routeQuery } = routes;
 
 const { Item } = Form;
@@ -17,21 +19,29 @@ interface IItemTableProps {
   setData: (data: Array<any>) => void
 }
 
+interface IData {
+  productDetails: Array<any>
+  routes: Array<any>
+}
+
 const ItemTable: FC<IItemTableProps> = props => {
   const { data, setData } = props;
 
-  const itemDescRef = useRef<Input>(null);
+  const [itemDesc, setItemDesc] = useState<SelectValue | null>(null);
   const byRef = useRef<Input>(null);
   const [route, setRoute]  = useState<SelectValue| null>(null);
   const priceRef = useRef<Input>(null);
 
-  const [routes, setRoutes] = useState<Array<any>>([]);
+  const [localData, setLocalData] = useState<IData>();
   useEffect(() => {
-    simpleQuery(routeQuery).then((routes: any) => setRoutes(routes));
-  }, []);
+    (async () => {
+      const productDetails = await simpleQuery(productDetailQuery) as Array<any>;
+      const routes = await simpleQuery(routeQuery) as Array<any>;
+      setLocalData({ productDetails, routes });
+    })();
+  }, [data]);
 
   function handleSubmit() {
-    const itemDesc = itemDescRef.current?.state.value;
     const by = byRef.current?.state.value;
     const price = priceRef.current?.state.value;
     const profile = JSON.parse(window.sessionStorage.getItem('profile')!);
@@ -58,11 +68,17 @@ const ItemTable: FC<IItemTableProps> = props => {
   return (
     <Fragment>
       <ItemStyles>
-        <Item label="Item Description" labelCol={{ span: 10 }} colon={false}><Input ref={itemDescRef} /></Item>
+        <Item label="Item Description" labelCol={{ span: 10 }} colon={false}>
+          <Select onChange={value => setItemDesc(value)}>
+            {localData?.productDetails.map(productDetail => (
+              <Option key={productDetail.brgcode} value={productDetail.brgcode}>{productDetail.brgdesc}</Option>
+            ))}
+          </Select>
+        </Item>
         <Item label="By" colon={false}><Input ref={byRef} /></Item>
         <Item label="Route" labelCol={{ span: 100 }} colon={false}>
           <Select onChange={value => setRoute(value)}>
-            {routes.map(route => (
+            {localData?.routes.map(route => (
               <Option key={route.rutecode} value={route.rutecode}>{route.rutedesc}</Option>
             ))}
           </Select>

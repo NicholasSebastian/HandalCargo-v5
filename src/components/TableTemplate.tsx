@@ -31,6 +31,7 @@ interface ITemplateProps {
   columns: ColumnsType<object>
   View?: FunctionComponent<IViewProps>
   Form: ComponentType<IFormProps>
+  extraDelete?: Array<string>
   extraData?: (data: Array<Object>) => Array<Object>
   width?: number
 }
@@ -113,26 +114,45 @@ class Template extends Component<ITemplateProps, ITemplateState> {
     });
   }
 
-  handleEdit(entryId: string | number, secondary: boolean) {
+  handleEdit(entry: Object) {
+    const { primaryKey, secondaryKey } = this.props;
     this.setState({
       modal: {
         mode: 'form',
         key: generateKey(),
-        entryId,
-        secondary
+        entryId: entry[primaryKey] || entry[secondaryKey!],
+        secondary: !entry[primaryKey]
       }
     });
   }
 
-  handleDelete(entryId: string | number, secondary: boolean) {
-    const { queries } = this.props;
-    const deleteQuery = secondary ? queries.deleteQueryAlt : queries.deleteQuery;
-    query(deleteQuery, [entryId])
-    .then(() => {
-      message.success(`Entry successfully deleted`);
-      this.refreshTable();
-    })
-    .catch(e => message.success(e.message));
+  handleDelete(entry: Object) {
+    const { queries, primaryKey, secondaryKey, extraDelete } = this.props;
+    const secondary = !entry[primaryKey];
+    
+    const deleteProcess = () => {
+      const entryId = entry[primaryKey] || entry[secondaryKey!];
+      const deleteQuery = secondary ? queries.deleteQueryAlt : queries.deleteQuery;
+      query(deleteQuery, [entryId])
+      .then(() => {
+        message.success(`Entry successfully deleted`);
+        this.refreshTable();
+      })
+      .catch(e => message.success(e.message));
+    }
+
+    const extraProcess = async () => {
+      for (const queryName of extraDelete!) {
+        const queryString = queries[queryName as never];
+        const entryId = secondaryKey ? entry[secondaryKey] : entry[primaryKey];
+        await query(queryString, [entryId]);
+      }
+    }
+
+    if (extraDelete) {
+      extraProcess().then(deleteProcess);
+    }
+    else deleteProcess();
   }
 
   render() {
@@ -161,21 +181,19 @@ class Template extends Component<ITemplateProps, ITemplateState> {
           const onEdit: EditEvent = e => { 
             e.stopPropagation(); 
             const entry = processedData[rowIndex];
-            const key = entry[primaryKey] || entry[secondaryKey!];
-            this.handleEdit(key, !entry[primaryKey]); 
+            this.handleEdit(entry); 
           }
           const onDelete: DeleteEvent = e => {
-            e?.stopPropagation(); 
+            e?.stopPropagation();
             const entry = processedData[rowIndex];
-            const key = entry[primaryKey] || entry[secondaryKey!];
-            this.handleDelete(key, !entry[primaryKey]);
+            this.handleDelete(entry);
           }
           return (
             <Space>
               <Button onClick={onEdit}>Edit</Button>
               <Popconfirm placement="left"
                 title="Are you sure you would like to delete this entry?"
-                onConfirm={onDelete}>
+                onConfirm={onDelete} onCancel={e => e?.stopPropagation()}>
                 <Button onClick={e => e.stopPropagation()}>Delete</Button>
               </Popconfirm>
             </Space>
