@@ -108,5 +108,10 @@
   },
   "staffGroup": {
     "tableQuery": "SELECT `stfgrcode`, `groupname` FROM `staffgroup`"
+  },
+  "companySetup": {
+    "formQuery": "SELECT `companyname`, `address`, `city`, `phone`, `zipcode`, `fax`, `email` FROM `companysetup`",
+    "initializeQuery": "INSERT INTO `companysetup` (`companyname`, `address`, `city`, `phone`, `zipcode`, `fax`, `email`) VALUES (NULL, NULL, NULL, NULL, NULL, NULL, NULL)",
+    "updateQuery": "UPDATE `companysetup` SET `companyname` = ?, `address` = ?, `city` = ?, `phone` = ?, `zipcode` = ?, `fax` = ?, `email` = ?"
   }
 }
