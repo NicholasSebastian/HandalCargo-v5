@@ -1,6 +1,6 @@
 import React, { FC, Fragment, useState, useEffect, useRef } from 'react';
 import styled from "styled-components";
-import { Table, Input, Form, Select, Button, Popconfirm } from 'antd';
+import { Table, Input, Form, Select, Button, Popconfirm, message } from 'antd';
 import { ColumnsType } from 'antd/lib/table';
 import { SelectValue } from 'antd/lib/select';
 import { DownOutlined, DeleteOutlined } from "@ant-design/icons";
@@ -42,22 +42,25 @@ const ItemTable: FC<IItemTableProps> = props => {
   }, [data]);
 
   function handleSubmit() {
-    const by = byRef.current?.state.value;
-    const price = priceRef.current?.state.value;
-    const profile = JSON.parse(window.sessionStorage.getItem('profile')!);
-
-    const newData = {
-      key: data.length,
-      date: null,
-      keteranganbarang: itemDesc,
-      by,
-      rute: route,
-      harga: price,
-      hargaterakhir: null,
-      user: profile.staffid
-    };
-
-    setData([...data, newData]);
+    const by = byRef.current?.state.value as string;
+    if (itemDesc && (by && by.length > 0) && route) {
+      const price = priceRef.current?.state.value;
+      const profile = JSON.parse(window.sessionStorage.getItem('profile')!);
+      const newData = {
+        key: data.length,
+        date: null,
+        keteranganbarang: itemDesc,
+        by,
+        rute: route,
+        harga: price,
+        hargaterakhir: null,
+        user: profile.staffid
+      };
+      setData([...data, newData]);
+    }
+    else {
+      message.error("'Item Description', 'By', and 'Route' fields may not be blank");
+    }
   }
 
   function handleDelete(index: number) {
@@ -108,7 +111,8 @@ export { itemColumns };
 export default ItemTable;
 
 const ItemStyles = styled.div`
-  display: flex;
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr 50px;
   margin-top: 10px;
 
   > * {

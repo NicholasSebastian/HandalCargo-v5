@@ -12,6 +12,8 @@ const { SubMenu, Item } = Menu;
 const { confirm } = Modal;
 const { Password } = Input;
 
+const PASSWORD = "password"; // temporary password
+
 interface ISidebarProps {
   collapse: boolean
   activePage: string
@@ -77,7 +79,7 @@ class Sidebar extends Component<ISidebarProps, ISidebarState> {
       maskClosable: true,
       onOk() {
         const enteredPassword = passwordRef.current!.state.value as string;
-        if (enteredPassword === 'test') { // temporary password
+        if (enteredPassword === PASSWORD) {
           message.success('Access Granted');
           callback();
         }

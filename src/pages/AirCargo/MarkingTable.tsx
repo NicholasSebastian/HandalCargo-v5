@@ -1,6 +1,6 @@
 import React, { FC, Fragment, useRef, useEffect, useState } from 'react';
 import styled from "styled-components";
-import { Table, Input, Select, Form, Button, Popconfirm } from 'antd';
+import { Table, Input, Select, Form, Button, Popconfirm, message } from 'antd';
 import { ColumnsType } from 'antd/lib/table';
 import { SelectValue } from 'antd/lib/select';
 import { DownOutlined, DeleteOutlined } from "@ant-design/icons";
@@ -34,25 +34,28 @@ const MarkingTable: FC<IMarkingTableProps> = props => {
   }, [data]);
 
   function handleSubmit() {
-    const quantity = quantityRef.current?.state.value;
-    const list = listRef.current?.state.value;
-
-    const newData = { 
-      key: data.length,
-      no: null,
-      marking,
-      qty: quantity,
-      'list[kg]': list,
-      'hb[kg]': null,
-      'standart[kg]': null,
-      'vol.charge': null,
-      lunas: false,
-      sisa: null,
-      suratjalan: null,
-      faktur: null
-    };
-    
-    setData([...data, newData]);
+    if (marking) {
+      const quantity = quantityRef.current?.state.value;
+      const list = listRef.current?.state.value;
+      const newData = { 
+        key: data.length,
+        no: null,
+        marking,
+        qty: quantity,
+        'list[kg]': list,
+        'hb[kg]': null,
+        'standart[kg]': null,
+        'vol.charge': null,
+        lunas: false,
+        sisa: null,
+        suratjalan: null,
+        faktur: null
+      };
+      setData([...data, newData]);
+    }
+    else {
+      message.error("'Marking' field may not be blank");
+    }
   }
 
   function handleDelete(index: number) {
@@ -96,7 +99,8 @@ export { markingColumns };
 export default MarkingTable;
 
 const ItemStyles = styled.div`
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 50px;
   margin-top: 10px;
 
   > * {

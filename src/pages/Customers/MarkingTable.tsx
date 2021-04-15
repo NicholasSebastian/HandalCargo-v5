@@ -1,6 +1,6 @@
 import React, { FC, Fragment, useRef } from 'react';
 import styled from "styled-components";
-import { Table, Input, Form, Button, Popconfirm } from 'antd';
+import { Table, Input, Form, Button, Popconfirm , message} from 'antd';
 import { ColumnsType } from 'antd/lib/table';
 import { DownOutlined, DeleteOutlined } from "@ant-design/icons";
 
@@ -16,8 +16,14 @@ const MarkingTable: FC<IMarkingTableProps> = props => {
   const markingRef = useRef<Input>(null);
 
   function handleSubmit() {
-    const marking = markingRef.current?.state.value;
-    setData([ ...data, { key: data.length, marking } ]);
+    const marking = markingRef.current?.state.value as string;
+    if (marking && marking.length > 0) {
+      const newData = { key: data.length, marking };
+      setData([...data, newData]);
+    }
+    else {
+      message.error("'Marking' field may not be blank");
+    }
   }
 
   function handleDelete(index: number) {
@@ -55,6 +61,7 @@ export default MarkingTable;
 
 const ItemStyles = styled.div`
   display: flex;
+  justify-content: center;
   margin-top: 10px;
 
   > * {
