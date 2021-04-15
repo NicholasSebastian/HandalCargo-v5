@@ -12,6 +12,7 @@ import { query, simpleQuery } from '../../utils/query';
 import scrollToTop from '../../utils/scrollModal';
 import { objectMomentToDates, objectDatesToMoment } from '../../utils/momentConverter';
 import isEmpty from '../../utils/isEmptyObject';
+import fillEmptyValues from '../../utils/objectNulling';
 
 import { staff, staffGroup } from '../../Queries.json';
 const { formQuery, insertQuery, updateQuery } = staff;
@@ -82,17 +83,23 @@ class Form extends Component<IFormProps, IFormState> {
 
   handleSubmit(values: any) {
     const { staffId, closeModal } = this.props;
-    const formValues = objectMomentToDates(values);
+    
+    const formValues = fillEmptyValues(values);
+    const formattedValues = objectMomentToDates(formValues);
+
     const encryptedPassword = ipcRenderer.sendSync('encrypt', values.pwd);
+    const { cipherText, initializeVector, salt } = encryptedPassword;
+
     const finalizedValues = { 
-      ...formValues, 
-      pwd: encryptedPassword.cipherText,
-      pwd_iv: encryptedPassword.initializeVector,
-      pwd_salt: encryptedPassword.salt,
+      ...formattedValues, 
+      pwd: cipherText,
+      pwd_iv: initializeVector,
+      pwd_salt: salt,
       profilepic: null,                   // TODO: Images
       profilepic_type: null
     };
     const rawValues = Object.values(finalizedValues);
+
     if (staffId) {
       // Edit form on submit.
       query(updateQuery, [...rawValues, staffId])

@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { Layout, Button, Tooltip, Dropdown, Menu, Modal, Avatar, Popover, Input } from 'antd';
 import { 
   MenuFoldOutlined, MenuUnfoldOutlined, OrderedListOutlined, CalculatorOutlined, MailOutlined,
-  UserOutlined, TranslationOutlined, LogoutOutlined, ExclamationCircleOutlined
+  UserOutlined, TranslationOutlined, BulbOutlined, LogoutOutlined, ExclamationCircleOutlined
 } from '@ant-design/icons';
 
 import Calculator from './Calculator';
@@ -56,7 +56,8 @@ class Header extends PureComponent<IHeaderProps, IHeaderState> {
     const overlay = (
       <Menu>
         <Item onClick={() => this.props.changeToPage('profile')} icon={<UserOutlined/>}>Profile</Item>
-        <Item /* onClick={} */ icon={<TranslationOutlined/>}>Language</Item>
+        <Item icon={<TranslationOutlined/>} disabled>Language</Item>
+        <Item icon={<BulbOutlined />} disabled>Theme</Item>
         <Item onClick={this.handleLogout} icon={<LogoutOutlined/>}>Log Out and Exit</Item>
       </Menu>
     );

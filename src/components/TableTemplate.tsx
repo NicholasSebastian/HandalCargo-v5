@@ -1,4 +1,4 @@
-import React, { Component, FunctionComponent, ComponentType } from 'react';
+import React, { Component, FunctionComponent, ComponentType, Fragment } from 'react';
 import styled from 'styled-components';
 import { Table, Input, Modal, message, Space, Button, Popconfirm } from 'antd';
 import { ColumnsType } from 'antd/lib/table';
@@ -57,7 +57,7 @@ interface IFormProps extends IFormData {
 
 type TViewMode = { mode: "view" } & IViewProps;
 type TFormMode = { mode: "form" } & IFormData;
-type TModal = (TViewMode | TFormMode) & { key?: string | number };
+type TModal = TViewMode | TFormMode;
 
 type EditEvent = React.MouseEventHandler<HTMLElement>;
 type DeleteEvent = (e?: React.MouseEvent<HTMLElement, MouseEvent> | undefined) => void;
@@ -99,7 +99,6 @@ class Template extends Component<ITemplateProps, ITemplateState> {
       this.setState({ 
         modal: {
           mode: "view",
-          key: generateKey(),
           data: entry
         }
       });
@@ -119,7 +118,6 @@ class Template extends Component<ITemplateProps, ITemplateState> {
     this.setState({
       modal: {
         mode: 'form',
-        key: generateKey(),
         entryId: entry[primaryKey] || entry[secondaryKey!],
         secondary: !entry[primaryKey]
       }
@@ -162,10 +160,13 @@ class Template extends Component<ITemplateProps, ITemplateState> {
 
     let modalComponent: JSX.Element | null = null;
     if (modal) {
-      const { key, mode } = modal;
+      const { mode } = modal;
+      const key = generateKey();
       if (View === undefined || mode === 'form') {
         const { entryId, secondary } = modal as never;
-        modalComponent = <Form key={key} entryId={entryId} secondary={secondary} closeModal={this.closeModal} />
+        modalComponent = (
+          <Form key={key} entryId={entryId} secondary={secondary} closeModal={this.closeModal} />
+        );
       }
       else if (mode === 'view') {
         const { data } = modal as never;
@@ -203,7 +204,7 @@ class Template extends Component<ITemplateProps, ITemplateState> {
     ];
 
     return (
-      <>
+      <Fragment>
         <PageEffect function={this.refreshTable} pageKey={pageKey} />
         {processedData.length > 0 ?
         <TemplateStyles>
@@ -224,18 +225,10 @@ class Template extends Component<ITemplateProps, ITemplateState> {
         </TemplateStyles> : <Loading />
         }
         <Modal centered maskClosable width={width || 1250} footer={null}
-          visible={modal !== null} onCancel={this.closeModal}
-          bodyStyle={{ 
-            paddingTop: 30, 
-            paddingBottom: 20, 
-            paddingLeft: 50,
-            paddingRight: 50,
-            maxHeight: '90vh', 
-            overflowY: 'auto' 
-          }}>
+          visible={modal !== null} onCancel={this.closeModal} bodyStyle={ModalStyles}>
           {modalComponent}
         </Modal>
-      </>
+      </Fragment>
     );
   }
 }
@@ -256,3 +249,12 @@ const TemplateStyles = styled.div`
     cursor: pointer;
   }
 `;
+
+const ModalStyles: React.CSSProperties = { 
+  paddingTop: 30, 
+  paddingBottom: 20, 
+  paddingLeft: 50,
+  paddingRight: 50,
+  maxHeight: '90vh', 
+  overflowY: 'auto' 
+}

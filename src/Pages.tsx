@@ -18,7 +18,7 @@ import Expedition from './pages/Expedition';
 import Staff from './pages/Staff/Index';
 import StaffGroups from './pages/StaffGroups';
 import AccessLevels from './pages/AccessLevels';
-import CompanySetup from './pages/CompanySetup';
+import CompanySetup from './pages/CompanySetup/View';
 import Mail from './pages/Mail';
 
 const pages: Array<IPage> = [

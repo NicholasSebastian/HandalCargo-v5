@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import styled from 'styled-components';
 import { List, Button, Modal, Input, message, Popconfirm } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
@@ -35,14 +35,12 @@ interface ITemplateProps {
 interface ITemplateState {
   listData: Array<IListEntry>
   search: string
-  modal: TModal | null
+  modal: IFormData | null
 }
 
 interface IFormData {
   entryId?: string | number
 }
-
-type TModal = IFormData & { key?: string | number };
 
 class Template extends Component<ITemplateProps, ITemplateState> {
   constructor(props: ITemplateProps) {
@@ -78,18 +76,11 @@ class Template extends Component<ITemplateProps, ITemplateState> {
   }
 
   handleAdd() {
-    this.setState({ 
-      modal: {} 
-    });
+    this.setState({ modal: {} });
   }
 
   handleEdit(entryId: string | number) {
-    this.setState({ 
-      modal: {
-        key: generateKey(),
-        entryId
-      }
-    });
+    this.setState({ modal: { entryId } });
   }
 
   handleDelete(entryId: string | number) {
@@ -104,18 +95,19 @@ class Template extends Component<ITemplateProps, ITemplateState> {
 
   render() {
     const { queries, formItems } = this.props;
+    const { modal } = this.state;
     
     let modalComponent: JSX.Element | null = null;
-    if (this.state.modal) {
-      modalComponent = 
-        <Form {...this.state.modal} 
-          closeModal={this.closeModal} 
-          queries={queries} 
-          formItems={formItems} />
+    if (modal) {
+      const key = generateKey();
+      modalComponent = (
+        <Form key={key} {...modal} closeModal={this.closeModal} 
+          queries={queries} formItems={formItems} />
+      );
     }
 
     return (
-      <>
+      <Fragment>
         <PageEffect function={this.refreshList} pageKey={this.props.pageKey} />
         <TemplateStyles>
           <div>
@@ -151,12 +143,11 @@ class Template extends Component<ITemplateProps, ITemplateState> {
             )} />
         </TemplateStyles>
         <Modal centered maskClosable width={600} footer={null}
-          bodyStyle={{ paddingTop: 55 }}
-          visible={this.state.modal !== null}
+          bodyStyle={{ paddingTop: 55 }} visible={this.state.modal !== null}
           onCancel={this.closeModal}>
           {modalComponent}
         </Modal>
-      </>
+      </Fragment>
     );
   }
 }

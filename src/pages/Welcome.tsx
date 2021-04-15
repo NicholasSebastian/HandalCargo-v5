@@ -1,23 +1,27 @@
-import React, { PureComponent } from 'react';
+import React, { FC, useState, useRef } from 'react';
 import styled from 'styled-components';
 import { Typography } from 'antd';
 
 import { IProfile } from '../components/ProfileTemplate';
+import PageEffect from '../components/PageEffect';
 
 const { Title } = Typography;
 
-class Welcome extends PureComponent {
-  render() {
-    const profile: IProfile = JSON.parse(window.sessionStorage.getItem('profile')!); 
-    const currentTime = new Date().toLocaleTimeString();
+const Welcome: FC = () => {
+  const profile = useRef<IProfile>(JSON.parse(window.sessionStorage.getItem('profile')!));
+  const [time, setTime] = useState<string>();
 
-    return (
-      <WelcomeStyles>
-        <Title>{currentTime}</Title>
-        <Title level={4}>Welcome {profile.staffname}</Title>
-      </WelcomeStyles>
-    );
+  function refreshTime() {
+    setTime(new Date().toLocaleTimeString());
   }
+
+  return (
+    <WelcomeStyles>
+      <PageEffect pageKey='welcome' function={refreshTime} />
+      <Title>{time}</Title>
+      <Title level={4}>Welcome {profile.current.staffname}</Title>
+    </WelcomeStyles>
+  );
 }
 
 export default Welcome;

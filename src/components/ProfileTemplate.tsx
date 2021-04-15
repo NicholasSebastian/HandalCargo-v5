@@ -49,31 +49,33 @@ class Template extends PureComponent<ITemplateProps, {}> {
     return (
       <TemplateStyles>
         <Card title="Account Details">
-          <Descriptions labelStyle={{ fontWeight: 500 }} bordered size='small' column={2}>
+          <Descriptions labelStyle={LabelStyles} bordered size='small' column={2}>
             <Item label="Username" span={2}>{profile.staffid}</Item>
             <Item label="Access Level">{profile.level}</Item>
             <Item label="Status">{profile.status ? active : inactive}</Item>
           </Descriptions>
         </Card>
         <Card title="Personal Information">
-          <Descriptions title="Personal Details" labelStyle={{ fontWeight: 500 }} bordered size='small'>
-            <Item label="Full Name" span={2}>{profile.staffname}</Item>
+          <Descriptions title="Personal Details" 
+            labelStyle={LabelStyles} bordered size='small' column={2}>
+            <Item label="Full Name">{profile.staffname}</Item>
             <Item label="Gender">{profile.gender ? 'Male' : 'Female'}</Item>
             <Item label="Phone Number">{profile.phonenum || 'Unknown'}</Item>
-            <Item label="Address" span={2}>{profile.address1 || 'Unknown'}</Item>
+            <Item label="Address">{profile.address1 || 'Unknown'}</Item>
             <Item label="City">{profile.city || 'Unknown'}</Item>
-            <Item label="District" span={2}>{profile.district || 'Unknown'}</Item>
+            <Item label="District">{profile.district || 'Unknown'}</Item>
             <Item label="Place of Birth">{profile.placeofbirth || 'Unknown'}</Item>
             <Item label="Date of Birth">{profile.dateofbirth?.toDateString() || 'Unknown'}</Item>
           </Descriptions>
-          <Descriptions title="Work Details" labelStyle={{ fontWeight: 500 }} bordered size='small'>
+          <Descriptions title="Work Details" 
+            labelStyle={LabelStyles} bordered size='small' column={2}>
             <Item label="Job Category">{profile.groupname}</Item>
             <Item label="Employment Date">{profile.dateofemployment?.toDateString() || 'Unknown'}</Item>
           </Descriptions>
         </Card>
         {this.props.showSalary &&
         <Card title="Salary Details">
-          <Descriptions labelStyle={{ fontWeight: 500 }} bordered size='small' column={2}>
+          <Descriptions labelStyle={LabelStyles} bordered size='small' column={2}>
             <Item label="Salary" span={2}>{profile.salary || 'Unknown'}</Item>
             <Item label="Overtime Pay">{profile.othr || 'Unknown'}</Item>
             <Item label="Meal Allowance">{profile.foodallowance || 'Unknown'}</Item>
@@ -97,3 +99,8 @@ const TemplateStyles = styled.div`
     > div:first-child { margin-bottom: 20px; }
   }
 `;
+
+const LabelStyles: React.CSSProperties = { 
+  fontWeight: 500, 
+  width: '150px' 
+};

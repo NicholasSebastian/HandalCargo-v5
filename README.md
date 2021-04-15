@@ -5,20 +5,25 @@ Uses Ant Design for UI components.
 
 ## To Do List
 
-### Content
+### Main Features
 
 - Invoice Entry
 - Payment
-- Company Setup
+- Payroll (Generate Reports and Printing)
 
 ### Extra Features
 
+#### More likely to be added
+
 - Dashboard
-- Language (English / Indonesian)
+- Backup and Restore
 - Images for Profiles
 - Local Messages
-- Backup and Restore?
-- Shortcuts?
+
+#### Less likely to be added
+
+- Shortcuts
+- Change account level access restriction password.
 
 ### Known Bugs and Issues
 
