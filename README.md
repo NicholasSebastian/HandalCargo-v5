@@ -27,10 +27,6 @@ Uses Ant Design for UI components.
 
 ### Known Bugs and Issues
 
-#### Top Priority Issues
-
-- Customer form has problems with the 'status' switch component returning null.
-
 #### Mid Priority Issues
 
 - Prevent new Marking Table and Item Table entries from being added with empty values.
