@@ -55,7 +55,7 @@ const Conversation: FC<IConversationProps> = props => {
     query(sendQuery, [value, user, sender])
     .then(() => {
       refresh();
-      scrollToBottom();
+      setTimeout(scrollToBottom, 100);
     })
     .catch(() => message.error("Failed to send message"));
   }

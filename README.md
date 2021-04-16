@@ -20,5 +20,4 @@ Uses Ant Design for UI components.
 
 ### Issues
 
-- Sea freight markings error.
 - Customer markings cannot 'delete then insert' for updating values, foreign key constraints.
