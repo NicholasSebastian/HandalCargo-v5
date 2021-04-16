@@ -113,5 +113,11 @@
     "formQuery": "SELECT `companyname`, `address`, `city`, `phone`, `zipcode`, `fax`, `email` FROM `companysetup`",
     "initializeQuery": "INSERT INTO `companysetup` (`companyname`, `address`, `city`, `phone`, `zipcode`, `fax`, `email`) VALUES (NULL, NULL, NULL, NULL, NULL, NULL, NULL)",
     "updateQuery": "UPDATE `companysetup` SET `companyname` = ?, `address` = ?, `city` = ?, `phone` = ?, `zipcode` = ?, `fax` = ?, `email` = ?"
+  },
+  "messages": {
+    "contactsQuery": "SELECT `staffid`, `staffname` FROM `staff` WHERE `staffid` != ?",
+    "messageQuery": "SELECT `message`, `datetime`, `sender`, `receiver` FROM `messages` WHERE `sender` = ? OR `receiver` = ?",
+    "sendQuery": "INSERT INTO `messages` (`message`, `sender`, `receiver`, `datetime`) VALUES (?, ?, ?, NOW())",
+    "clearQuery": "DELETE FROM `messages` WHERE DATE(`datetime`) < DATE(NOW() - INTERVAL 7 DAY)"
   }
 }

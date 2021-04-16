@@ -13,14 +13,7 @@ Uses Ant Design for UI components.
 
 ### Extra Features
 
-#### More likely to be added
-
 - Dashboard
-- Backup and Restore
 - Images for Profiles
-- Local Messages
-
-#### Less likely to be added
-
 - Shortcuts
-- Change account level access restriction password.
+- Backup and Restore?
