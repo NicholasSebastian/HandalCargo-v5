@@ -27,7 +27,7 @@
     "updateQuery": "UPDATE `customers` SET `customerid` = ?, `customername` = ?, `company` = ?, `address1` = ?, `city1` = ?, `postalcode1` = ?, `address2` = ?, `city2` = ?, `postalcode2` = ?, `officephone1` = ?, `officephone2` = ?, `mobilephone1` = ?, `mobilephone2` = ?, `homephone` = ?, `fax` = ?, `email` = ?, `contactperson1` = ?, `contactperson2` = ?, `sizedesc` = ?, `courierdesc` = ?, `others` = ?, `status` = ? WHERE `customerid` = ?",
     "deleteQuery": "DELETE FROM `customermarking` WHERE `marking` = ?",
     "deleteQueryAlt": "DELETE FROM `customers` WHERE `customerid` = ?",
-    "markingQuery": "SELECT `marking` FROM `customermarking` WHERE `marking` NOT IN (SELECT `marking` FROM `aircargomarking` UNION ALL SELECT `marking` FROM `seafreightmarking`)",
+    "markingQuery": "SELECT `marking` FROM `customermarking`",
     "markingTableQuery": "SELECT `marking` FROM `customermarking` WHERE `customerid` = ?",
     "markingInsertQuery": "INSERT INTO `customermarking` (`customerid`, `marking`) VALUES (?, ?)",
     "markingDeleteQuery": "DELETE FROM `customermarking` WHERE `customerid` = ?",

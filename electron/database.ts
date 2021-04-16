@@ -60,7 +60,7 @@ class Connection {
   }
 
   public query (event: Electron.IpcMainEvent, query: string, replyKey: string): void {
-    console.log(`Querying: ${query}`);
+    console.log(`\nQuerying: ${query}`);
     if (this.connection?.isValid()) {
       this.connection.query(query)
         .then((data: Array<any>) => {
@@ -78,7 +78,7 @@ class Connection {
   }
 
   public queryWithValues (event: Electron.IpcMainEvent, query: string, values: Array<string>, replyKey: string): void {
-    console.log(`Querying: ${query}\nWith Values: ${values}`);
+    console.log(`\nQuerying: ${query}\nWith Values: ${values}`);
     if (this.connection?.isValid()) {
       this.connection.query(query, values)
         .then((data: Array<any>) => {

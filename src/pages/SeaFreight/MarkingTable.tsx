@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { Table, Input, Select, Form, Button, Popconfirm, message } from 'antd';
 import { ColumnsType } from 'antd/lib/table';
 import { SelectValue } from 'antd/lib/select';
-import { DownOutlined, DeleteOutlined } from "@ant-design/icons";
+import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 
 import { simpleQuery } from '../../utils/query';
 
@@ -36,28 +36,33 @@ const MarkingTable: FC<MarkingTableProps> = props => {
 
   function handleSubmit() {
     if (marking) {
-      const quantity = quantityRef.current?.state.value;
-      const listM3 = listM3Ref.current?.state.value;
-      const listKg = listKgRef.current?.state.value;
-      const newData = {
-        key: data.length,
-        no: null,
-        marking,
-        qty: quantity,
-        'list[m3]': listM3,
-        'list[kg]': listKg,
-        'dlist[m3]': null,
-        'dlist[kg]': null,
-        'hb[m3]': null,
-        'hb[kg]': null,
-        'cust[m3]': null,
-        'cust[kg]': null,
-        lunas: false,
-        sisa: null,
-        suratjalan: null,
-        faktur: null
-      };
-      setData([...data, newData]);
+      if (data.find(d => d.marking === marking)) {
+        message.error("Cannot have duplicate markings in the same entry");
+      }
+      else {
+        const quantity = quantityRef.current?.state.value;
+        const listM3 = listM3Ref.current?.state.value;
+        const listKg = listKgRef.current?.state.value;
+        const newData = {
+          key: data.length,
+          no: null,
+          marking,
+          qty: quantity,
+          'list[m3]': listM3,
+          'list[kg]': listKg,
+          'dlist[m3]': null,
+          'dlist[kg]': null,
+          'hb[m3]': null,
+          'hb[kg]': null,
+          'cust[m3]': null,
+          'cust[kg]': null,
+          lunas: false,
+          sisa: null,
+          suratjalan: null,
+          faktur: null
+        };
+        setData([...data, newData]);
+      }
     }
     else {
       message.error("'Marking' field may not be blank");
@@ -82,7 +87,7 @@ const MarkingTable: FC<MarkingTableProps> = props => {
         <Item label="Quantity" colon={false}><Input ref={quantityRef} type='number' /></Item>
         <Item label="List [m3]" colon={false}><Input ref={listM3Ref} type='number' /></Item>
         <Item label="List [Kg]" colon={false}><Input ref={listKgRef} type='number' /></Item>
-        <Button type="default" htmlType="button" icon={<DownOutlined />} onClick={handleSubmit} />
+        <Button type="default" htmlType="button" icon={<PlusOutlined />} onClick={handleSubmit} />
       </ItemStyles>
       <Table pagination={false}
         dataSource={data} size='small' 

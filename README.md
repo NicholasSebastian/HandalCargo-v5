@@ -17,3 +17,8 @@ Uses Ant Design for UI components.
 - Images for Profiles
 - Shortcuts
 - Backup and Restore?
+
+### Issues
+
+- Sea freight markings error.
+- Customer markings cannot 'delete then insert' for updating values, foreign key constraints.

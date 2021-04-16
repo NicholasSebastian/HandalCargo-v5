@@ -53,7 +53,7 @@ class Notes extends Component {
             </Item>
           )} />
         <AddButtonStyles>
-          <Input ref={this.inputRef} />
+          <Input ref={this.inputRef} maxLength={45} />
           <Button icon={<PlusOutlined />}
             onClick={() => this.handleAdd(this.inputRef.current?.state.value)} />
         </AddButtonStyles>

@@ -2,7 +2,7 @@ import React, { FC, Fragment, useRef } from 'react';
 import styled from "styled-components";
 import { Table, Input, Form, Button, Popconfirm , message} from 'antd';
 import { ColumnsType } from 'antd/lib/table';
-import { DownOutlined, DeleteOutlined } from "@ant-design/icons";
+import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 
 const { Item } = Form;
 
@@ -18,8 +18,13 @@ const MarkingTable: FC<IMarkingTableProps> = props => {
   function handleSubmit() {
     const marking = markingRef.current?.state.value as string;
     if (marking && marking.length > 0) {
-      const newData = { key: data.length, marking };
-      setData([...data, newData]);
+      if (data.find(d => d.marking === marking)) {
+        message.error("Cannot have duplicate markings in the same entry");
+      }
+      else {
+        const newData = { key: data.length, marking };
+        setData([...data, newData]);
+      }
     }
     else {
       message.error("'Marking' field may not be blank");
@@ -35,7 +40,7 @@ const MarkingTable: FC<IMarkingTableProps> = props => {
     <Fragment>
       <ItemStyles>
         <Item label="Marking" colon={false}><Input ref={markingRef} /></Item>
-        <Button type="default" htmlType="button" icon={<DownOutlined />} onClick={handleSubmit} />
+        <Button type="default" htmlType="button" icon={<PlusOutlined />} onClick={handleSubmit} />
       </ItemStyles>
       <Table pagination={false}
         dataSource={data} size='small'

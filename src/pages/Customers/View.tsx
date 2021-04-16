@@ -2,17 +2,19 @@ import React, { FC, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Card, Descriptions, Table } from 'antd';
 
-import { query } from '../../utils/query';
+import { query, simpleQuery } from '../../utils/query';
 import { IViewProps } from '../../components/TableTemplate';
 import { markingColumns } from './MarkingTable';
 import { itemColumns } from './ItemTable';
 
-import { customers } from '../../Queries.json';
+import { customers, productDetails } from '../../Queries.json';
 const { markingTableQuery: markingQuery, itemTableQuery: itemQuery } = customers;
+const { tableQuery: productDetailQuery } = productDetails;
 
 interface IViewState {
   markingData: Array<any>
   itemData: Array<any>
+  productDetails: Array<any>
 }
 
 const View: FC<IViewProps> = props => {
@@ -25,7 +27,8 @@ const View: FC<IViewProps> = props => {
     (async () => {
       const markingData = await query(markingQuery, [primaryKey]) as Array<any>;
       const itemData = await query(itemQuery, [primaryKey]) as Array<any>;
-      setExtraData({ markingData, itemData });
+      const productDetails = await simpleQuery(productDetailQuery) as Array<any>;
+      setExtraData({ markingData, itemData, productDetails });
     })();
   }, []);
 
@@ -71,7 +74,14 @@ const View: FC<IViewProps> = props => {
       </Card>
       <Card title="Items">
         <Table size='small' pagination={false}
-          columns={itemColumns}
+          columns={[
+            {
+              title: 'Item Description',
+              dataIndex: 'keteranganbarang',
+              render: (itemcode) => extraData?.productDetails.find(pd => pd.brgcode === itemcode).brgdesc
+            },
+            ...itemColumns
+          ]}
           dataSource={itemDataWithKeys}
           loading={extraData === null} />
       </Card>

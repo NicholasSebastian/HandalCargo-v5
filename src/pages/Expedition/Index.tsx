@@ -18,49 +18,42 @@ const Expedition: FC = () => {
     <Template width={600}
       pageKey="expeditions"
       primaryKey="expedisicode"
+      searchKey="expedisiname"
       queries={expedition}
       Form={Form}
       columns={[
         {
           title: "Expedition Code",
-          dataIndex: "expedisicode",
-          key: "expedisicode"
+          dataIndex: "expedisicode"
         },
         {
           title: "Name",
-          dataIndex: "expedisiname",
-          key: "expedisiname"
+          dataIndex: "expedisiname"
         },
         {
           title: "Route Name",
           dataIndex: "ruteid",
-          key: "ruteid",
           render: (routeid: number) => routes?.find(route => route.rutecode === routeid)?.rutedesc
         },
         {
           title: "Address",
-          dataIndex: "alamat",
-          key: "alamat"
+          dataIndex: "alamat"
         },
         {
           title: "Phone 1",
-          dataIndex: "phone1",
-          key: "phone1"
+          dataIndex: "phone1"
         },
         {
           title: "Phone 2",
-          dataIndex: "phone2",
-          key: "phone2"
+          dataIndex: "phone2"
         },
         {
           title: "Fax",
-          dataIndex: "fax",
-          key: "fax"
+          dataIndex: "fax"
         },
         {
           title: "Description",
-          dataIndex: "keterangan",
-          key: "keterangan"
+          dataIndex: "keterangan"
         }
       ]} />
   );

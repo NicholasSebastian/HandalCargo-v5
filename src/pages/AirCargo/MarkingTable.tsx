@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { Table, Input, Select, Form, Button, Popconfirm, message } from 'antd';
 import { ColumnsType } from 'antd/lib/table';
 import { SelectValue } from 'antd/lib/select';
-import { DownOutlined, DeleteOutlined } from "@ant-design/icons";
+import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 
 import { simpleQuery } from '../../utils/query';
 
@@ -35,23 +35,28 @@ const MarkingTable: FC<IMarkingTableProps> = props => {
 
   function handleSubmit() {
     if (marking) {
-      const quantity = quantityRef.current?.state.value;
-      const list = listRef.current?.state.value;
-      const newData = { 
-        key: data.length,
-        no: null,
-        marking,
-        qty: quantity,
-        'list[kg]': list,
-        'hb[kg]': null,
-        'standart[kg]': null,
-        'vol.charge': null,
-        lunas: false,
-        sisa: null,
-        suratjalan: null,
-        faktur: null
-      };
-      setData([...data, newData]);
+      if (data.find(d => d.marking === marking)) {
+        message.error("Cannot have duplicate markings in the same entry");
+      }
+      else {
+        const quantity = quantityRef.current?.state.value;
+        const list = listRef.current?.state.value;
+        const newData = { 
+          key: data.length,
+          no: null,
+          marking,
+          qty: quantity,
+          'list[kg]': list,
+          'hb[kg]': null,
+          'standart[kg]': null,
+          'vol.charge': null,
+          lunas: false,
+          sisa: null,
+          suratjalan: null,
+          faktur: null
+        };
+        setData([...data, newData]);
+      }
     }
     else {
       message.error("'Marking' field may not be blank");
@@ -75,7 +80,7 @@ const MarkingTable: FC<IMarkingTableProps> = props => {
         </Item>
         <Item label="Quantity" colon={false}><Input ref={quantityRef} type='number' /></Item>
         <Item label="List [Kg]" colon={false}><Input ref={listRef} type='number' /></Item>
-        <Button type="default" htmlType="button" icon={<DownOutlined />} onClick={handleSubmit} />
+        <Button type="default" htmlType="button" icon={<PlusOutlined />} onClick={handleSubmit} />
       </ItemStyles>
       <Table pagination={false}
         dataSource={data} size='small' 

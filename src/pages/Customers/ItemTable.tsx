@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { Table, Input, Form, Select, Button, Popconfirm, message } from 'antd';
 import { ColumnsType } from 'antd/lib/table';
 import { SelectValue } from 'antd/lib/select';
-import { DownOutlined, DeleteOutlined } from "@ant-design/icons";
+import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 
 import { simpleQuery } from '../../utils/query';
 
@@ -44,19 +44,24 @@ const ItemTable: FC<IItemTableProps> = props => {
   function handleSubmit() {
     const by = byRef.current?.state.value as string;
     if (itemDesc && (by && by.length > 0) && route) {
-      const price = priceRef.current?.state.value;
-      const profile = JSON.parse(window.sessionStorage.getItem('profile')!);
-      const newData = {
-        key: data.length,
-        date: null,
-        keteranganbarang: itemDesc,
-        by,
-        rute: route,
-        harga: price,
-        hargaterakhir: null,
-        user: profile.staffid
-      };
-      setData([...data, newData]);
+      if (data.find(d => d.keteranganbarang === itemDesc)) {
+        message.error("Cannot have duplicate markings in the same entry");
+      }
+      else {
+        const price = priceRef.current?.state.value;
+        const profile = JSON.parse(window.sessionStorage.getItem('profile')!);
+        const newData = {
+          key: data.length,
+          date: null,
+          keteranganbarang: itemDesc,
+          by,
+          rute: route,
+          harga: price,
+          hargaterakhir: null,
+          user: profile.staffid
+        };
+        setData([...data, newData]);
+      }
     }
     else {
       message.error("'Item Description', 'By', and 'Route' fields may not be blank");
@@ -87,11 +92,16 @@ const ItemTable: FC<IItemTableProps> = props => {
           </Select>
         </Item>
         <Item label="Price" colon={false}><Input ref={priceRef} type='number' /></Item>
-        <Button type="default" htmlType="button" icon={<DownOutlined />} onClick={handleSubmit} />
+        <Button type="default" htmlType="button" icon={<PlusOutlined />} onClick={handleSubmit} />
       </ItemStyles>
       <Table pagination={false}
         dataSource={data} size='small'
         columns={[
+          {
+            title: 'Item Description',
+            dataIndex: 'keteranganbarang',
+            render: (itemcode) => localData?.productDetails.find(pd => pd.brgcode === itemcode).brgdesc
+          },
           ...itemColumns,
           {
             render: (value, row, index) => (
@@ -124,10 +134,6 @@ const itemColumns: ColumnsType<object> = [
   {
     title: 'Date',
     dataIndex: 'date'
-  },
-  {
-    title: 'Item Description',
-    dataIndex: 'keteranganbarang'
   },
   {
     title: 'By',

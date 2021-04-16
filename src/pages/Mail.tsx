@@ -37,10 +37,11 @@ interface IMailState {
 interface IConversationProps {
   data: IGroupedMessage
   refresh: () => void
+  scrollToBottom: () => void
 }
 
 const Conversation: FC<IConversationProps> = props => {
-  const { data, refresh } = props;
+  const { data, refresh, scrollToBottom } = props;
   const { sender, name, image, messages } = data;
   const inputRef = useRef<Input>(null);
 
@@ -52,7 +53,10 @@ const Conversation: FC<IConversationProps> = props => {
     inputRef.current?.setState({ value: '' });
 
     query(sendQuery, [value, user, sender])
-    .then(() => refresh())
+    .then(() => {
+      refresh();
+      scrollToBottom();
+    })
     .catch(() => message.error("Failed to send message"));
   }
 
@@ -65,7 +69,7 @@ const Conversation: FC<IConversationProps> = props => {
   const timeFormat: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit' };
   return (
     <InnerStyles>
-      <Content>
+      <Content className='chat-body'>
         <span>Chat history is only kept for 7 days.</span>
         {messages.map((msg, i) => {
           const timeSent = msg.datetime.toLocaleTimeString(navigator.language, timeFormat);
@@ -89,7 +93,7 @@ const Conversation: FC<IConversationProps> = props => {
         })}
       </Content>
       <Footer>
-        <Input ref={inputRef} onKeyDown={handleKeyDown} />
+        <Input ref={inputRef} maxLength={100} onKeyDown={handleKeyDown} />
         <Button icon={<SendOutlined />} onClick={handleSubmit} />
       </Footer>
     </InnerStyles>
@@ -108,6 +112,7 @@ class Mail extends Component<never, IMailState> {
     };
     this.refreshMessages = this.refreshMessages.bind(this);
     this.groupMessages = this.groupMessages.bind(this);
+    this.scrollBottom = this.scrollBottom.bind(this);
     
     const profile = JSON.parse(window.sessionStorage.getItem('profile')!);
     this.user = profile.staffid;
@@ -146,6 +151,11 @@ class Mail extends Component<never, IMailState> {
     });
   }
 
+  scrollBottom() {
+    const chatBody = document.getElementsByClassName('chat-body')[0];
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }
+
   render() {
     const { messagebox, current } = this.state;
     const openMessages = current && messagebox.find(msg => msg.sender === current);
@@ -162,14 +172,18 @@ class Mail extends Component<never, IMailState> {
             <Title level={5}>Staff Contacts</Title>
             <Menu mode='inline' theme='light' 
               selectedKeys={current ? [current] : undefined}
-              onClick={({ key }) => this.setState({ current: key as string })}>
+              onClick={({ key }) => {
+                this.setState({ current: key as string });
+                setTimeout(this.scrollBottom, 5);
+              }}>
               {messagebox.map(entry => (
                 <Item key={entry.sender}>{entry.sender}</Item>
               ))}
             </Menu>
           </Sider>
           {current ? (
-            <Conversation data={openMessages as never} refresh={this.refreshMessages} />
+            <Conversation data={openMessages as never} refresh={this.refreshMessages}
+              scrollToBottom={this.scrollBottom} />
           ) : NotOpen}
         </MailStyles>
       </Fragment>
@@ -194,6 +208,7 @@ const InnerStyles = styled(Layout)`
   > main {
     background-color: #fff;
     padding: 0 20px;
+    overflow-y: scroll;
 
     > span:first-child {
       display: block;
@@ -204,7 +219,7 @@ const InnerStyles = styled(Layout)`
     }
 
     > div {
-      margin-top: 5px;
+      margin-bottom: 5px;
       display: flex;
 
       > div {
