@@ -24,9 +24,3 @@ Uses Ant Design for UI components.
 
 - Shortcuts
 - Change account level access restriction password.
-
-### Known Bugs and Issues
-
-- Calculator should automatically focus on Input when opened.
-- Inputting long text in the To-Do-List Input gets covered by the plus icon.
-- Replace Encryption.json with a local environment variable.

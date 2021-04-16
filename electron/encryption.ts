@@ -1,5 +1,4 @@
 import { encrypt, decrypt } from 'sjcl'
-import { key } from './Encryption.json'
 
 // I honestly know nothing about security and encryption so...
 
@@ -13,7 +12,8 @@ const params = { // default parameters, taken out to save space on DB.
 }
 
 export function customEncrypt (message: string): Encrypted {
-  const encrypted = encrypt(key, message)
+  const key = process.env.ENCRYPTION_KEY
+  const encrypted = encrypt(key!, message)
   const encryptedObject = JSON.parse(encrypted as unknown as string)
   return {
     cipherText: encryptedObject.ct,
@@ -23,6 +23,7 @@ export function customEncrypt (message: string): Encrypted {
 }
 
 export function customDecrypt (crypted: Encrypted): string {
+  const key = process.env.ENCRYPTION_KEY
   const encryptedObject = {
     ct: crypted.cipherText,
     iv: crypted.initializeVector,
@@ -30,7 +31,7 @@ export function customDecrypt (crypted: Encrypted): string {
     ...params
   }
   const encrypted = JSON.stringify(encryptedObject)
-  const decrypted = decrypt(key, encrypted)
+  const decrypted = decrypt(key!, encrypted)
   return decrypted
 }
 

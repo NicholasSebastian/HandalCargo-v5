@@ -98,7 +98,7 @@ class Form extends Component<IFormProps, IFormState> {
       // Initialize 'edit' form values.
       const data = await query(formQuery, [entryId]) as Array<any>;
       const entry = data[0];
-      const markingData = await query(markingTableQuery, [entry.container]) as Array<any>;
+      const markingData = await query(markingTableQuery, [entry.nocontainer]) as Array<any>;
       const markingDataWithKeys = markingData.map((entry, i) => ({ key: i, ...entry }));
       this.setState({ 
         initialData: entry,

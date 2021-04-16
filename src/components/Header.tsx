@@ -7,7 +7,6 @@ import {
   UserOutlined, TranslationOutlined, BulbOutlined, LogoutOutlined, ExclamationCircleOutlined
 } from '@ant-design/icons';
 
-import Calculator from './Calculator';
 import Notes from './Notes';
 
 const { Header: AntHeader } = Layout;
@@ -23,8 +22,6 @@ interface IHeaderProps {
 interface IHeaderState {
   notesTooltip: boolean
   notesVisible: boolean
-  calculatorTooltip: boolean
-  calculatorVisible: boolean
 }
 
 class Header extends PureComponent<IHeaderProps, IHeaderState> {
@@ -32,9 +29,7 @@ class Header extends PureComponent<IHeaderProps, IHeaderState> {
     super(props);
     this.state = {
       notesTooltip: false,
-      notesVisible: false,
-      calculatorTooltip: false,
-      calculatorVisible: false
+      notesVisible: false
     };
   }
 
@@ -74,14 +69,6 @@ class Header extends PureComponent<IHeaderProps, IHeaderState> {
             <Tooltip title="Notes" visible={this.state.notesTooltip} 
               onVisibleChange={e => this.setState({ notesTooltip: this.state.notesVisible ? false : e })}>
               <Button type="text" icon={<OrderedListOutlined />} />
-            </Tooltip>
-          </Popover>
-          <Popover content={<Calculator visible={this.state.calculatorVisible} />} 
-            placement='bottom' trigger='click' visible={this.state.calculatorVisible}
-            onVisibleChange={e => this.setState({ calculatorVisible: e, calculatorTooltip: false })}>
-            <Tooltip title="Calculator" visible={this.state.calculatorTooltip} 
-              onVisibleChange={e => this.setState({ calculatorTooltip: this.state.calculatorVisible ? false : e })}>
-              <Button type="text" icon={<CalculatorOutlined />} />
             </Tooltip>
           </Popover>
           <Tooltip title="Mail">

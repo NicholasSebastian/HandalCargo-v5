@@ -54,7 +54,7 @@ class Notes extends Component {
           )} />
         <AddButtonStyles>
           <Input ref={this.inputRef} />
-          <Button type='text' icon={<PlusOutlined />}
+          <Button icon={<PlusOutlined />}
             onClick={() => this.handleAdd(this.inputRef.current?.state.value)} />
         </AddButtonStyles>
       </Space>
@@ -65,10 +65,9 @@ class Notes extends Component {
 export default Notes;
 
 const AddButtonStyles = styled.div`
-  > button {
-    position: absolute;
-    right: 20px;
-  }
+  display: grid;
+  grid-template-columns: 1fr 32px;
+  column-gap: 4px;
 `;
 
 const StyledButton = styled.button`

@@ -1,4 +1,5 @@
 import { app, ipcMain } from 'electron'
+import dotenv from 'dotenv'
 
 import Window from './window'
 import Connection from './database'
@@ -7,6 +8,7 @@ import { customEncrypt, customDecrypt } from './encryption'
 export let windowInstance: Window
 export let connectionInstance: Connection
 
+dotenv.config()
 app.on('ready', () => {
   windowInstance = new Window()
 

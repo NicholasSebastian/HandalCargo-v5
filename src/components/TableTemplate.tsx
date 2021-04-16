@@ -1,6 +1,6 @@
 import React, { Component, FunctionComponent, ComponentType, Fragment } from 'react';
 import styled from 'styled-components';
-import { Table, Input, Modal, message, Space, Button, Popconfirm } from 'antd';
+import { Typography, Table, Input, Modal, message, Space, Button, Popconfirm } from 'antd';
 import { ColumnsType } from 'antd/lib/table';
 import { PlusOutlined } from '@ant-design/icons';
 import { v4 as generateKey } from 'uuid';
@@ -10,6 +10,7 @@ import { simpleQuery, query } from '../utils/query';
 import PageEffect from './PageEffect';
 import Loading from './Loading';
 
+const { Text } = Typography;
 const { Search } = Input;
 
 type Object = { [key: string]: any }
@@ -158,6 +159,10 @@ class Template extends Component<ITemplateProps, ITemplateState> {
     const { tableData, modal, search } = this.state;
     const processedData = extraData ? extraData(tableData) : tableData;
 
+    const dataSource = processedData.filter((entry: Object) => (
+      new RegExp(search, 'i').test(entry[searchKey || primaryKey])
+    ));
+
     let modalComponent: JSX.Element | null = null;
     if (modal) {
       const { mode } = modal;
@@ -210,13 +215,12 @@ class Template extends Component<ITemplateProps, ITemplateState> {
         <TemplateStyles>
           <Search placeholder="Search" allowClear style={{ width: 300 }}
             onSearch={value => this.setState({ search: value })} />
-          <br />
-          <Button icon={<PlusOutlined />} onClick={this.handleAdd}>Add Record</Button> 
+          <div>
+            <Text>Query returned {dataSource.length} results.</Text>
+            <Button icon={<PlusOutlined />} onClick={this.handleAdd}>Add Record</Button> 
+          </div>
           <Table columns={columns} size='small' pagination={false}
-            dataSource={processedData.filter((entry: Object) => (
-              new RegExp(search, 'i').test(entry[searchKey || primaryKey])
-            ))}
-            onRow={(record, rowIndex) => ({
+            dataSource={dataSource} onRow={(record, rowIndex) => ({
               onClick: View && (e => {
                 const key = record[primaryKey] || record[secondaryKey!];
                 this.handleView(key, !record[primaryKey]);
@@ -241,8 +245,20 @@ const TemplateStyles = styled.div`
   padding: 20px;
   text-align: right;
 
-  > span:first-child, > button {
+  > span:first-child {
     margin-bottom: 10px;
+  }
+
+  > div:first-of-type {
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+
+    > span:first-child {
+      color: #999;
+      font-size: 12px;
+    }
   }
 
   tbody > tr:hover {

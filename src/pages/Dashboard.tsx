@@ -28,11 +28,10 @@ class Dashboard extends PureComponent<never, IDashboardState> {
     return (
       <DashboardStyles direction='vertical' size='large'>
         <StatisticsStyles>
-          <Statistic title="Air Cargo Entries" value={100} prefix={<AppstoreOutlined />} />
-          <Statistic title="Sea Freight Entries" value={100} prefix={<AppstoreOutlined />} />
+          <Statistic title="Air Cargo Markings" value={100} prefix={<AppstoreOutlined />} />
+          <Statistic title="Sea Freight Markings" value={100} prefix={<AppstoreOutlined />} />
           <Statistic title="Total Customers" value={100} prefix={<TeamOutlined />} />
         </StatisticsStyles>
-        <Panel>Dashboard</Panel>
         <Panel>Dashboard</Panel>
       </DashboardStyles>
     );
