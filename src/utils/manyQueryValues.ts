@@ -1,4 +1,10 @@
-const withMultipleValues = (insertQuery: string, queryValues: Array<object>) => {
+function onMultipleValues (deleteQuery: string, queryValues: Array<string>) {
+  const queryEnd = queryValues.map(() => '?').join(',');
+  const newDeleteQuery = deleteQuery.replace('?', queryEnd);
+  return newDeleteQuery;
+}
+
+function withMultipleValues (insertQuery: string, queryValues: Array<object>) {
   const from = insertQuery.lastIndexOf('(');
   const queryEnd = insertQuery.substring(from);
 
@@ -11,4 +17,5 @@ const withMultipleValues = (insertQuery: string, queryValues: Array<object>) => 
   return [newInsertQuery, flattenedValues];
 }
 
+export { onMultipleValues };
 export default withMultipleValues;

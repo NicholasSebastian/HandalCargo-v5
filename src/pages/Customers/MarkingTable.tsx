@@ -4,6 +4,10 @@ import { Table, Input, Form, Button, Popconfirm , message} from 'antd';
 import { ColumnsType } from 'antd/lib/table';
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 
+import { query } from '../../utils/query';
+import { customers } from '../../Queries.json';
+const { markingCheckQuery } = customers;
+
 const { Item } = Form;
 
 interface IMarkingTableProps {
@@ -31,9 +35,17 @@ const MarkingTable: FC<IMarkingTableProps> = props => {
     }
   }
 
-  function handleDelete(index: number) {
-    const newData = [...data.slice(0, index), ...data.slice(index + 1)];
-    setData(newData);
+  async function handleDelete(index: number) {
+    const { marking } = data[index];
+    const result = await query(markingCheckQuery, [marking, marking]) as Array<any>;
+    const isReferenced = Boolean(Object.values(result[0])[0]);
+    if (isReferenced) {
+      message.error("This marking is currently being used in a shipping entry");
+    }
+    else {
+      const newData = [...data.slice(0, index), ...data.slice(index + 1)];
+      setData(newData);
+    }
   }
 
   return (

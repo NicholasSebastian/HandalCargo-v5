@@ -14,10 +14,9 @@ Uses Ant Design for UI components.
 ### Extra Features
 
 - Dashboard
-- Images for Profiles
 - Shortcuts
-- Backup and Restore?
+- Images for Profiles
 
 ### Issues
 
-- Customer markings cannot 'delete then insert' for updating values, foreign key constraints.
+- Translate the whole app to Bahasa Indonesia.

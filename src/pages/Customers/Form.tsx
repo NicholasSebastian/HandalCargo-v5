@@ -8,7 +8,7 @@ import { objectDatesToMoment } from '../../utils/momentConverter';
 import fillEmptyValues from '../../utils/objectNulling';
 import scrollToTop from '../../utils/scrollModal';
 import isEmpty from '../../utils/isEmptyObject';
-import withMultipleValues from '../../utils/manyQueryValues';
+import withMultipleValues, { onMultipleValues } from '../../utils/manyQueryValues';
 
 import { IFormProps } from '../../components/TableTemplate';
 import Loading from '../../components/Loading';
@@ -35,8 +35,36 @@ interface IFormState {
   expeditions: Array<any>
 }
 
+function updateMarkings(originalMarkings: Array<any>, currentMarkings: Array<any>) {
+  const toBeDeleted: Array<string> = [], toBeInserted: Array<any> = [];
+
+  originalMarkings.forEach(({ marking }) => {
+    const exists = currentMarkings.some(c => marking === c.marking);
+    if (!exists) {
+      toBeDeleted.push(marking);
+    }
+  });
+
+  currentMarkings.forEach(current => {
+    const { marking } = current;
+    const exists = originalMarkings.some(o => marking === o.marking);
+    if (!exists) {
+      toBeInserted.push(current);
+    }
+  });
+
+  const mDeleteQuery = onMultipleValues(markingDeleteQuery, toBeDeleted);
+  const [mInsertQuery, markingsToBeInserted] = withMultipleValues(markingInsertQuery, toBeInserted);
+
+  return Promise.all([
+    toBeDeleted.length > 0 && query(mDeleteQuery, toBeDeleted),
+    markingsToBeInserted.length > 0 && query(mInsertQuery, markingsToBeInserted)
+  ]);
+}
+
 class Form extends Component<IFormProps, IFormState> {
   formRef: React.RefObject<FormInstance>;
+  initialMarkingsRef: React.MutableRefObject<Array<any> | null>;
 
   constructor(props: IFormProps) {
     super(props);
@@ -48,6 +76,7 @@ class Form extends Component<IFormProps, IFormState> {
     };
 
     this.formRef = createRef();
+    this.initialMarkingsRef = createRef();
     this.initializeData = this.initializeData.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
 
@@ -73,6 +102,7 @@ class Form extends Component<IFormProps, IFormState> {
         itemData: itemDataWithKeys,
         expeditions
       });
+      this.initialMarkingsRef.current = markingDataWithKeys;
       this.formRef.current?.resetFields();
     }
     else {
@@ -110,8 +140,7 @@ class Form extends Component<IFormProps, IFormState> {
       // Edit form on submit.
       Promise.all([
         query(updateQuery, [...rawValues, id]),
-        query(markingDeleteQuery, [id]),
-        markingValues.length > 0 && query(mInsertQuery, allMarkings),
+        updateMarkings(this.initialMarkingsRef.current!, markingValues),
         query(itemDeleteQuery, [id]),
         itemValues.length > 0 && query(iInsertQuery, allItems)
       ])
@@ -127,7 +156,7 @@ class Form extends Component<IFormProps, IFormState> {
       const rawValuesWithDate = [...rawValues, dateAdded];
       Promise.all([
         query(insertQuery, rawValuesWithDate),
-        markingValues.length  > 0 && query(mInsertQuery, allMarkings),
+        markingValues.length > 0 && query(mInsertQuery, allMarkings),
         itemValues.length > 0 && query(iInsertQuery, allItems)
       ])
       .then(() => {
@@ -152,10 +181,6 @@ class Form extends Component<IFormProps, IFormState> {
         <Title level={4}>Customer</Title>
         <DoubleColumns>
           <div>
-            <Item label="Customer ID" name="customerid"
-              rules={[{ required: true, message: `Customer ID is required` }]}>
-              <Input />
-            </Item>
             <Item label="Name" name="customername"
               rules={[{ required: true, message: `Customer Name is required` }]}>
               <Input />
