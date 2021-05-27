@@ -39,10 +39,6 @@ class Template extends PureComponent<ITemplateProps, {}> {
   render() {
     const { profile } = this.props;
 
-    // TODO: images here
-    // Just store and retrieve images in the database as Base64. Something like https://www.youtube.com/watch?v=9Rhsb3GU2Iw
-    // Use antd's "Upload" component https://ant.design/components/upload/
-
     const active = <span style={{ color: 'green' }}>Active</span>
     const inactive = <span style={{ color: 'red' }}>Inactive</span>
 

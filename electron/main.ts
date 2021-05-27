@@ -24,7 +24,7 @@ app.on('ready', () => {
     ipcMain.once('logout', () => windowInstance.onLogout())
 
     // database query functionality
-    ipcMain.on('query', (event, query, replyKey) => connectionInstance.query(event, query, replyKey));
+    ipcMain.on('query', (event, query, replyKey) => connectionInstance.query(event, query, replyKey))
     ipcMain.on('queryValues', (event, query, values, replyKey) => connectionInstance.queryWithValues(event, query, values, replyKey))
   })
 })

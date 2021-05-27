@@ -1,6 +1,6 @@
-import React, { Component, FC, Fragment, useRef, useEffect } from 'react';
+import React, { Component, FC, Fragment, useRef } from 'react';
 import styled from 'styled-components';
-import { Typography, Layout, Menu, Empty, Input, Button, message } from 'antd';
+import { Typography, Layout, Menu, Empty, Input, Button, Avatar, message } from 'antd';
 import { SendOutlined } from '@ant-design/icons';
 
 import { query, simpleQuery } from '../utils/query';
@@ -25,7 +25,6 @@ interface IMessage {
 interface IGroupedMessage {
   sender: string
   name: string
-  image: any
   messages: Array<IMessage>
 }
 
@@ -42,7 +41,7 @@ interface IConversationProps {
 
 const Conversation: FC<IConversationProps> = props => {
   const { data, refresh, scrollToBottom } = props;
-  const { sender, name, image, messages } = data;
+  const { sender, name, messages } = data;
   const inputRef = useRef<Input>(null);
 
   function handleSubmit() {
@@ -145,7 +144,6 @@ class Mail extends Component<never, IMailState> {
       });
       return {
         sender, name,
-        image: null, // TODO: images
         messages: conversation
       }
     });
@@ -170,16 +168,16 @@ class Mail extends Component<never, IMailState> {
         <MailStyles>
           <Sider theme='light'>
             <Title level={5}>Staff Contacts</Title>
-            <Menu mode='inline' theme='light' 
+            <ListStyles mode='inline' theme='light' 
               selectedKeys={current ? [current] : undefined}
               onClick={({ key }) => {
                 this.setState({ current: key as string });
                 setTimeout(this.scrollBottom, 5);
               }}>
               {messagebox.map(entry => (
-                <Item key={entry.sender}>{entry.sender}</Item>
+                <Item key={entry.sender}>{entry.name}</Item>
               ))}
-            </Menu>
+            </ListStyles>
           </Sider>
           {current ? (
             <Conversation data={openMessages as never} refresh={this.refreshMessages}
@@ -199,6 +197,14 @@ const MailStyles = styled(Layout)`
   h5 {
     margin-top: 12px;
     margin-left: 16px;
+  }
+`;
+
+const ListStyles = styled(Menu)`
+  .ant-menu-item {
+    display: flex;
+    align-items: center;
+    padding-left: 16px !important;
   }
 `;
 

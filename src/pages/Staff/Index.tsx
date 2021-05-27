@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
 import { 
-  Card, Avatar, Typography, Space, Modal, Button, message, Popconfirm 
+  Card, Avatar, Typography, Space, Modal, Button, message, Popconfirm
 } from 'antd';
 import { EditOutlined, DeleteOutlined, UserOutlined } from '@ant-design/icons';
 import { v4 as generateKey } from 'uuid';
 
 import { query, simpleQuery } from '../../utils/query';
+import { urlFromBuffer } from '../../utils/images';
 
 import PageEffect from '../../components/PageEffect';
 import Loading from '../../components/Loading';
@@ -25,6 +26,7 @@ interface IStaffTableInfo {
   groupname: string
   phonenum: string
   status: boolean
+  image: Uint8Array
 }
 
 interface IStaffState {
@@ -52,7 +54,7 @@ class Staff extends Component<{}, IStaffState> {
   }
 
   async refreshTable() {
-    const data = await simpleQuery(tableQuery) as Array<any>;
+    const data = await simpleQuery(tableQuery) as Array<IStaffTableInfo>;
     this.setState({ tableData: data });
   }
 
@@ -138,8 +140,8 @@ class Staff extends Component<{}, IStaffState> {
                   <DeleteOutlined onClick={e => e.stopPropagation()}>Delete</DeleteOutlined>
                 </Popconfirm>
               ]}>
-              <Meta
-                avatar={<Avatar size={64} shape="square" icon={<UserOutlined />} /* TODO: images */ />}
+              <Meta avatar={<Avatar size={64} shape="square" 
+                icon={staff.image ? <img src={urlFromBuffer(staff.image)} /> : <UserOutlined />} />}
                 title={staff.staffname}
                 description={
                   <Space direction='vertical' size={2}>

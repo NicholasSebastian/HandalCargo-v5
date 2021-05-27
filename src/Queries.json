@@ -93,12 +93,13 @@
     "deleteQuery": "DELETE FROM `expedisi` WHERE `expedisicode` = ?"
   },
   "staff": {
-    "tableQuery": "SELECT `staffid`, `staffname`, `groupname`, `phonenum`, `status` FROM `staff` LEFT JOIN `staffgroup` ON `staff`.`groupcode` = `staffgroup`.`stfgrcode`",
+    "tableQuery": "SELECT `staffid`, `staffname`, `groupname`, `phonenum`, `status`, `image` FROM `staff` LEFT JOIN `staffgroup` ON `staff`.`groupcode` = `staffgroup`.`stfgrcode`",
     "viewQuery": "SELECT * FROM `staff` LEFT JOIN `staffgroup` ON `staff`.`groupcode` = `staffgroup`.`stfgrcode` WHERE `staffid` = ?",
-    "formQuery": "SELECT `staffid`, `level`, `status`, `staffname`, `gender`, `phonenum`, `address1`, `district`, `city`, `placeofbirth`, `dateofbirth`, `groupcode`, `dateofemployment`, `salary`, `othr`, `foodallowance`, `bonus`, `dilligencebonus` FROM `staff` WHERE `staffid` = ?",
-    "insertQuery": "INSERT INTO `staff` (`staffid`, `pwd`, `level`, `status`, `staffname`, `gender`, `phonenum`, `address1`, `district`, `city`, `placeofbirth`, `dateofbirth`, `groupcode`, `dateofemployment`, `salary`, `othr`, `foodallowance`, `bonus`, `dilligencebonus`, `pwd_iv`, `pwd_salt`, `profilepic`, `profilepictype`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-    "updateQuery": "UPDATE `staff` SET `staffid` = ?, `pwd` = ?, `level` = ?, `status` = ?, `staffname` = ?, `gender` = ?, `phonenum` = ?, `address1` = ?, `district` = ?, `city` = ?, `placeofbirth` = ?, `dateofbirth` = ?, `groupcode` = ?, `dateofemployment` = ?, `salary` = ?, `othr` = ?, `foodallowance` = ?, `bonus` = ?, `dilligencebonus` = ?, `pwd_iv` = ?, `pwd_salt` = ?, `profilepic` = ?, `profilepictype` = ? WHERE `staffid` = ?",
-    "deleteQuery": "DELETE FROM `staff` WHERE `staffid` = ?"
+    "formQuery": "SELECT `staffid`, `level`, `status`, `staffname`, `gender`, `phonenum`, `address1`, `district`, `city`, `placeofbirth`, `dateofbirth`, `groupcode`, `dateofemployment`, `salary`, `othr`, `foodallowance`, `bonus`, `dilligencebonus`, `image` FROM `staff` WHERE `staffid` = ?",
+    "insertQuery": "INSERT INTO `staff` (`staffid`, `pwd`, `level`, `status`, `staffname`, `gender`, `phonenum`, `address1`, `district`, `city`, `placeofbirth`, `dateofbirth`, `groupcode`, `dateofemployment`, `salary`, `othr`, `foodallowance`, `bonus`, `dilligencebonus`, `pwd_iv`, `pwd_salt`, `image`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, BINARY(?))",
+    "updateQuery": "UPDATE `staff` SET `staffid` = ?, `pwd` = ?, `level` = ?, `status` = ?, `staffname` = ?, `gender` = ?, `phonenum` = ?, `address1` = ?, `district` = ?, `city` = ?, `placeofbirth` = ?, `dateofbirth` = ?, `groupcode` = ?, `dateofemployment` = ?, `salary` = ?, `othr` = ?, `foodallowance` = ?, `bonus` = ?, `dilligencebonus` = ?, `pwd_iv` = ?, `pwd_salt` = ?, `image` = BINARY(?) WHERE `staffid` = ?",
+    "deleteQuery": "DELETE FROM `staff` WHERE `staffid` = ?",
+    "imageQuery": "SELECT `image` FROM `staff` WHERE `staffid` = ?"
   },
   "staffGroups": {
     "tableQuery": "SELECT `stfgrcode`, `groupname` FROM `staffgroup`",

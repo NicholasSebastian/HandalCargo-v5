@@ -211,7 +211,9 @@ class Form extends Component<IFormProps, IFormState> {
             <Item label="Courier" name="courierdesc">
               <Select>
                 {expeditions.map(expedition => (
-                  <Option key={expedition.expedisicode} value={expedition.expedisicode}>{expedition.expedisiname}</Option>
+                  <Option key={expedition.expedisicode} value={expedition.expedisicode}>
+                    {expedition.expedisiname}
+                  </Option>
                 ))}
               </Select>
             </Item>

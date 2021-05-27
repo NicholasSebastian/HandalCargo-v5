@@ -7,7 +7,7 @@ function isError (obj: any) {
   return isError || likeError;
 }
 
-function query (query: any, values: any) {
+function query (query: string, values: Array<any>) {
   return new Promise((resolve, reject) => {
     const queryKey = generateKey();
     ipcRenderer.once(queryKey, (event, data) => {
@@ -20,7 +20,7 @@ function query (query: any, values: any) {
   });
 }
 
-function simpleQuery (query: any) {
+function simpleQuery (query: string) {
   return new Promise((resolve, reject) => {
     const queryKey = generateKey();
     ipcRenderer.once(queryKey, (event, data) => {

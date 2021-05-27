@@ -1,13 +1,18 @@
 import React, { PureComponent } from 'react';
 import { ipcRenderer } from 'electron';
 import styled from 'styled-components';
-import { Layout, Button, Tooltip, Dropdown, Menu, Modal, Avatar, Popover, Input } from 'antd';
+import { Layout, Button, Tooltip, Dropdown, Menu, Modal, Avatar, Popover } from 'antd';
 import { 
-  MenuFoldOutlined, MenuUnfoldOutlined, OrderedListOutlined, CalculatorOutlined, MailOutlined,
+  MenuFoldOutlined, MenuUnfoldOutlined, OrderedListOutlined, MailOutlined,
   UserOutlined, TranslationOutlined, BulbOutlined, LogoutOutlined, ExclamationCircleOutlined
 } from '@ant-design/icons';
 
 import Notes from './Notes';
+import { query } from '../utils/query';
+import { urlFromBuffer } from '../utils/images';
+
+import { staff } from '../Queries.json';
+const { imageQuery } = staff;
 
 const { Header: AntHeader } = Layout;
 const { Item } = Menu;
@@ -22,6 +27,7 @@ interface IHeaderProps {
 interface IHeaderState {
   notesTooltip: boolean
   notesVisible: boolean
+  profileImage: any
 }
 
 class Header extends PureComponent<IHeaderProps, IHeaderState> {
@@ -29,8 +35,22 @@ class Header extends PureComponent<IHeaderProps, IHeaderState> {
     super(props);
     this.state = {
       notesTooltip: false,
-      notesVisible: false
+      notesVisible: false,
+      profileImage: null
     };
+    this.getImage = this.getImage.bind(this);
+    this.getImage();
+  }
+
+  getImage() {
+    const profile = JSON.parse(window.sessionStorage.getItem('profile')!);
+
+    query(imageQuery, [profile.staffid])
+    .then(data => {
+      const profileData = (data as never)[0];
+      const { image } = profileData;
+      this.setState({ profileImage: image });
+    });
   }
 
   handleLogout() {
@@ -46,6 +66,7 @@ class Header extends PureComponent<IHeaderProps, IHeaderState> {
   }
 
   render() {
+    const { profileImage } = this.state;
     const profile = JSON.parse(window.sessionStorage.getItem('profile')!);
 
     const overlay = (
@@ -76,7 +97,7 @@ class Header extends PureComponent<IHeaderProps, IHeaderState> {
           </Tooltip>
           <Dropdown overlay={overlay} placement="bottomRight">
             <Button type="text">
-              <Avatar size={28} icon={<UserOutlined />} /* TODO: images */ />
+              <Avatar size={28} icon={profileImage ? <img src={urlFromBuffer(profileImage)} /> : <UserOutlined />} />
               {profile.staffname}
             </Button>
           </Dropdown>
