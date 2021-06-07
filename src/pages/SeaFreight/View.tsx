@@ -1,11 +1,12 @@
 import React, { FC, useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { Card, Descriptions, Table } from 'antd';
+import { Card, Descriptions, Table, Space, Button } from 'antd';
 
 import { query, simpleQuery } from '../../utils/query';
 
 import { IViewProps } from '../../components/TableTemplate';
 import { markingColumns } from './MarkingTable';
+import ShippingForm from './ShippingForm';
 
 import { seaFreight, containerGroup, carriers, routes, handlers, currencies } from '../../Queries.json';
 const { markingTableQuery: markingQuery } = seaFreight;
@@ -28,6 +29,7 @@ const View: FC<IViewProps> = (props) => {
   const { data } = props;
   const { Item } = Descriptions;
 
+  const [shippingForm, setShippingForm] = useState<string | null>(null);
   const [extraData, setExtraData] = useState<IViewState>(null);
   useEffect(() => {
     (async () => {
@@ -71,6 +73,14 @@ const View: FC<IViewProps> = (props) => {
   const totalWeightHB = extraData?.markingData.map(d => d['hb[kg]']).reduce((a, b) => a + b, 0);
   const totalWeightCust = extraData?.markingData.map(d => d['cust[kg]']).reduce((a, b) => a + b, 0);
 
+  if (shippingForm) {
+    return (
+      <ShippingForm
+        containerNumber={data.nocontainer} 
+        marking={shippingForm} 
+        closeForm={() => setShippingForm(null)} />
+    );
+  }
   return (
     <ViewStyles>
       <Card title="Shipping Information">
@@ -99,9 +109,19 @@ const View: FC<IViewProps> = (props) => {
       </Card>
       <Card title="Markings">
         <Table size='small' pagination={false}
-          columns={markingColumns}
           dataSource={markingDataWithKeys}
-          loading={extraData === null} />
+          loading={extraData === null}
+          columns={[
+            ...markingColumns,
+            {
+              render: (value, row, index) => (
+                <Space>
+                  <Button onClick={() => setShippingForm(value.marking)}>Surat Jalan</Button>
+                  <Button>Faktur</Button>
+                </Space>
+              )
+            }
+          ]} />
       </Card>
       <Card>
         <Descriptions title="Summary" labelStyle={{ fontWeight: 500 }} bordered size='small'>

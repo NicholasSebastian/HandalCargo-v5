@@ -13,6 +13,8 @@ const { markingQuery } = customers;
 const { Item } = Form;
 const { Option } = Select;
 
+// TODO: change the kg and m3 values on the 'form' marking table to be buttons.
+
 interface IMarkingTableProps {
   data: Array<any>
   setData: (data: Array<any>) => void
@@ -48,11 +50,8 @@ const MarkingTable: FC<IMarkingTableProps> = props => {
           qty: quantity,
           'list[kg]': list,
           'hb[kg]': null,
-          'standart[kg]': null,
-          'vol.charge': null,
           lunas: false,
-          sisa: null,
-          suratjalan: null,
+          sisa: quantity,
           faktur: null
         };
         setData([...data, newData]);
@@ -135,17 +134,9 @@ const markingColumns: ColumnsType<object> = [
     dataIndex: 'hb[kg]'
   },
   {
-    title: 'Standard [Kg]',
-    dataIndex: 'standart[kg]'
-  },
-  {
-    title: 'Vol. Charge',
-    dataIndex: 'vol.charge'
-  },
-  {
     title: 'Settled',
     dataIndex: 'lunas',
-    render: (value) => value ? 
+    render: value => value ? 
       <span style={{ color: 'green' }}>Paid Off</span> : 
       <span style={{ color: 'red' }}>Not Settled</span>
   },
@@ -155,7 +146,10 @@ const markingColumns: ColumnsType<object> = [
   },
   {
     title: 'Delivery Orders',
-    dataIndex: 'suratjalan'
+    dataIndex: 'sisa',
+    render: (value: number) => value === 0 ? 
+      <span>True</span> :
+      <span>False</span>
   },
   {
     title: 'Invoice',

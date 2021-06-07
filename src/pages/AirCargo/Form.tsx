@@ -131,7 +131,7 @@ class Form extends Component<IFormProps, IFormState> {
       Promise.all([
         query(updateQuery, [...rawValues, entryId]),
         query(markingDeleteQuery, [entryId]),
-        markingValues.length > 0 && query(mInsertQuery, allMarkings)
+        markingValues.length > 0 && query(mInsertQuery as string, allMarkings as Array<any>)
       ])
       .then(() => {
         message.success(`'${entryId}' successfully updated`);
@@ -143,7 +143,7 @@ class Form extends Component<IFormProps, IFormState> {
       // Add form on submit.
       Promise.all([
         query(insertQuery, rawValues),
-        markingValues.length > 0 && query(mInsertQuery, allMarkings)
+        markingValues.length > 0 && query(mInsertQuery as string, allMarkings as Array<any>)
       ])
       .then(() => {
         message.success('Entry successfully added');

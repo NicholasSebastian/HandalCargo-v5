@@ -7,15 +7,19 @@ Uses Ant Design for UI components.
 
 ### Main Features
 
-- Invoice Entry
-- Payment
-- Payroll (Generate Reports and Printing)
-
-### Extra Features
-
-- Dashboard
+- Surat Jalan -> print
+- Faktur -> print
+- Sea Freight Kg and m3
+- Air Cargo Kg
+- Sisa
+- Invoice Entry and Payment
+- Advanced Search
+- Advanced Access Level account feature restriction
 - Shortcuts
-- Images for Profiles
+- Red Asterisks
+- Printing
+- Reports
+- Offline mode
 
 ### Issues
 

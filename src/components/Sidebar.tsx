@@ -105,7 +105,6 @@ class Sidebar extends Component<ISidebarProps, ISidebarState> {
             <Item key="airCargo">Air Cargo</Item>
             <Item key="seaFreight">Sea Freight</Item>
             <Item key="invoiceEntry">Invoice Entry</Item>
-            <Item key="payment">Payment</Item>
             <Item key="customers">Customers</Item>
           </SubMenu>
           <SubMenu icon={<AppstoreAddOutlined/>} title="References">

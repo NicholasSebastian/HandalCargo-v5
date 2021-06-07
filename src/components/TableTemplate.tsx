@@ -94,7 +94,7 @@ class Template extends Component<ITemplateProps, ITemplateState> {
   handleView(entryId: string | number, secondary: boolean) {
     const { queries } = this.props;
     const entryQuery = secondary ? queries.formQueryAlt : queries.formQuery;
-    query(entryQuery, [entryId])
+    query(entryQuery!, [entryId])
     .then((data: any) => {
       const entry = data[0];
       this.setState({ 
@@ -132,7 +132,7 @@ class Template extends Component<ITemplateProps, ITemplateState> {
     const deleteProcess = () => {
       const entryId = entry[primaryKey] || entry[secondaryKey!];
       const deleteQuery = secondary ? queries.deleteQueryAlt : queries.deleteQuery;
-      query(deleteQuery, [entryId])
+      query(deleteQuery!, [entryId])
       .then(() => {
         message.success(`Entry successfully deleted`);
         this.refreshTable();

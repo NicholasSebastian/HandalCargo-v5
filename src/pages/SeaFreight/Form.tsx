@@ -222,7 +222,7 @@ class Form extends Component<IFormProps, IFormState> {
       <FormStyles ref={this.formRef} labelCol={{ span: 6 }}
         onFinish={this.handleSubmit} onFieldsChange={this.calculateValues}
         onFinishFailed={scrollToTop} initialValues={initialValues}>
-          <Title level={4}>Sea Freight</Title>
+        <Title level={4}>Sea Freight</Title>
         <DoubleColumns>
           <div>
             <Item label="Container No" name='nocontainer'
