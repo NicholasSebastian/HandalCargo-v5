@@ -1,125 +1,91 @@
-import React, { FC, Fragment, useRef, useEffect, useState } from 'react';
-import styled from "styled-components";
-import { Table, Input, Select, Form, Button, Popconfirm, message } from 'antd';
+import React, { FC, useRef } from 'react';
+import { Input, Form } from 'antd';
 import { ColumnsType } from 'antd/lib/table';
 import { SelectValue } from 'antd/lib/select';
-import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 
-import { simpleQuery } from '../../utils/query';
+import Template, { IMarkingTableProps } from '../../components/MarkingTableTemplate';
+import SizeTable from './SizeTable';
 
 import { customers } from '../../Queries.json';
 const { markingQuery } = customers;
 
 const { Item } = Form;
-const { Option } = Select;
 
-// TODO: change the kg and m3 values on the 'form' marking table to be buttons.
-
-interface MarkingTableProps {
-  data: Array<any>
-  setData: (data: Array<any>) => void
-}
-
-const MarkingTable: FC<MarkingTableProps> = props => {
-  const { data, setData } = props;
-
-  const [marking, setMarking] = useState<SelectValue | null>(null);
+const MarkingTable: FC<IMarkingTableProps> = props => {
+  const { data, sizeData } = props;
   const quantityRef = useRef<Input>(null);
   const listM3Ref = useRef<Input>(null);
   const listKgRef = useRef<Input>(null);
 
-  const [customerMarkings, setCustomerMarkings] = useState([]);
-  useEffect(() => {
-    simpleQuery(markingQuery).then((customerMarkings: any) => {
-      const markings = customerMarkings.map((customerMarking: any) => customerMarking.marking);
-      setCustomerMarkings(markings);
-    });
-  }, [data]);
-
-  function handleSubmit() {
-    if (marking) {
-      if (data.find(d => d.marking === marking)) {
-        message.error("Cannot have duplicate markings in the same entry");
-      }
-      else {
-        const quantity = quantityRef.current?.state.value;
-        const listM3 = listM3Ref.current?.state.value;
-        const listKg = listKgRef.current?.state.value;
-        const newData = {
-          key: data.length,
-          no: null,
-          marking,
-          qty: quantity,
-          'list[m3]': listM3,
-          'list[kg]': listKg,
-          'dlist[m3]': 0,
-          'dlist[kg]': 0,
-          'hb[m3]': 0,
-          'hb[kg]': 0,
-          'cust[m3]': 0,
-          'cust[kg]': 0,
-          lunas: false,
-          sisa: quantity,
-          faktur: null
-        };
-        setData([...data, newData]);
-      }
-    }
-    else {
-      message.error("'Marking' field may not be blank");
-    }
+  function handleSubmit(marking: SelectValue) {
+    const quantity = quantityRef.current?.state.value;
+    const listM3 = listM3Ref.current?.state.value;
+    const listKg = listKgRef.current?.state.value;
+    return {
+      key: Math.max(...data.map(d => d.key)) + 1,
+      no: null,
+      marking,
+      qty: quantity,
+      'list[m3]': listM3,
+      'list[kg]': listKg,
+      lunas: false,
+      sisa: quantity,
+      faktur: null
+    };
   }
 
-  function handleDelete(index: number) {
-    const newData = [...data.slice(0, index), ...data.slice(index + 1)];
-    setData(newData);
-  }
+  const getSizeData = (key: string, no: number) => sizeData[key].filter((d: any) => d.markingno === no);
+  const sum = (numArray: Array<number>) => numArray.reduce((a: number, b: number) => a + b, 0);
+  const calculateVolume = (data: Array<any>) => sum(data.map((d: any) => d.panjang * d.lebar * d.tinggi * d.colly));
+  const calculateWeight = (data: Array<any>) => sum(data.map((d: any) => d.berat * d.colly));
+
+  const newColumns = [...markingColumns];
+  newColumns[5].render = (markingNo: any) => {
+    const dListM3Data = getSizeData('dListM3', markingNo);
+    const dListM3 = calculateVolume(dListM3Data);
+    return dListM3;
+  };
+  newColumns[6].render = (markingNo: any) => {
+    const dListKgData = getSizeData('dListKg', markingNo);
+    const dListKg = calculateWeight(dListKgData);
+    return dListKg;
+  };
+  newColumns[7].render = (markingNo: any) => {
+    const hbM3Data = getSizeData('hbM3', markingNo);
+    const hbM3 = calculateVolume(hbM3Data);
+    return hbM3;
+  };
+  newColumns[8].render = (markingNo: any) => {
+    const hbKgData = getSizeData('hbKg', markingNo);
+    const hbKg = calculateWeight(hbKgData);
+    return hbKg;
+  };
+  newColumns[9].render = (markingNo: any) => {
+    const custM3Data = getSizeData('custM3', markingNo);
+    const custM3 = calculateVolume(custM3Data);
+    return custM3;
+  };
+  newColumns[10].render = (markingNo: any) => {
+    const custKgData = getSizeData('custKg', markingNo);
+    const custKg = calculateWeight(custKgData);
+    return custKg;
+  };
 
   return (
-    <Fragment>
-      <ItemStyles>
-        <Item label="Marking" colon={false}>
-          <Select onChange={value => setMarking(value)}>
-            {customerMarkings.map(marking => (
-              <Option key={marking} value={marking}>{marking}</Option>
-            ))}
-          </Select>
-        </Item>
-        <Item label="Quantity" colon={false}><Input ref={quantityRef} type='number' /></Item>
-        <Item label="List [m3]" colon={false}><Input ref={listM3Ref} type='number' /></Item>
-        <Item label="List [Kg]" colon={false}><Input ref={listKgRef} type='number' /></Item>
-        <Button type="default" htmlType="button" icon={<PlusOutlined />} onClick={handleSubmit} />
-      </ItemStyles>
-      <Table pagination={false}
-        dataSource={data} size='small' 
-        columns={[
-          ...markingColumns,
-          {
-            render: (value, row, index) => (
-              <Popconfirm placement="left"
-                title="Are you sure you would like to delete this entry?"
-                onConfirm={() => handleDelete(index)}>
-                <Button danger icon={<DeleteOutlined />} />
-              </Popconfirm>
-            )
-          }
-        ]} />
-    </Fragment>
+    <Template {...props}
+      query={markingQuery}
+      columns={newColumns}
+      onSubmit={handleSubmit}
+      SizeTable={SizeTable}>
+      <Item label="Quantity" colon={false}><Input ref={quantityRef} type='number' /></Item>
+      <Item label="List [m3]" colon={false}><Input ref={listM3Ref} type='number' /></Item>
+      <Item label="List [Kg]" colon={false}><Input ref={listKgRef} type='number' /></Item>
+    </Template>
   );
 }
 
 export { markingColumns };
 export default MarkingTable;
-
-const ItemStyles = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 50px;
-  margin-top: 10px;
-
-  > * {
-    margin-right: 12px;
-  }
-`;
 
 const markingColumns: ColumnsType<object> = [
   {
@@ -144,27 +110,27 @@ const markingColumns: ColumnsType<object> = [
   },
   {
     title: 'DList [m3]',
-    dataIndex: 'dlist[m3]'
+    dataIndex: 'no'
   },
   {
     title: 'DList [Kg]',
-    dataIndex: 'dlist[kg]'
+    dataIndex: 'no'
   },
   {
     title: 'HB [m3]',
-    dataIndex: 'hb[m3]'
+    dataIndex: 'no'
   },
   {
     title: 'HB [Kg]',
-    dataIndex: 'hb[kg]'
+    dataIndex: 'no'
   },
   {
     title: 'Cust [m3]',
-    dataIndex: 'cust[m3]'
+    dataIndex: 'no'
   },
   {
     title: 'Cust [Kg]',
-    dataIndex: 'cust[kg]'
+    dataIndex: 'no'
   },
   {
     title: 'Settled',

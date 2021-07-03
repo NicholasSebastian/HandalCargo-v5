@@ -10,7 +10,10 @@ import scrollToTop from '../../utils/scrollModal';
 import isEmptyObject from '../../utils/isEmptyObject';
 
 import { seaFreight, routes, carriers, expedition } from '../../Queries.json';
-const { shippingQuery, shippingMarkingQuery, shippingCustomerQuery } = seaFreight;
+const { 
+  shippingQuery, shippingMarkingQuery, shippingCustomerQuery,
+  shippingMarkingKgQuery, shippingMarkingM3Query
+} = seaFreight;
 const { tableQuery: routesQuery } = routes;
 const { tableQuery: carriersQuery } = carriers;
 const { tableQuery: expeditionsQuery } = expedition;
@@ -19,6 +22,13 @@ const { Item } = Form;
 const { TextArea } = Input;
 const { Option } = Select;
 const { Title } = Typography;
+
+const dListKgQuery = shippingMarkingKgQuery.replace('|type|', 'dlist');
+const dListM3Query = shippingMarkingM3Query.replace('|type|', 'dlist');
+const hbKgQuery = shippingMarkingKgQuery.replace('|type|', 'hb');
+const hbM3Query = shippingMarkingM3Query.replace('|type|', 'hb');
+const custKgQuery = shippingMarkingKgQuery.replace('|type|', 'cust');
+const custM3Query = shippingMarkingM3Query.replace('|type|', 'cust');
 
 interface IValues { 
   'list[m3]': any
@@ -112,15 +122,33 @@ class ShippingForm extends Component<IFormProps, IFormState> {
     this.setState({ initialData, routes, shippers, expeditions });
     this.formRef.current?.resetFields();
 
+    const markingDListKgData = await query(dListKgQuery, [markingData.no]) as Array<any>;
+    const dListKg = markingDListKgData.map(d => d.berat * d.colly).reduce((a, b) => a + b, 0);
+
+    const markingDListM3Data = await query(dListM3Query, [markingData.no]) as Array<any>;
+    const dListM3 = markingDListM3Data.map(d => d.panjang * d.lebar * d.tinggi * d.colly).reduce((a, b) => a + b, 0);
+
+    const markingHbKgData = await query(hbKgQuery, [markingData.no]) as Array<any>;
+    const hbKg = markingHbKgData.map(d => d.berat * d.colly).reduce((a, b) => a + b, 0);
+
+    const markingHbM3Data = await query(hbM3Query, [markingData.no]) as Array<any>;
+    const hbM3 = markingHbM3Data.map(d => d.panjang * d.lebar * d.tinggi * d.colly).reduce((a, b) => a + b, 0);
+
+    const markingCustKgData = await query(custKgQuery, [markingData.no]) as Array<any>;
+    const custKg = markingCustKgData.map(d => d.berat * d.colly).reduce((a, b) => a + b, 0);
+
+    const markingCustM3Data = await query(custM3Query, [markingData.no]) as Array<any>;
+    const custM3 = markingCustM3Data.map(d => d.panjang * d.lebar * d.tinggi * d.colly).reduce((a, b) => a + b, 0);
+
     this.valuesRef.current = {
       'list[m3]': markingData['list[m3]'],
       'list[kg]': markingData['list[kg]'],
-      'dist[m3]': markingData['dist[m3]'],
-      'dist[kg]': markingData['dist[kg]'],
-      'hb[m3]': markingData['hb[m3]'],
-      'hb[kg]': markingData['hb[kg]'],
-      'cust[m3]': markingData['cust[m3]'],
-      'cust[kg]': markingData['cust[kg]']
+      'dist[m3]': dListM3,
+      'dist[kg]': dListKg,
+      'hb[m3]': hbM3,
+      'hb[kg]': hbKg,
+      'cust[m3]': custM3,
+      'cust[kg]': custKg
     };
 
     this.addressRef.current = {

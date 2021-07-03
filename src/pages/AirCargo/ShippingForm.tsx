@@ -10,7 +10,7 @@ import scrollToTop from '../../utils/scrollModal';
 import isEmptyObject from '../../utils/isEmptyObject';
 
 import { airCargo, routes, expedition } from '../../Queries.json';
-const { shippingQuery, shippingMarkingQuery, shippingCustomerQuery } = airCargo;
+const { shippingQuery, shippingMarkingQuery, shippingMarkingSizeQuery, shippingCustomerQuery } = airCargo;
 const { tableQuery: routesQuery } = routes;
 const { tableQuery: expeditionsQuery } = expedition;
 
@@ -102,9 +102,12 @@ class ShippingForm extends Component<IFormProps, IFormState> {
     this.setState({ initialData, routes, expeditions });
     this.formRef.current?.resetFields();
 
+    const markingHbKgData = await query(shippingMarkingSizeQuery, [markingData.no]) as Array<any>;
+    const hbKg = markingHbKgData.map(d => d.berat * d.colly).reduce((a, b) => a + b, 0);
+
     this.valuesRef.current = {
       'list[kg]': markingData['list[kg]'],
-      'hb[kg]': markingData['hb[kg]']
+      'hb[kg]': hbKg
     };
 
     this.addressRef.current = {

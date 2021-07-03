@@ -25,11 +25,16 @@ type IViewState = null | {
   markingData: Array<any>
 };
 
+type Mode = null | {
+  mode: 'shipping' | 'invoice'
+  markingKey: string
+};
+
 const View: FC<IViewProps> = (props) => {
   const { data } = props;
   const { Item } = Descriptions;
 
-  const [shippingForm, setShippingForm] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<Mode>(null);
   const [extraData, setExtraData] = useState<IViewState>(null);
   useEffect(() => {
     (async () => {
@@ -73,13 +78,21 @@ const View: FC<IViewProps> = (props) => {
   const totalWeightHB = extraData?.markingData.map(d => d['hb[kg]']).reduce((a, b) => a + b, 0);
   const totalWeightCust = extraData?.markingData.map(d => d['cust[kg]']).reduce((a, b) => a + b, 0);
 
-  if (shippingForm) {
-    return (
-      <ShippingForm
-        containerNumber={data.nocontainer} 
-        marking={shippingForm} 
-        closeForm={() => setShippingForm(null)} />
-    );
+  if (viewMode) {
+    const { mode, markingKey } = viewMode;
+    if (mode === 'shipping') {
+      return (
+        <ShippingForm
+          containerNumber={data.nocontainer} 
+          marking={markingKey} 
+          closeForm={() => setViewMode(null)} />
+      );
+    }
+    if (mode === 'invoice') {
+      return (
+        <div>faktur page here</div> // TODO: Faktur page
+      );
+    }
   }
   return (
     <ViewStyles>
@@ -114,10 +127,11 @@ const View: FC<IViewProps> = (props) => {
           columns={[
             ...markingColumns,
             {
-              render: (value, row, index) => (
+              dataIndex: 'marking',
+              render: markingKey => (
                 <Space>
-                  <Button onClick={() => setShippingForm(value.marking)}>Surat Jalan</Button>
-                  <Button>Faktur</Button>
+                  <Button onClick={() => setViewMode({ mode: 'shipping', markingKey })}>Surat Jalan</Button>
+                  <Button onClick={() => setViewMode({ mode: 'invoice', markingKey })}>Faktur</Button>
                 </Space>
               )
             }

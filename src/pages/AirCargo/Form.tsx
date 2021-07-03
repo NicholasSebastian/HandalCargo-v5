@@ -17,7 +17,11 @@ import Loading from '../../components/Loading';
 import MarkingTable from './MarkingTable';
 
 import { airCargo, routes, planes, currencies } from '../../Queries.json';
-const { formQuery, insertQuery, updateQuery, markingTableQuery, markingInsertQuery, markingDeleteQuery } = airCargo;
+const { 
+  formQuery, insertQuery, updateQuery, 
+  markingTableQuery, markingInsertQuery, markingDeleteQuery, 
+  markingSizeTableQuery, markingSizeInsertQuery, markingSizeDeleteQuery
+} = airCargo;
 const { tableQuery: routeQuery } = routes;
 const { tableQuery: planeQuery } = planes;
 const { tableQuery: currencyQuery } = currencies;
@@ -29,6 +33,7 @@ const { TextArea } = Input;
 interface IFormState {
   initialData: Store
   markingData: Array<any>
+  sizeData: Array<any>
   routes: Array<any>
   planes: Array<any>
   currencies: Array<any>
@@ -54,6 +59,7 @@ class Form extends Component<IFormProps, IFormState> {
     this.state = {
       initialData: {},
       markingData: [],
+      sizeData: [],
       routes: [],
       planes: [],
       currencies: []
@@ -81,27 +87,37 @@ class Form extends Component<IFormProps, IFormState> {
 
   async initializeData() {
     const { entryId } = this.props;
+
     const routes = await simpleQuery(routeQuery) as Array<any>;
     const planes = await simpleQuery(planeQuery) as Array<any>;
     const currencies = await simpleQuery(currencyQuery) as Array<any>;
+
     if (entryId) {
       // Initialize 'edit' form values.
       const entry = await query(formQuery, [entryId]) as Array<any>;
       const data = entry[0];
+
       const markingData = await query(markingTableQuery, [data.no]) as Array<any>;
       const markingDataWithKeys = markingData.map((entry, i) => ({ key: i, ...entry }));
+
+      const sizeData = await query(markingSizeTableQuery, [data.no]) as Array<any>;
+      const sizeDataWithKeys = sizeData.map((entry, i) => ({ key: i, ...entry }));
+
       this.setState({ 
         initialData: data,
         markingData: markingDataWithKeys,
+        sizeData: sizeDataWithKeys,
         routes, planes, currencies
       });
       this.formRef.current?.resetFields();
+
       this.calculateValues();
       this.calculateMarkingValues();
     }
     else {
       // Initialize 'add' form values.
       this.setState({ routes, planes, currencies });
+
       this.formRef.current?.resetFields();
       this.calculateValues();
     }
@@ -114,24 +130,32 @@ class Form extends Component<IFormProps, IFormState> {
     const formattedValues = objectMomentToDates(formValues);
     const rawValues = Object.values(formattedValues);
 
-    const { markingData } = this.state;
-    const markingValues = markingData.map(entry => {
-      delete entry.key;
-      delete entry.no;
-      return { 
-        noaircargo: entryId || values.no, 
-        ...entry 
-      };
-    });
+    const neutralize = (formValues: Array<any>) => {
+      return formValues.map(entry => {
+        delete entry.key;
+        delete entry.no;
+        return { 
+          noaircargo: entryId || values.no, 
+          ...entry 
+        };
+      });
+    }
+
+    const { markingData, sizeData } = this.state;
+    const markingValues = neutralize(markingData);
+    const sizeValues = neutralize(sizeData);
 
     const [mInsertQuery, allMarkings] = withMultipleValues(markingInsertQuery, markingValues);
+    const [sInsertQuery, allSizes] = withMultipleValues(markingSizeInsertQuery, sizeValues);
     
     if (entryId) {
       // Edit form on submit.
       Promise.all([
         query(updateQuery, [...rawValues, entryId]),
         query(markingDeleteQuery, [entryId]),
-        markingValues.length > 0 && query(mInsertQuery as string, allMarkings as Array<any>)
+        markingValues.length > 0 && query(mInsertQuery as string, allMarkings as Array<any>),
+        query(markingSizeDeleteQuery, [entryId]),
+        sizeValues.length > 0 && query(sInsertQuery as string, allSizes as Array<any>)
       ])
       .then(() => {
         message.success(`'${entryId}' successfully updated`);
@@ -143,7 +167,8 @@ class Form extends Component<IFormProps, IFormState> {
       // Add form on submit.
       Promise.all([
         query(insertQuery, rawValues),
-        markingValues.length > 0 && query(mInsertQuery as string, allMarkings as Array<any>)
+        markingValues.length > 0 && query(mInsertQuery as string, allMarkings as Array<any>),
+        sizeValues.length > 0 && query(sInsertQuery as string, allSizes as Array<any>)
       ])
       .then(() => {
         message.success('Entry successfully added');
@@ -177,16 +202,17 @@ class Form extends Component<IFormProps, IFormState> {
     }
   }
 
-  calculateMarkingValues(data?: Array<any>) {
+  calculateMarkingValues(data?: Array<any>, sData?: Array<any>) {
     const markingData = data || this.state.markingData;
+    const sizeData = sData || this.state.sizeData;
 
-    const totalQuantity = markingData.map(d => +d.qty).reduce((a, b) => a + b, 0) as number;
+    const totalQuantity = markingData.map(d => +d.qty).reduce((a, b) => a + b, 0);
     this.totalQuantityRef.current?.setState({ value: totalQuantity || 0 });
 
-    const totalWeightList = markingData.map(d => +d['list[kg]']).reduce((a, b) => a + b, 0) as number;
+    const totalWeightList = markingData.map(d => +d['list[kg]']).reduce((a, b) => a + b, 0);
     this.totalWeightListRef.current?.setState({ value: totalWeightList || 0 });
 
-    const totalWeightHb = markingData.map(d => +d['hb[kg]']).reduce((a, b) => a + b, 0) as number;
+    const totalWeightHb = sizeData.map(d => d.berat * d.colly).reduce((a, b) => a + b, 0);
     this.totalWeightHbRef.current?.setState({ value: totalWeightHb || 0 });
 
     const realDifference = round(totalWeightHb - totalWeightList);
@@ -200,7 +226,7 @@ class Form extends Component<IFormProps, IFormState> {
   render() {
     const { Item } = AntForm;
     const { entryId } = this.props;
-    const { initialData: data, markingData, routes, planes, currencies } = this.state;
+    const { initialData: data, markingData, sizeData, routes, planes, currencies } = this.state;
     const initialValues = objectDatesToMoment(data);
 
     const isLoading = entryId ? isEmpty(data) : false;
@@ -282,9 +308,14 @@ class Form extends Component<IFormProps, IFormState> {
         <Divider />
         <MarkingTable 
           data={markingData} 
+          sizeData={sizeData}
           setData={data => {
             this.setState({ markingData: data });
             this.calculateMarkingValues(data);
+          }}
+          setSizeData={data => {
+            this.setState({ sizeData: data });
+            this.calculateMarkingValues(undefined, data);
           }} />
         <Divider />
         <DoubleColumns>

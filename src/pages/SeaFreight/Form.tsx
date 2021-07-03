@@ -16,7 +16,11 @@ import isEmpty from '../../utils/isEmptyObject';
 import withMultipleValues from '../../utils/manyQueryValues';
 
 import { seaFreight, containerGroup, carriers, routes, handlers, currencies } from '../../Queries.json';
-const { formQuery, insertQuery, updateQuery, markingTableQuery, markingInsertQuery, markingDeleteQuery } = seaFreight;
+const { 
+  formQuery, insertQuery, updateQuery, 
+  markingTableQuery, markingInsertQuery, markingDeleteQuery,
+  markingSizeTableQuery, markingKgInsertQuery, markingM3InsertQuery, markingSizeDeleteQuery
+} = seaFreight;
 const { tableQuery: containerGroupQuery } = containerGroup;
 const { tableQuery: carrierQuery } = carriers;
 const { tableQuery: routeQuery } = routes;
@@ -30,11 +34,21 @@ const { TextArea } = Input;
 interface IFormState {
   initialData: Store
   markingData: Array<any>
+  sizeData: ISizeData
   containerGroups: Array<any>
   carriers: Array<any>
   routes: Array<any>
   handlers: Array<any>
   currencies: Array<any>
+}
+
+interface ISizeData {
+  dListKg?: Array<any>
+  dListM3?: Array<any>
+  hbKg?: Array<any>
+  hbM3?: Array<any>
+  custKg?: Array<any>
+  custM3?: Array<any>
 }
 
 class Form extends Component<IFormProps, IFormState> {
@@ -59,6 +73,7 @@ class Form extends Component<IFormProps, IFormState> {
     this.state = {
       initialData: {},
       markingData: [],
+      sizeData: {},
       containerGroups: [],
       carriers: [],
       routes: [],
@@ -98,20 +113,40 @@ class Form extends Component<IFormProps, IFormState> {
       // Initialize 'edit' form values.
       const data = await query(formQuery, [entryId]) as Array<any>;
       const entry = data[0];
+      
       const markingData = await query(markingTableQuery, [entry.nocontainer]) as Array<any>;
       const markingDataWithKeys = markingData.map((entry, i) => ({ key: i, ...entry }));
+
+      const sizeData: Array<any> = [];
+      for (const type of ['dlist[kg]', 'dlist[m3]', 'hb[kg]', 'hb[m3]', 'cust[kg]', 'cust[m3]']) {
+        const sizeQuery = markingSizeTableQuery.replace('|type|', type);
+        const data = await query(sizeQuery, [entry.nocontainer]) as Array<any>;
+        const dataWithKeys = data.map((entry, i) => ({ key: i, ...entry }));
+        sizeData.push(dataWithKeys);
+      }
+
       this.setState({ 
         initialData: entry,
         markingData: markingDataWithKeys,
+        sizeData: {
+          dListKg: sizeData[0],
+          dListM3: sizeData[1],
+          hbKg: sizeData[2],
+          hbM3: sizeData[3],
+          custKg: sizeData[4],
+          custM3: sizeData[5]
+        },
         containerGroups, carriers, routes, handlers, currencies
       });
       this.formRef.current?.resetFields();
+
       this.calculateValues();
       this.calculateMarkingValues();
     }
     else {
       // Initialize 'add' form values.
       this.setState({ containerGroups, carriers, routes, handlers, currencies });
+
       this.formRef.current?.resetFields();
       this.calculateValues();
     }
@@ -141,7 +176,7 @@ class Form extends Component<IFormProps, IFormState> {
       Promise.all([
         query(updateQuery, [...rawValues, entryId]),
         query(markingDeleteQuery, [entryId]),
-        markingValues.length > 0 && query(mInsertQuery, allMarkings)
+        markingValues.length > 0 && query(mInsertQuery as string, allMarkings as Array<any>)
       ])
       .then(() => {
         message.success(`'${entryId}' successfully updated`);
@@ -153,7 +188,7 @@ class Form extends Component<IFormProps, IFormState> {
       // Add form on submit.
       Promise.all([
         query(insertQuery, rawValues),
-        markingValues.length > 0 && query(mInsertQuery, allMarkings)
+        markingValues.length > 0 && query(mInsertQuery as string, allMarkings as Array<any>)
       ])
       .then(() => {
         message.success('Entry successfully added');
@@ -180,41 +215,42 @@ class Form extends Component<IFormProps, IFormState> {
     }
   }
 
-  calculateMarkingValues(data?: Array<any>) {
+  calculateMarkingValues(data?: Array<any>, sData?: ISizeData) {
     const markingData = data || this.state.markingData;
+    const sizeData = sData || this.state.sizeData;
 
-    const totalQuantity = markingData.map(d => +d.qty).reduce((a, b) => a + b, 0) as number;
+    const totalQuantity = markingData.map(d => +d.qty).reduce((a, b) => a + b, 0);
     this.totalQuantityRef.current?.setState({ value: totalQuantity || 0 });
 
-    const totalVolumeList = markingData.map(d => +d['list[m3]']).reduce((a, b) => a + b, 0) as number;
+    const totalVolumeList = markingData.map(d => +d['list[m3]']).reduce((a, b) => a + b, 0);
     this.totalVolumeListRef.current?.setState({ value: totalVolumeList || 0 });
 
-    const totalVolumeDList = markingData.map(d => +d['dlist[m3]']).reduce((a, b) => a + b, 0) as number;
-    this.totalVolumeDListRef.current?.setState({ value: totalVolumeDList || 0 });
-
-    const totalVolumeHb = markingData.map(d => +d['hb[m3]']).reduce((a, b) => a + b, 0) as number;
-    this.totalVolumeHbRef.current?.setState({ value: totalVolumeHb || 0 });
-
-    const totalVolumeCust = markingData.map(d => +d['cust[m3]']).reduce((a, b) => a + b, 0) as number;
-    this.totalVolumeCustRef.current?.setState({ value: totalVolumeCust || 0 });
-
-    const totalWeightList = markingData.map(d => +d['list[kg]']).reduce((a, b) => a + b, 0) as number;
+    const totalWeightList = markingData.map(d => +d['list[kg]']).reduce((a, b) => a + b, 0);
     this.totalWeightListRef.current?.setState({ value: totalWeightList || 0 });
 
-    const totalWeightDList = markingData.map(d => +d['dlist[kg]']).reduce((a, b) => a + b, 0) as number;
+    const totalVolumeDList = sizeData.dListM3?.map(d => d.panjang * d.lebar * d.tinggi * d.colly).reduce((a, b) => a + b, 0);
+    this.totalVolumeDListRef.current?.setState({ value: totalVolumeDList || 0 });
+
+    const totalWeightDList = sizeData.dListKg?.map(d => d.berat * d.colly).reduce((a, b) => a + b, 0);
     this.totalWeightDListRef.current?.setState({ value: totalWeightDList || 0 });
 
-    const totalWeightHb = markingData.map(d => +d['hb[kg]']).reduce((a, b) => a + b, 0) as number;
+    const totalVolumeHb = sizeData.hbM3?.map(d => d.panjang * d.lebar * d.tinggi * d.colly).reduce((a, b) => a + b, 0);
+    this.totalVolumeHbRef.current?.setState({ value: totalVolumeHb || 0 });
+
+    const totalWeightHb = sizeData.hbKg?.map(d => d.berat * d.colly).reduce((a, b) => a + b, 0);
     this.totalWeightHbRef.current?.setState({ value: totalWeightHb || 0 });
 
-    const totalWeightCust = markingData.map(d => +d['cust[kg]']).reduce((a, b) => a + b, 0) as number;
+    const totalVolumeCust = sizeData.custM3?.map(d => d.panjang * d.lebar * d.tinggi * d.colly).reduce((a, b) => a + b, 0);
+    this.totalVolumeCustRef.current?.setState({ value: totalVolumeCust || 0 });
+
+    const totalWeightCust = sizeData.custKg?.map(d => d.berat * d.colly).reduce((a, b) => a + b, 0);
     this.totalWeightCustRef.current?.setState({ value: totalWeightCust || 0 });
   }
  
   render() {
     const { Item } = AntForm;
     const { entryId } = this.props;
-    const { initialData: data, markingData, containerGroups, carriers, routes, handlers, currencies } = this.state;
+    const { initialData: data, markingData, sizeData, containerGroups, carriers, routes, handlers, currencies } = this.state;
     const initialValues = objectDatesToMoment(data);
 
     const isLoading = entryId ? isEmpty(data) : false;
@@ -296,9 +332,14 @@ class Form extends Component<IFormProps, IFormState> {
         <Divider />
         <MarkingTable
           data={markingData}
+          sizeData={sizeData}
           setData={data => {
             this.setState({ markingData: data });
             this.calculateMarkingValues(data);
+          }}
+          setSizeData={data => {
+            this.setState({ sizeData: data });
+            this.calculateMarkingValues(undefined, data);
           }} />
         <Divider />
         <DoubleColumns>
@@ -322,6 +363,7 @@ class Form extends Component<IFormProps, IFormState> {
   }
 }
 
+export { ISizeData };
 export default Form;
 
 const FormStyles = styled(AntForm)`

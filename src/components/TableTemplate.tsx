@@ -213,12 +213,14 @@ class Template extends Component<ITemplateProps, ITemplateState> {
         <PageEffect function={this.refreshTable} pageKey={pageKey} />
         {processedData.length > 0 ?
         <TemplateStyles>
+          { /* TODO: Advanced Search features */ }
           <Search placeholder="Search" allowClear style={{ width: 300 }}
             onSearch={value => this.setState({ search: value })} />
           <div>
             <Text>Query returned {dataSource.length} results.</Text>
             <Button icon={<PlusOutlined />} onClick={this.handleAdd}>Add Record</Button> 
           </div>
+          { /* TODO: Limit the table height; Add pagination. */ }
           <Table columns={columns} size='small' pagination={false}
             dataSource={dataSource} onRow={(record, rowIndex) => ({
               onClick: View && (e => {
